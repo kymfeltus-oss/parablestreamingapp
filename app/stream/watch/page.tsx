@@ -1,19 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Link from "next/link";
 import {
   Send,
   Users,
   Scissors,
   X,
   ArrowLeft,
-  DollarSign,
   Sparkles,
   Gift,
   Coins,
+  Menu,
+  Bell,
+  Search
 } from "lucide-react";
+
+// --- MOCKS FOR PREVIEW ---
+// In your actual Next.js app, keep your original imports:
+// import Navbar from "@/components/Navbar";
+// import Link from "next/link";
+
+const Link = ({ href, children, className }: any) => (
+  <a href={href} className={className}>
+    {children}
+  </a>
+);
+
+const Navbar = () => (
+  <nav className="h-16 bg-[#111] border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-40">
+    <div className="flex items-center gap-4">
+      <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center font-bold text-xl">
+        P
+      </div>
+      <span className="font-bold text-lg tracking-tight">Parable</span>
+    </div>
+    <div className="flex items-center gap-6 text-gray-400">
+      <Search className="w-5 h-5 hover:text-white cursor-pointer" />
+      <Bell className="w-5 h-5 hover:text-white cursor-pointer" />
+      <div className="w-8 h-8 bg-gray-800 rounded-full"></div>
+    </div>
+  </nav>
+);
+// -------------------------
 
 export default function WatchPage() {
   const [isStitching, setIsStitching] = useState(false);
@@ -45,7 +73,8 @@ export default function WatchPage() {
     setInput("");
   }
 
-  function sendGift(gift) {
+  // FIX APPLIED HERE: Added ': any' to the gift parameter
+  function sendGift(gift: any) {
     if (seedBalance < gift.amount) return alert("Not enough Prophetic Seeds!");
 
     setSeedBalance(seedBalance - gift.amount);
@@ -99,6 +128,7 @@ export default function WatchPage() {
                 <img
                   src="/course_music.jpg"
                   className="w-full h-full object-cover opacity-40 grayscale"
+                  onError={(e) => (e.currentTarget.style.display = "none")}
                 />
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -161,6 +191,7 @@ export default function WatchPage() {
                   <img
                     src="/td_avatar.jpg"
                     className="w-16 h-16 rounded-full border-2 border-green-500 p-0.5 object-cover"
+                    onError={(e) => (e.currentTarget.style.display = "none")}
                   />
                   <div className="absolute bottom-0 right-0 bg-green-500 text-black text-[8px] font-bold px-1.5 py-0.5 rounded-full border border-black uppercase">
                     LIVE
