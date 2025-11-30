@@ -1,0 +1,265 @@
+import os
+
+print("🎹 Updating for Real Images, C-Dub, and The Shed...")
+
+# 1. UPDATE PREACHERS (Bishop Jakes Real Images)
+preachers_code = """export type StreamCategory = "Live" | "Teaching" | "Conference" | "Youth" | "Worship" | "Real Talk" | "Music";
+
+export interface Stream {
+  id: string;
+  title: string;
+  category: StreamCategory;
+  isLive: boolean;
+  viewers: number;
+  thumbnailUrl: string;
+  scheduledFor?: string;
+}
+
+export interface Creator {
+  slug: string;
+  name: string;
+  ministry: string;
+  avatarUrl: string;
+  bannerUrl: string;
+  tags: string[];
+  shortTagline: string;
+  bio: string;
+  socialStats?: { followers: string; subscribers: string; instagram: string };
+  liveStream?: Stream;
+  featuredStreams: Stream[];
+  monetization: string[];
+}
+
+export const creators: Creator[] = [
+  {
+    slug: "td-jakes",
+    name: "Bishop T.D. Jakes",
+    ministry: "The Potter's House",
+    avatarUrl: "/td_avatar.jpg",   // <--- REAL IMAGE
+    bannerUrl: "/td_banner.jpg",   // <--- REAL IMAGE
+    tags: ["Leadership", "Vision", "Empowerment"],
+    shortTagline: "Transforming lives through the Word.",
+    bio: "Bishop T.D. Jakes is a visionary leader and entrepreneur serving as senior pastor of The Potter's House.",
+    socialStats: { followers: "6.5M", subscribers: "2.1M", instagram: "@bishopjakes" },
+    liveStream: {
+      id: "tdj-live-1",
+      title: "Live: The Mantle of Digital Influence",
+      category: "Teaching",
+      isLive: true,
+      viewers: 45200,
+      thumbnailUrl: "/td_banner.jpg",
+    },
+    featuredStreams: [],
+    monetization: ["Books", "Conferences", "Leadership Training"],
+  }
+];
+
+export function getCreatorBySlug(slug: string): Creator | undefined {
+  return creators.find((c) => c.slug === slug);
+}
+"""
+
+# 2. UPDATE ARTISTS (Kirk Real Images + C-Dub Added)
+artists_code = """export interface Album {
+  title: string;
+  coverUrl: string;
+  year: string;
+  type: "Album" | "Single" | "EP" | "Product";
+}
+
+export interface MerchItem {
+  name: string;
+  price: number;
+  imageUrl: string;
+}
+
+export interface Concert {
+  city: string;
+  date: string;
+  venue: string;
+  isSoldOut: boolean;
+}
+
+export interface Artist {
+  slug: string;
+  name: string;
+  genre: string;
+  avatarUrl: string;
+  bannerUrl: string;
+  bio: string;
+  latestRelease: Album;
+  albums: Album[];
+  merch: MerchItem[];
+  tourSchedule: Concert[];
+  isLive: boolean;
+  liveStreamTitle?: string;
+  viewers?: number;
+}
+
+export const artists: Artist[] = [
+  {
+    slug: "kirk-franklin",
+    name: "Kirk Franklin",
+    genre: "Gospel Legend",
+    avatarUrl: "/kirk_avatar.jpg", // <--- REAL IMAGE
+    bannerUrl: "/kirk_banner.jpg", // <--- REAL IMAGE
+    bio: "Revolutionizing Gospel Music for decades.",
+    isLive: false,
+    latestRelease: {
+      title: "Father's Day",
+      coverUrl: "/kirk_banner.jpg",
+      year: "2023",
+      type: "Album",
+    },
+    albums: [],
+    merch: [],
+    tourSchedule: [],
+  },
+  {
+    slug: "c-dub",
+    name: "Carlton Whitfield (C-Dub)",
+    genre: "Musician Tools",
+    avatarUrl: "https://i.ytimg.com/vi/1_M3X9J1g8w/maxresdefault.jpg", // Placeholder for C-Dub
+    bannerUrl: "https://i.ytimg.com/vi/1_M3X9J1g8w/maxresdefault.jpg", 
+    bio: "Creator of Whoop Triggerz and pro tools for church musicians.",
+    isLive: true,
+    liveStreamTitle: "The Shed: Advanced Chords",
+    viewers: 1500,
+    latestRelease: {
+      title: "Whoop Triggerz Platinum",
+      coverUrl: "https://i.ytimg.com/vi/1_M3X9J1g8w/maxresdefault.jpg",
+      year: "2024",
+      type: "Product",
+    },
+    albums: [],
+    merch: [
+        { name: "Whoop Triggerz App", price: 49.99, imageUrl: "" },
+        { name: "Preacher Chords Vol 1", price: 29.99, imageUrl: "" }
+    ],
+    tourSchedule: [],
+  }
+];
+
+export function getArtistBySlug(slug: string) {
+  return artists.find((a) => a.slug === slug);
+}
+"""
+
+# 3. UPDATE MUSIC PAGE UI (The Shed Section)
+music_page_code = """import Link from "next/link";
+import { artists } from "@/lib/artists";
+import Navbar from "@/components/Navbar";
+import { Flame, Mic2, Music2, Play, Headphones, Speaker, Download, Zap, Layers } from "lucide-react";
+
+export default function MusicPage() {
+  const kirk = artists.find(a => a.slug === "kirk-franklin");
+  const cdub = artists.find(a => a.slug === "c-dub");
+
+  return (
+    <div className="min-h-screen bg-[#0e0e0e] text-white font-sans pb-20">
+      <Navbar />
+      
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+        
+        {/* HERO: KIRK FRANKLIN */}
+        {kirk && (
+            <div className="relative mb-12 overflow-hidden rounded-3xl border-2 border-transparent hover:border-violet-500/50 transition duration-500 group">
+            <div
+                className="absolute inset-0 opacity-80 group-hover:scale-105 transition duration-700"
+                style={{
+                backgroundImage: `url(${kirk.bannerUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="relative flex flex-col items-start justify-end px-8 py-12 h-[50vh]">
+                <h1 className="text-6xl font-black uppercase italic tracking-tighter mb-2">{kirk.name}</h1>
+                <p className="text-xl text-gray-200 mb-6">The King of Urban Gospel is back.</p>
+                <button className="bg-white text-black font-extrabold px-8 py-3 rounded-full uppercase tracking-wide hover:bg-gray-200 transition">
+                    View Tour
+                </button>
+            </div>
+            </div>
+        )}
+
+        {/* THE SHED: MUSICIANS ONLY */}
+        <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+                <Headphones className="w-8 h-8 text-orange-500" />
+                <h2 className="text-3xl font-black uppercase italic tracking-tighter">The Shed</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* C-DUB PRODUCT CARD */}
+                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4">
+                        <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded">PRO TOOL</span>
+                    </div>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center text-3xl">🎹</div>
+                        <div>
+                            <h3 className="text-xl font-bold">Whoop Triggerz</h3>
+                            <p className="text-xs text-gray-400">By Carlton Whitfield</p>
+                        </div>
+                    </div>
+                    <p className="text-sm text-gray-300 mb-6">
+                        The secret weapon for church musicians. Add backing tracks, preacher chords, and loops instantly.
+                    </p>
+                    <div className="flex gap-2">
+                        <button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg text-xs uppercase">Get the App</button>
+                        <button className="px-4 border border-white/20 rounded-lg hover:bg-white/10"><Play className="w-4 h-4" /></button>
+                    </div>
+                </div>
+
+                {/* LOOP PACK CARD */}
+                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4">
+                        <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded">LOOP PACK</span>
+                    </div>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center text-3xl">🥁</div>
+                        <div>
+                            <h3 className="text-xl font-bold">Churchy Drums Vol. 4</h3>
+                            <p className="text-xs text-gray-400">High energy shout loops</p>
+                        </div>
+                    </div>
+                    <p className="text-sm text-gray-300 mb-6">
+                        150+ royalty-free drum loops perfect for praise breaks and high praise moments.
+                    </p>
+                    <button className="w-full border border-white/20 hover:bg-white/10 text-white font-bold py-2 rounded-lg text-xs uppercase">
+                        Download Pack ($29)
+                    </button>
+                </div>
+
+                {/* LIVE SHED */}
+                <div className="bg-gradient-to-br from-red-900/50 to-black border border-red-500/30 rounded-2xl p-6 flex flex-col justify-center items-center text-center">
+                    <div className="bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full mb-4 animate-pulse">LIVE NOW</div>
+                    <h3 className="text-2xl font-black italic uppercase mb-2">Late Night Shed</h3>
+                    <p className="text-sm text-gray-300 mb-6">Jam session with the keys players from Maverick City.</p>
+                    <button className="bg-white text-black font-extrabold px-8 py-3 rounded-full uppercase text-xs hover:bg-gray-200">
+                        Join Room
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}
+"""
+
+def write_file(path, content):
+    directory = os.path.dirname(path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"✅ Updated: {path}")
+
+write_file("lib/preachers.ts", preachers_code)
+write_file("lib/artists.ts", artists_code)
+write_file("app/music/page.tsx", music_page_code)

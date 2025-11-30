@@ -1,0 +1,35 @@
+import Navbar from "@/components/Navbar";
+
+export default function WatchPage({ params }: { params: { id: string } }) {
+  return (
+    <div className="flex h-screen flex-col bg-black text-white">
+      <Navbar />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left: Video Player Area */}
+        <div className="flex-1 bg-gray-900 flex items-center justify-center relative">
+          <div className="text-center p-10">
+            <h2 className="text-2xl font-bold mb-2">Live Stream Simulator</h2>
+            <p className="text-gray-400">Video Player ID: {params.id}</p>
+            <div className="mt-8 aspect-video bg-black rounded-xl border border-white/10 w-full max-w-4xl mx-auto flex items-center justify-center">
+                <span className="animate-pulse text-red-500 font-bold">● LIVE FEED</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Interactive Sanctuary */}
+        <div className="w-80 border-l border-white/10 bg-gray-950 flex flex-col hidden lg:flex">
+          <div className="p-4 border-b border-white/10 font-bold">Virtual Sanctuary</div>
+          <div className="flex-1 p-4 overflow-y-auto space-y-4">
+            <div className="text-xs text-gray-500 text-center">Chat started</div>
+            <div className="text-sm"><span className="text-violet-400 font-bold">User1:</span> Hallelujah!</div>
+            <div className="text-sm"><span className="text-blue-400 font-bold">Sarah:</span> Watching from Texas!</div>
+            <div className="text-sm"><span className="text-green-400 font-bold">Mike:</span> What chapter is this?</div>
+          </div>
+          <div className="p-4 bg-gray-900 border-t border-white/10">
+             <input type="text" placeholder="Send a message..." className="w-full bg-black border border-white/20 rounded-full px-4 py-2 text-sm text-white" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
