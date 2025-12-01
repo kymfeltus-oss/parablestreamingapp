@@ -14,12 +14,21 @@ import {
   Play,
 } from "lucide-react";
 
+// =========================================
+// ARTIST + CREATOR SLUGS
+// =========================================
 const artistSlugs = ["lauren-daigle", "kirk-franklin", "steven-furtick"];
 const creatorSlugs = ["td-jakes", "mike-todd", "pastor-stevenson", "steven-furtick"];
 
+// =========================================
+// PAGE COMPONENT
+// =========================================
 export default function FeedPage() {
   const [content, setContent] = useState("");
 
+  // =========================================
+  // STATIC POSTS
+  // =========================================
   const [posts, setPosts] = useState([
     {
       id: 0,
@@ -99,10 +108,9 @@ export default function FeedPage() {
         name: "Lauren Daigle",
         handle: "@laurendaigle",
         avatar: "/lauren-daigle.jpg",
-        slug: "lauren-daigle",
+        slug: "laurendaigle",
         live: false,
       },
-
       time: "Yesterday",
       content: "Grateful to worship with you all ❤️🎵",
       tags: ["#ChristianMusic", "#Worship"],
@@ -114,7 +122,9 @@ export default function FeedPage() {
     },
   ]);
 
-  // Instagram embed loader fix
+  // =========================================
+  // INSTAGRAM EMBED LOADER
+  // =========================================
   useEffect(() => {
     if (!document.querySelector('script[src="//www.instagram.com/embed.js"]')) {
       const script = document.createElement("script");
@@ -124,7 +134,9 @@ export default function FeedPage() {
     }
   }, []);
 
-  // Handle new post
+  // =========================================
+  // HANDLE NEW POST
+  // =========================================
   const handlePost = () => {
     if (!content.trim()) return;
 
@@ -151,7 +163,9 @@ export default function FeedPage() {
     setContent("");
   };
 
-  // Profile routing
+  // =========================================
+  // PROFILE ROUTING
+  // =========================================
   const getProfileUrl = (slug: string, live?: boolean) => {
     if (artistSlugs.includes(slug)) return `/artist/${slug}`;
     if (creatorSlugs.includes(slug))
@@ -159,17 +173,19 @@ export default function FeedPage() {
     return `/creator/${slug}`;
   };
 
+  // =========================================
+  // UI RENDER
+  // =========================================
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white">
       <Navbar />
-
       <div className="flex">
         <Sidebar resolveProfileUrl={getProfileUrl} />
 
         <main className="flex-1 lg:ml-64 p-6 flex justify-center">
           <div className="w-full max-w-2xl space-y-8">
 
-            {/* Heading */}
+            {/* TITLE */}
             <div>
               <h1 className="text-3xl font-black">Your Feed</h1>
               <p className="text-gray-400 text-sm mt-1">
@@ -177,7 +193,7 @@ export default function FeedPage() {
               </p>
             </div>
 
-            {/* Category Filter */}
+            {/* CATEGORY FILTER */}
             <div className="flex gap-3 overflow-x-auto pb-2 text-xs">
               {["All", "Live", "Sermons", "Music", "Clips", "Popular"].map(
                 (tab, i) => (
@@ -193,7 +209,7 @@ export default function FeedPage() {
               )}
             </div>
 
-            {/* Create Post */}
+            {/* CREATE POST */}
             <div className="bg-[#1a1a1a] border border-white/10 p-4 rounded-xl">
               <div className="flex items-center gap-4">
                 <img
@@ -217,7 +233,7 @@ export default function FeedPage() {
               </div>
             </div>
 
-            {/* FEED POSTS */}
+            {/* FEED SECTION */}
             <h2 className="text-xl font-bold">For You</h2>
 
             {posts.map((post) => (
@@ -225,18 +241,18 @@ export default function FeedPage() {
                 key={post.id}
                 className="bg-[#111] border border-white/10 rounded-xl overflow-hidden"
               >
-                {/* Post Header */}
+                {/* HEADER */}
                 <div className="p-4 flex justify-between">
                   <Link
                     href={getProfileUrl(post.user.slug, post.user.live)}
-                    className="flex items-center gap-3"
+                    className="flex gap-3"
                   >
                     <img
                       src={post.user.avatar}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <p className="text-sm font-bold">{post.user.name}</p>
+                      <p className="font-bold text-sm">{post.user.name}</p>
                       <p className="text-[10px] text-gray-500">{post.time}</p>
                     </div>
                   </Link>
@@ -244,11 +260,11 @@ export default function FeedPage() {
                   <MoreHorizontal className="text-gray-500" />
                 </div>
 
-                {/* Content */}
+                {/* CONTENT */}
                 <div className="px-4 pb-3 text-sm">{post.content}</div>
 
-                {/* Tags */}
-                <div className="px-4 pb-1 flex gap-2">
+                {/* TAGS */}
+                <div className="px-4 pb-2 flex gap-2">
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
@@ -259,7 +275,7 @@ export default function FeedPage() {
                   ))}
                 </div>
 
-                {/* Post Media */}
+                {/* MEDIA */}
                 {post.media && post.type !== "text" && (
                   <div className="bg-black">
                     {post.type === "youtube" ? (
@@ -275,7 +291,7 @@ export default function FeedPage() {
                   </div>
                 )}
 
-                {/* Footer */}
+                {/* FOOTER */}
                 <div className="p-4 flex gap-6 border-t border-white/10 text-gray-400 text-xs">
                   <button className="flex items-center gap-1">
                     <Heart className="w-4 h-4" /> {post.likes}
@@ -287,8 +303,10 @@ export default function FeedPage() {
                     <Share2 className="w-4 h-4" /> {post.shares}
                   </button>
                 </div>
+
               </div>
             ))}
+
           </div>
         </main>
       </div>

@@ -69,7 +69,9 @@ export default function MusicRoomPage() {
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
   const room = rooms.find((r) => r.id === id);
 
-  // Handle NON-EXISTENT room
+  // ========================================================
+  // ROOM DOES NOT EXIST
+  // ========================================================
   if (!room) {
     return (
       <div className="min-h-screen bg-black text-white p-10">
@@ -86,7 +88,9 @@ export default function MusicRoomPage() {
   // STATE
   // ========================================================
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
+  const [messages, setMessages] = useState<{ user: string; text: string }[]>(
+    []
+  );
   const [viewerCount, setViewerCount] = useState(room.viewers);
 
   // ========================================================
@@ -98,7 +102,6 @@ export default function MusicRoomPage() {
         let delta = Math.random() < 0.5 ? -1 : 1;
         let next = prev + delta;
 
-        // Bound the viewer fluctuation
         if (next < room.viewers - 20) next = room.viewers;
         if (next > room.viewers + 40) next = room.viewers + 20;
 
@@ -116,14 +119,14 @@ export default function MusicRoomPage() {
     const interval = setInterval(() => {
       const msg =
         randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      setMessages((prev) => [msg, ...prev].slice(0, 40)); // Keep last 40 messages
+      setMessages((prev) => [msg, ...prev].slice(0, 40)); // keep last 40 messages
     }, 8000);
 
     return () => clearInterval(interval);
   }, []);
 
   // ========================================================
-  // SEND CHAT MESSAGE
+  // SEND MESSAGE
   // ========================================================
   function send() {
     if (!input.trim()) return;
@@ -132,7 +135,7 @@ export default function MusicRoomPage() {
   }
 
   // ========================================================
-  // UI RENDER
+  // UI
   // ========================================================
   return (
     <div className="min-h-screen bg-black text-white">
@@ -146,7 +149,6 @@ export default function MusicRoomPage() {
             src={room.avatar}
             className="w-20 h-20 rounded-full border border-white/20"
           />
-
           <div>
             <h1 className="text-3xl font-black">{room.name}</h1>
             <p className="text-gray-400 text-sm">Hosted by {room.host}</p>
@@ -178,7 +180,7 @@ export default function MusicRoomPage() {
           ))}
         </div>
 
-        {/* CHAT PANEL */}
+        {/* CHAT BOX */}
         <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
 
           {/* Chat Header */}
@@ -217,7 +219,7 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* BACK LINK */}
+        {/* BACK BUTTON */}
         <Link
           href="/music"
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
