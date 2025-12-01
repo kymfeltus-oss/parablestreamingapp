@@ -65,13 +65,9 @@ const randomMessages = [
 export default function MusicRoomPage() {
   const params = useParams();
 
-  // Normalize id safely
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
   const room = rooms.find((r) => r.id === id);
 
-  // ========================================================
-  // ROOM DOES NOT EXIST
-  // ========================================================
   if (!room) {
     return (
       <div className="min-h-screen bg-black text-white p-10">
@@ -84,18 +80,11 @@ export default function MusicRoomPage() {
     );
   }
 
-  // ========================================================
-  // STATE
-  // ========================================================
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ user: string; text: string }[]>(
-    []
-  );
+  const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
   const [viewerCount, setViewerCount] = useState(room.viewers);
 
-  // ========================================================
   // VIEWER COUNT SIMULATION
-  // ========================================================
   useEffect(() => {
     const interval = setInterval(() => {
       setViewerCount((prev) => {
@@ -112,31 +101,23 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, [room]);
 
-  // ========================================================
   // RANDOM CHAT SIMULATION
-  // ========================================================
   useEffect(() => {
     const interval = setInterval(() => {
       const msg =
         randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      setMessages((prev) => [msg, ...prev].slice(0, 40)); // keep last 40 messages
+      setMessages((prev) => [msg, ...prev].slice(0, 40));
     }, 8000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // ========================================================
-  // SEND MESSAGE
-  // ========================================================
   function send() {
     if (!input.trim()) return;
     setMessages([{ user: "You", text: input }, ...messages]);
     setInput("");
   }
 
-  // ========================================================
-  // UI
-  // ========================================================
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
@@ -183,7 +164,6 @@ export default function MusicRoomPage() {
         {/* CHAT BOX */}
         <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
 
-          {/* Chat Header */}
           <div className="h-10 border-b border-white/10 flex items-center justify-between px-3 text-xs">
             <span className="uppercase tracking-wide text-gray-400 font-bold">
               Room Chat
@@ -191,7 +171,6 @@ export default function MusicRoomPage() {
             <span className="text-gray-500">{messages.length} msgs</span>
           </div>
 
-          {/* Chat Messages */}
           <div className="flex-1 p-3 overflow-y-auto text-sm space-y-3 max-h-[300px]">
             {messages.map((m, i) => (
               <div key={i}>
@@ -201,7 +180,6 @@ export default function MusicRoomPage() {
             ))}
           </div>
 
-          {/* Chat Input */}
           <div className="p-3 flex gap-2 border-t border-white/10">
             <input
               value={input}
@@ -219,7 +197,6 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* BACK BUTTON */}
         <Link
           href="/music"
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
