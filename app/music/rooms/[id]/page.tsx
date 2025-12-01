@@ -1,12 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { Users } from "lucide-react";
 
-// Room data source
 const rooms = [
   {
     id: "organ-drums",
@@ -46,39 +45,25 @@ const rooms = [
   },
 ];
 
+// Fake chat messages for demo
+const randomMessages = [
+  { user: "Guest123", text: "Bro this is nuts 🔥" },
+  { user: "ChurchDrummer", text: "Drop that in 7/4 👀" },
+  { user: "Keys4Christ", text: "Save this progression please 🙏" },
+  { user: "SingerLife", text: "Those voicings >>>" },
+  { user: "ProducerMike", text: "Loop that!!!" },
+];
+
 export default function MusicRoomPage() {
   const params = useParams();
-
-  // Convert id from string | string[] | undefined → string
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
 
   const room = rooms.find((r) => r.id === id);
 
-  const [viewerCount, setViewerCount] = useState(room?.viewers ?? 0);
-
-  // Live viewer fluctuations
-  useEffect(() => {
-    if (!room) return;
-
-    const interval = setInterval(() => {
-      setViewerCount((prev: number) => {
-        let delta = Math.random() < 0.5 ? -1 : 1;
-        let next = prev + delta;
-
-        const min = Math.max(1, room.viewers - 20);
-        if (next < min) next = room.viewers;
-
-        return next;
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [room]);
-
-  // Room Not Found
   if (!room) {
     return (
       <div className="min-h-screen bg-black text-white p-10">
+        <Navbar />
         <h1 className="text-2xl font-bold">Room not found</h1>
         <Link href="/music" className="text-gray-400 underline mt-4 block">
           Go back
@@ -87,11 +72,49 @@ export default function MusicRoomPage() {
     );
   }
 
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
+  const [viewerCount, setViewerCount] = useState<number>(room.viewers);
+
+  // Live viewer simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setViewerCount((prev) => {
+        let delta = Math.random() < 0.5 ? -1 : 1;
+        let next = prev + delta;
+
+        if (next < room.viewers - 20) next = room.viewers;
+        if (next > room.viewers + 40) next = room.viewers + 20;
+
+        return next;
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [room]);
+
+  // Fake incoming chat
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const msg = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+      setMessages((prev) => [msg, ...prev].slice(0, 40));
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  function send() {
+    if (!input.trim()) return;
+    setMessages([{ user: "You", text: input }, ...messages]);
+    setInput("");
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-6 py-10">
+        
         {/* HEADER */}
         <div className="flex items-center gap-6 mb-10">
           <img
@@ -107,7 +130,7 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* VIDEO PLAYER */}
+        {/* VIDEO */}
         <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl mb-8">
           <iframe
             src={room.stream}
@@ -118,7 +141,7 @@ export default function MusicRoomPage() {
 
         {/* TAGS */}
         <div className="flex gap-3 mb-6">
-          {room.tags?.map((tag) => (
+          {room.tags.map((tag) => (
             <span
               key={tag}
               className="text-xs bg-white/10 px-3 py-1 rounded-full text-gray-300"
@@ -128,15 +151,52 @@ export default function MusicRoomPage() {
           ))}
         </div>
 
-        {/* BACK BUTTON */}
+        {/* CHAT */}
+        <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
+          
+          {/* Chat Header */}
+          <div className="h-10 border-b border-white/10 flex items-center justify-between px-3 text-xs">
+            <span className="uppercase tracking-wide text-gray-400 font-bold">Room Chat</span>
+            <span className="text-gray-500">{messages.length} msgs</span>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 p-3 overflow-y-auto text-sm space-y-3 max-h-[300px]">
+            {messages.map((m, i) => (
+              <div key={i}>
+                <span className="font-bold text-orange-400">{m.user}: </span>
+                <span className="text-gray-200">{m.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="p-3 flex gap-2 border-t border-white/10">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && send()}
+              className="flex-1 bg-black border border-white/20 rounded-lg px-3 py-2 text-sm outline-none"
+              placeholder="Say something..."
+            />
+            <button
+              onClick={send}
+              className="bg-orange-600 hover:bg-orange-500 px-3 py-2 rounded-lg text-xs font-bold"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+
+        {/* BACK */}
         <Link
           href="/music"
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
         >
           ← Back to Music Rooms
         </Link>
+
       </main>
     </div>
   );
 }
-
