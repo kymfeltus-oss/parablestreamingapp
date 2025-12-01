@@ -9,7 +9,7 @@ export default function HomePage() {
       id: 1,
       title: "Faith + Obedience = Miracles!",
       streamer: "Bishop T.D. Jakes",
-      viewers: 18_205,
+      viewers: 18205,
       tags: ["Sermon", "Faith", "Live"],
       thumbnail: "/td-jakes.jpg",
     },
@@ -17,15 +17,16 @@ export default function HomePage() {
       id: 2,
       title: "Praise Break • Live Worship",
       streamer: "Kirk Franklin",
-      viewers: 12_440,
+      viewers: 12440,
       tags: ["Worship", "Music", "Praise"],
       thumbnail: "/kirk_avatar.png",
+      album: "/kirk-franklin-album.jpg",
     },
     {
       id: 3,
       title: "Late Night Gospel Flow",
       streamer: "Lauren Daigle",
-      viewers: 9_200,
+      viewers: 9200,
       tags: ["Gospel", "Live", "Music"],
       thumbnail: "/lauren-daigle.jpg",
     },
@@ -33,137 +34,135 @@ export default function HomePage() {
       id: 4,
       title: "Prayer & Prophetic Flow",
       streamer: "Pastor Stevenson",
-      viewers: 7_855,
+      viewers: 7855,
       tags: ["Prayer", "Teaching"],
       thumbnail: "/steven-furtick.jpg",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
+    <div className="min-h-screen bg-black text-white pb-28">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between px-5 py-4 bg-[#0f0f0f] border-b border-white/10">
+      <div className="flex items-center justify-between w-full px-6 py-5 bg-[#0f0f0f] border-b border-white/10">
 
-        {/* BIG PARABLE LOGO */}
-        <span className="text-5xl font-black tracking-tight text-[#53fc18]">
+        {/* LARGER LOGO */}
+        <span className="text-6xl font-black tracking-tight text-[#53fc18] neon-text">
           PARABLE
         </span>
 
         {/* GET SEEDS BUTTON */}
         <Link
           href="/monetization"
-          className="bg-[#53fc18] text-black font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-[0_0_10px_#53fc18] text-sm"
+          className="bg-[#53fc18] text-black font-bold px-5 py-2 rounded-xl flex items-center gap-2 shadow-[0_0_12px_#53fc18] text-base"
         >
-          <Coins className="w-4 h-4" />
+          <Coins className="w-5 h-5" />
           GET SEEDS
         </Link>
       </div>
 
-      {/* FEATURED FLASH BANNER */}
-      <div className="relative mt-4 mx-5 rounded-2xl overflow-hidden border border-white/10 h-40 bg-gradient-to-r from-[#53fc18]/20 via-black to-[#3bff95]/20 flex items-center">
+      {/* FLASH HERO BANNER */}
+      <div className="relative mt-5 mx-6 rounded-2xl overflow-hidden border border-white/10 h-44 bg-gradient-to-r from-[#53fc18]/20 via-black to-[#3bff95]/20 flex items-center justify-start">
         <div className="px-6">
-          <h2 className="text-3xl font-black">Streaming. Creating. Believing.</h2>
-          <p className="text-gray-300 mt-1 text-sm">
-            Build your voice. Grow your ministry. Inspire a generation.
+          <h2 className="text-4xl font-black">Streaming. Creating. Believing.</h2>
+          <p className="text-gray-300 mt-2 text-sm max-w-xs">
+            A community for believers, creators & gospel influencers.
           </p>
         </div>
-        <Sparkles className="absolute right-6 bottom-6 w-10 h-10 text-[#53fc18]" />
+        <Sparkles className="absolute right-6 bottom-6 w-12 h-12 text-[#53fc18]" />
       </div>
 
-      {/* LIVE NOW SECTION */}
-      <div className="mt-8 px-5">
-        <h2 className="text-2xl font-bold mb-3">Live Now</h2>
+      {/* LIVE NOW */}
+      <div className="mt-10 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">Live Now</h2>
 
-        {/* GRID — 2 on desktop, 3–4 on tablet/phone */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {liveStreams.map((stream) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {liveStreams.map((s) => (
             <div
-              key={stream.id}
-              className="bg-[#111] border border-white/10 rounded-xl overflow-hidden shadow-xl"
+              key={s.id}
+              className="neon-card rounded-xl overflow-hidden border border-white/10"
             >
               <div className="relative">
                 <img
-                  src={stream.thumbnail}
-                  className="w-full h-32 object-cover"
+                  src={s.thumbnail}
+                  className="w-full h-36 object-cover"
                 />
-
                 <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">
                   LIVE
                 </span>
-
-                <span className="absolute bottom-1 left-2 bg-black/70 px-2 py-0.5 text-[11px] rounded flex items-center gap-1">
+                <span className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[11px] flex items-center gap-1">
                   <Users className="w-3 h-3" />
-                  {stream.viewers.toLocaleString()}
+                  {s.viewers.toLocaleString()}
                 </span>
               </div>
 
-              <div className="p-2">
-                <p className="font-bold text-sm leading-tight">{stream.title}</p>
-                <p className="text-[11px] text-gray-400">{stream.streamer}</p>
+              <div className="p-3">
+                <p className="font-bold text-sm">{s.title}</p>
+                <p className="text-[11px] text-gray-400">{s.streamer}</p>
 
+                {/* TAGS */}
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {stream.tags.map((t, i) => (
-                    <span
-                      key={i}
-                      className="px-1 py-0.5 bg-[#222] border border-white/10 text-[9px] rounded text-gray-300"
-                    >
-                      {t}
-                    </span>
+                  {s.tags.map((tag, i) => (
+                    <span key={i} className="neon-tag">{tag}</span>
                   ))}
                 </div>
+
+                {/* KIRK FRANKLIN ALBUM BELOW HIS POST */}
+                {s.album && (
+                  <div className="mt-3">
+                    <img
+                      src={s.album}
+                      className="w-full h-28 object-cover rounded-lg border border-white/10"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* CREATOR TOOLS SECTION */}
-      <div className="mt-10 px-5">
-        <h2 className="text-2xl font-bold mb-3">Creator Tools</h2>
+      {/* CREATOR TOOLS */}
+      <div className="mt-12 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">Creator Tools</h2>
 
-        <div className="grid grid-cols-2 gap-4">
-          {/* STREAM SETUP */}
+        <div className="grid grid-cols-2 gap-5 text-center">
+
           <Link
             href="/creator/tools"
-            className="bg-[#111] p-4 rounded-xl border border-white/10 hover:bg-[#1a1a1a] transition"
+            className="neon-card p-5 rounded-xl text-center"
           >
-            <h3 className="font-bold">Stream Setup</h3>
-            <p className="text-gray-400 text-xs mt-1">Go live, manage overlays</p>
+            <h3 className="text-lg font-bold">Stream Setup</h3>
+            <p className="text-xs text-gray-400 mt-1">Go live & manage overlays</p>
           </Link>
 
-          {/* ANALYTICS */}
           <Link
             href="/dashboard/analytics"
-            className="bg-[#111] p-4 rounded-xl border border-white/10 hover:bg-[#1a1a1a] transition"
+            className="neon-card p-5 rounded-xl"
           >
-            <h3 className="font-bold">Analytics</h3>
-            <p className="text-gray-400 text-xs mt-1">View engagement</p>
+            <h3 className="text-lg font-bold">Analytics</h3>
+            <p className="text-xs text-gray-400 mt-1">Track performance</p>
           </Link>
 
-          {/* MONETIZATION */}
           <Link
             href="/monetization"
-            className="bg-[#111] p-4 rounded-xl border border-white/10 hover:bg-[#1a1a1a] transition"
+            className="neon-card p-5 rounded-xl"
           >
-            <h3 className="font-bold">Monetization</h3>
-            <p className="text-gray-400 text-xs mt-1">
-              Earn seeds & gifts
-            </p>
+            <h3 className="text-lg font-bold">Monetization</h3>
+            <p className="text-xs text-gray-400 mt-1">Earn Seeds & Gifts</p>
           </Link>
 
-          {/* LIBRARY */}
           <Link
             href="/library"
-            className="bg-[#111] p-4 rounded-xl border border-white/10 hover:bg-[#1a1a1a] transition"
+            className="neon-card p-5 rounded-xl"
           >
-            <h3 className="font-bold">My Library</h3>
-            <p className="text-gray-400 text-xs mt-1">
-              Saved content
-            </p>
+            <h3 className="text-lg font-bold">Library</h3>
+            <p className="text-xs text-gray-400 mt-1">Saved content</p>
           </Link>
+
         </div>
       </div>
+
     </div>
   );
 }
