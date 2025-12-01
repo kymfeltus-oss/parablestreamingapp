@@ -1,74 +1,66 @@
-// app/layout.tsx
-"use client";
-
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-
-import {
-  Home,
-  Compass,
-  Video,
-  Library,
-  User,
-} from "lucide-react";
+import { Home, Compass, Video, Library, User } from "lucide-react";
+import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Nexus Platform",
   description: "Faith-based content app",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-
-  const BottomNav = () => (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#111] border-t border-white/10 px-4 py-2 flex justify-between items-center lg:hidden">
-
-      <Link href="/feed" className="flex flex-col items-center text-xs">
-        <Home className={`w-6 h-6 ${pathname === "/feed" ? "text-white" : "text-gray-400"}`} />
-        <span className={pathname === "/feed" ? "text-white" : "text-gray-400"}>Home</span>
-      </Link>
-
-      <Link href="/discover" className="flex flex-col items-center text-xs">
-        <Compass className={`w-6 h-6 ${pathname?.startsWith("/discover") ? "text-white" : "text-gray-400"}`} />
-        <span className={pathname?.startsWith("/discover") ? "text-white" : "text-gray-400"}>Discover</span>
-      </Link>
-
-      <Link href="/stream" className="flex flex-col items-center text-xs">
-        <Video className={`w-6 h-6 ${pathname?.startsWith("/stream") ? "text-white" : "text-gray-400"}`} />
-        <span className={pathname?.startsWith("/stream") ? "text-white" : "text-gray-400"}>Stream</span>
-      </Link>
-
-      <Link href="/library" className="flex flex-col items-center text-xs">
-        <Library className={`w-6 h-6 ${pathname?.startsWith("/library") ? "text-white" : "text-gray-400"}`} />
-        <span className={pathname?.startsWith("/library") ? "text-white" : "text-gray-400"}>Library</span>
-      </Link>
-
-      <Link href="/profile" className="flex flex-col items-center text-xs">
-        <User className={`w-6 h-6 ${pathname?.startsWith("/profile") ? "text-white" : "text-gray-400"}`} />
-        <span className={pathname?.startsWith("/profile") ? "text-white" : "text-gray-400"}>Profile</span>
-      </Link>
-
-    </div>
-  );
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Bottom nav MUST be client-side, so we wrap only that part.
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-black text-white`}>
-        <div className="min-h-screen pb-20">
-          {children}
-        </div>
+      <body className={`${inter.className} bg-black text-white pb-20`}>
+        {children}
 
-        <BottomNav />
+        {/* CLIENT SIDE NAVIGATION BAR */}
+        <MobileBottomNav />
       </body>
     </html>
+  );
+}
+
+/* ---- CLIENT COMPONENT BELOW ---- */
+"use client";
+
+function MobileBottomNav() {
+  const path = typeof window !== "undefined" ? window.location.pathname : "";
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-[#111] border-t border-white/10 px-4 py-2 flex justify-between items-center lg:hidden z-50">
+
+      <NavItem href="/feed" label="Home" icon={Home} active={path === "/feed"} />
+
+      <NavItem href="/discover" label="Browse" icon={Compass} active={path.startsWith("/discover")} />
+
+      <NavItem href="/stream" label="Stream" icon={Video} active={path.startsWith("/stream")} />
+
+      <NavItem href="/library" label="Library" icon={Library} active={path.startsWith("/library")} />
+
+      <NavItem href="/profile" label="Profile" icon={User} active={path.startsWith("/profile")} />
+    </div>
+  );
+}
+
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  active,
+}: {
+  href: string;
+  label: string;
+  icon: any;
+  active: boolean;
+}) {
+  return (
+    <Link href={href} className="flex flex-col items-center text-xs">
+      <Icon className={`w-6 h-6 ${active ? "text-white" : "text-gray-400"}`} />
+      <span className={active ? "text-white" : "text-gray-400"}>{label}</span>
+    </Link>
   );
 }
