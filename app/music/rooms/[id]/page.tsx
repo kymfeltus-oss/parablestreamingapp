@@ -45,7 +45,6 @@ const rooms = [
   },
 ];
 
-// Fake chat messages for demo
 const randomMessages = [
   { user: "Guest123", text: "Bro this is nuts 🔥" },
   { user: "ChurchDrummer", text: "Drop that in 7/4 👀" },
@@ -57,7 +56,6 @@ const randomMessages = [
 export default function MusicRoomPage() {
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
-
   const room = rooms.find((r) => r.id === id);
 
   if (!room) {
@@ -76,7 +74,6 @@ export default function MusicRoomPage() {
   const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
   const [viewerCount, setViewerCount] = useState<number>(room.viewers);
 
-  // Live viewer simulation
   useEffect(() => {
     const interval = setInterval(() => {
       setViewerCount((prev) => {
@@ -93,7 +90,6 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, [room]);
 
-  // Fake incoming chat
   useEffect(() => {
     const interval = setInterval(() => {
       const msg = randomMessages[Math.floor(Math.random() * randomMessages.length)];
@@ -112,15 +108,10 @@ export default function MusicRoomPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-
       <main className="max-w-5xl mx-auto px-6 py-10">
         
-        {/* HEADER */}
         <div className="flex items-center gap-6 mb-10">
-          <img
-            src={room.avatar}
-            className="w-20 h-20 rounded-full border border-white/20"
-          />
+          <img src={room.avatar} className="w-20 h-20 rounded-full border border-white/20" />
           <div>
             <h1 className="text-3xl font-black">{room.name}</h1>
             <p className="text-gray-400 text-sm">Hosted by {room.host}</p>
@@ -130,37 +121,24 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* VIDEO */}
         <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl mb-8">
-          <iframe
-            src={room.stream}
-            className="w-full aspect-video"
-            allowFullScreen
-          ></iframe>
+          <iframe src={room.stream} className="w-full aspect-video" allowFullScreen></iframe>
         </div>
 
-        {/* TAGS */}
         <div className="flex gap-3 mb-6">
           {room.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs bg-white/10 px-3 py-1 rounded-full text-gray-300"
-            >
+            <span key={tag} className="text-xs bg-white/10 px-3 py-1 rounded-full text-gray-300">
               {tag}
             </span>
           ))}
         </div>
 
-        {/* CHAT */}
         <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
-          
-          {/* Chat Header */}
           <div className="h-10 border-b border-white/10 flex items-center justify-between px-3 text-xs">
             <span className="uppercase tracking-wide text-gray-400 font-bold">Room Chat</span>
             <span className="text-gray-500">{messages.length} msgs</span>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 p-3 overflow-y-auto text-sm space-y-3 max-h-[300px]">
             {messages.map((m, i) => (
               <div key={i}>
@@ -170,7 +148,6 @@ export default function MusicRoomPage() {
             ))}
           </div>
 
-          {/* Input */}
           <div className="p-3 flex gap-2 border-t border-white/10">
             <input
               value={input}
@@ -188,14 +165,9 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* BACK */}
-        <Link
-          href="/music"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
-        >
+        <Link href="/music" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
           ← Back to Music Rooms
         </Link>
-
       </main>
     </div>
   );

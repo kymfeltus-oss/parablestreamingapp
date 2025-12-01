@@ -9,33 +9,37 @@ import { ArrowLeft, Users } from "lucide-react";
 
 export default function DiscoverCategoryPage() {
   const { category } = useParams();
-  const categorySlug = String(category || "").toLowerCase().replace(/\s+/g, "-");
 
-  // Combine all content
+  // normalize category slug
+  const categorySlug = String(category || "")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
+  // merge all content
   const allContent = [...creators, ...artists];
 
-  // Define normalization helper
+  // helper to normalize strings
   const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
-  // Filter by category or tags
-  const filteredContent = categorySlug === "all"
-    ? allContent
-    : allContent.filter((item: any) => {
-        const cat =
-          item.liveStream?.category ||
-          item.category ||
-          item.genre ||
-          "";
+  // filter logic
+  const filteredContent =
+    categorySlug === "all"
+      ? allContent
+      : allContent.filter((item: any) => {
+          const cat =
+            item.liveStream?.category ||
+            item.category ||
+            item.genre ||
+            "";
+          const tags = item.tags || [];
 
-        const tags = item.tags || [];
+          return (
+            normalize(cat) === categorySlug ||
+            tags.some((tag: string) => normalize(tag) === categorySlug)
+          );
+        });
 
-        return (
-          normalize(cat) === categorySlug ||
-          tags.some((tag: string) => normalize(tag) === categorySlug)
-        );
-      });
-
-  // Convert slug to readable title
+  // readable title
   const categoryTitle = categorySlug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -51,8 +55,7 @@ export default function DiscoverCategoryPage() {
           href="/discover"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Discover
+          <ArrowLeft className="w-5 h-5" /> Back to Discover
         </Link>
 
         {/* Title */}
@@ -66,7 +69,11 @@ export default function DiscoverCategoryPage() {
             {filteredContent.map((item: any, i: number) => (
               <Link
                 key={i}
-                href={item.ministry ? `/creator/${item.slug}` : `/artist/${item.slug}`}
+                href={
+                  item.ministry
+                    ? `/creator/${item.slug}`
+                    : `/artist/${item.slug}`
+                }
                 className="group"
               >
                 {/* Card */}
@@ -76,14 +83,14 @@ export default function DiscoverCategoryPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                   />
 
-                  {/* LIVE Badge */}
+                  {/* LIVE badge */}
                   {item.liveStream?.isLive && (
                     <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">
                       LIVE
                     </div>
                   )}
 
-                  {/* Viewer Count */}
+                  {/* viewer count */}
                   <div className="absolute bottom-2 left-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
                     <Users className="w-3 h-3 text-violet-400" />
                     {item.liveStream?.viewers?.toLocaleString() || "Offline"}
@@ -96,7 +103,6 @@ export default function DiscoverCategoryPage() {
                     src={item.avatarUrl}
                     className="w-10 h-10 rounded-full object-cover bg-[#222]"
                   />
-
                   <div>
                     <h3 className="text-[15px] font-bold leading-tight group-hover:text-violet-400 transition">
                       {item.liveStream?.title || item.name}

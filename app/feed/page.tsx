@@ -10,9 +10,10 @@ import {
   Heart,
   MessageCircle,
   Share2,
+  Image as ImageIcon,
+  Play,
 } from "lucide-react";
 
-// ARTIST + CREATOR SLUGS
 const artistSlugs = ["lauren-daigle", "kirk-franklin", "steven-furtick"];
 const creatorSlugs = [
   "td-jakes",
@@ -21,7 +22,6 @@ const creatorSlugs = [
   "steven-furtick",
 ];
 
-// FEED POSTS
 export default function FeedPage() {
   const [content, setContent] = useState("");
 
@@ -118,7 +118,6 @@ export default function FeedPage() {
     },
   ]);
 
-  // Instagram embed loader fix
   useEffect(() => {
     if (!document.querySelector('script[src="//www.instagram.com/embed.js"]')) {
       const script = document.createElement("script");
@@ -128,7 +127,6 @@ export default function FeedPage() {
     }
   }, []);
 
-  // Handle posts
   const handlePost = () => {
     if (!content.trim()) return;
 
@@ -155,7 +153,6 @@ export default function FeedPage() {
     setContent("");
   };
 
-  // Determine profile URL routing
   const getProfileUrl = (slug: string, live?: boolean) => {
     if (artistSlugs.includes(slug)) return `/artist/${slug}`;
     if (creatorSlugs.includes(slug))
@@ -172,126 +169,10 @@ export default function FeedPage() {
 
         <main className="flex-1 lg:ml-64 p-6 flex justify-center">
           <div className="w-full max-w-2xl space-y-8">
-            {/* PAGE TITLE */}
+            
             <div>
               <h1 className="text-3xl font-black">Your Feed</h1>
               <p className="text-gray-400 text-sm mt-1">
                 Stay connected. Stay inspired.
               </p>
-            </div>
-
-            {/* CATEGORY BUTTONS */}
-            <div className="flex gap-3 overflow-x-auto pb-2 text-xs">
-              {["All", "Live", "Sermons", "Music", "Clips", "Popular"].map(
-                (tab, i) => (
-                  <button
-                    key={i}
-                    className={`px-4 py-2 rounded-full border border-white/10 transition ${
-                      i === 0 ? "bg-violet-600 text-white" : "text-gray-300"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                )
-              )}
-            </div>
-
-            {/* CREATE POST */}
-            <div className="bg-[#1a1a1a] border border-white/10 p-4 rounded-xl">
-              <div className="flex items-center gap-4">
-                <img
-                  src="/td_jakes_avatar.jpg"
-                  className="w-10 h-10 rounded-full"
-                />
-                <input
-                  placeholder="Drop a testimony or share a clip..."
-                  className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-                <button
-                  onClick={handlePost}
-                  className="bg-violet-600 px-6 py-1.5 rounded-full text-xs font-bold"
-                >
-                  Post <Send className="w-3 h-3 inline" />
-                </button>
-              </div>
-            </div>
-
-            {/* FOR YOU FEED */}
-            <h2 className="text-xl font-bold">For You</h2>
-
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                className="bg-[#111] border border-white/10 rounded-xl overflow-hidden"
-              >
-                {/* HEADER */}
-                <div className="p-4 flex justify-between">
-                  <Link
-                    href={getProfileUrl(post.user.slug, post.user.live)}
-                    className="flex gap-3"
-                  >
-                    <img
-                      src={post.user.avatar}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="font-bold text-sm">{post.user.name}</p>
-                      <p className="text-[10px] text-gray-500">{post.time}</p>
-                    </div>
-                  </Link>
-                  <MoreHorizontal className="text-gray-500" />
-                </div>
-
-                {/* CONTENT */}
-                <div className="px-4 pb-3 text-sm">{post.content}</div>
-
-                {/* TAGS */}
-                <div className="px-4 pb-2 flex gap-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-violet-400 text-xs cursor-pointer"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* MEDIA */}
-                {post.media && post.type !== "text" && (
-                  <div className="bg-black">
-                    {post.type === "youtube" ? (
-                      <iframe
-                        title="YouTube player"
-                        src={post.media}
-                        className="w-full aspect-video"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <img src={post.media} className="w-full" />
-                    )}
-                  </div>
-                )}
-
-                {/* FOOTER */}
-                <div className="p-4 flex gap-6 border-t border-white/10 text-gray-400 text-xs">
-                  <button className="flex items-center gap-1">
-                    <Heart className="w-4 h-4" /> {post.likes}
-                  </button>
-                  <button className="flex items-center gap-1">
-                    <MessageCircle className="w-4 h-4" /> {post.comments}
-                  </button>
-                  <button className="flex items-center gap-1">
-                    <Share2 className="w-4 h-4" /> {post.shares}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
+            </div
