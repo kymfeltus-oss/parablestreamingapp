@@ -64,8 +64,8 @@ const randomMessages = [
 // ========================================================
 export default function MusicRoomPage() {
   const params = useParams();
-
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
+
   const room = rooms.find((r) => r.id === id);
 
   if (!room) {
@@ -84,6 +84,7 @@ export default function MusicRoomPage() {
   const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
   const [viewerCount, setViewerCount] = useState(room.viewers);
 
+  // VIEWER COUNT SIMULATION
   useEffect(() => {
     const interval = setInterval(() => {
       setViewerCount((prev) => {
@@ -100,6 +101,7 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, [room]);
 
+  // RANDOM CHAT SIMULATION
   useEffect(() => {
     const interval = setInterval(() => {
       const msg =
@@ -122,6 +124,7 @@ export default function MusicRoomPage() {
 
       <main className="max-w-5xl mx-auto px-6 py-10">
 
+        {/* HEADER */}
         <div className="flex items-center gap-6 mb-10">
           <img
             src={room.avatar}
@@ -130,12 +133,14 @@ export default function MusicRoomPage() {
           <div>
             <h1 className="text-3xl font-black">{room.name}</h1>
             <p className="text-gray-400 text-sm">Hosted by {room.host}</p>
+
             <div className="flex items-center gap-2 text-red-500 text-xs font-bold mt-1">
               <Users className="w-4 h-4" /> {viewerCount} Watching Live
             </div>
           </div>
         </div>
 
+        {/* VIDEO */}
         <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl mb-8">
           <iframe
             src={room.stream}
@@ -144,6 +149,7 @@ export default function MusicRoomPage() {
           ></iframe>
         </div>
 
+        {/* TAGS */}
         <div className="flex gap-3 mb-6">
           {room.tags.map((tag) => (
             <span
@@ -155,6 +161,7 @@ export default function MusicRoomPage() {
           ))}
         </div>
 
+        {/* CHAT BOX */}
         <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
 
           <div className="h-10 border-b border-white/10 flex items-center justify-between px-3 text-xs">
