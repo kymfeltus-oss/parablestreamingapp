@@ -14,7 +14,6 @@ import {
   Play,
 } from "lucide-react";
 
-// ARTIST + CREATOR SLUGS
 const artistSlugs = ["lauren-daigle", "kirk-franklin", "steven-furtick"];
 const creatorSlugs = ["td-jakes", "mike-todd", "pastor-stevenson", "steven-furtick"];
 
@@ -103,6 +102,7 @@ export default function FeedPage() {
         slug: "lauren-daigle",
         live: false,
       },
+
       time: "Yesterday",
       content: "Grateful to worship with you all ❤️🎵",
       tags: ["#ChristianMusic", "#Worship"],
@@ -114,7 +114,7 @@ export default function FeedPage() {
     },
   ]);
 
-  // Instagram embed loader
+  // Instagram embed loader fix
   useEffect(() => {
     if (!document.querySelector('script[src="//www.instagram.com/embed.js"]')) {
       const script = document.createElement("script");
@@ -124,7 +124,7 @@ export default function FeedPage() {
     }
   }, []);
 
-  // Handle posts
+  // Handle new post
   const handlePost = () => {
     if (!content.trim()) return;
 
@@ -151,7 +151,7 @@ export default function FeedPage() {
     setContent("");
   };
 
-  // Determine profile URL
+  // Profile routing
   const getProfileUrl = (slug: string, live?: boolean) => {
     if (artistSlugs.includes(slug)) return `/artist/${slug}`;
     if (creatorSlugs.includes(slug))
@@ -169,7 +169,7 @@ export default function FeedPage() {
         <main className="flex-1 lg:ml-64 p-6 flex justify-center">
           <div className="w-full max-w-2xl space-y-8">
 
-            {/* Title */}
+            {/* Heading */}
             <div>
               <h1 className="text-3xl font-black">Your Feed</h1>
               <p className="text-gray-400 text-sm mt-1">
@@ -200,12 +200,14 @@ export default function FeedPage() {
                   src="/td_jakes_avatar.jpg"
                   className="w-10 h-10 rounded-full"
                 />
+
                 <input
                   placeholder="Drop a testimony or share a clip..."
                   className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                 />
+
                 <button
                   onClick={handlePost}
                   className="bg-violet-600 px-6 py-1.5 rounded-full text-xs font-bold"
@@ -215,7 +217,7 @@ export default function FeedPage() {
               </div>
             </div>
 
-            {/* Feed */}
+            {/* FEED POSTS */}
             <h2 className="text-xl font-bold">For You</h2>
 
             {posts.map((post) => (
@@ -223,21 +225,22 @@ export default function FeedPage() {
                 key={post.id}
                 className="bg-[#111] border border-white/10 rounded-xl overflow-hidden"
               >
-                {/* Header */}
+                {/* Post Header */}
                 <div className="p-4 flex justify-between">
                   <Link
                     href={getProfileUrl(post.user.slug, post.user.live)}
-                    className="flex gap-3"
+                    className="flex items-center gap-3"
                   >
                     <img
                       src={post.user.avatar}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <p className="font-bold text-sm">{post.user.name}</p>
+                      <p className="text-sm font-bold">{post.user.name}</p>
                       <p className="text-[10px] text-gray-500">{post.time}</p>
                     </div>
                   </Link>
+
                   <MoreHorizontal className="text-gray-500" />
                 </div>
 
@@ -245,7 +248,7 @@ export default function FeedPage() {
                 <div className="px-4 pb-3 text-sm">{post.content}</div>
 
                 {/* Tags */}
-                <div className="px-4 pb-2 flex gap-2">
+                <div className="px-4 pb-1 flex gap-2">
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
@@ -256,7 +259,7 @@ export default function FeedPage() {
                   ))}
                 </div>
 
-                {/* Media */}
+                {/* Post Media */}
                 {post.media && post.type !== "text" && (
                   <div className="bg-black">
                     {post.type === "youtube" ? (
@@ -284,10 +287,8 @@ export default function FeedPage() {
                     <Share2 className="w-4 h-4" /> {post.shares}
                   </button>
                 </div>
-
               </div>
             ))}
-
           </div>
         </main>
       </div>

@@ -6,9 +6,9 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { Users } from "lucide-react";
 
-// ====================================
+// ========================================================
 // ROOM DEFINITIONS
-// ====================================
+// ========================================================
 const rooms = [
   {
     id: "organ-drums",
@@ -48,9 +48,9 @@ const rooms = [
   },
 ];
 
-// ====================================
+// ========================================================
 // RANDOM CHAT MESSAGES
-// ====================================
+// ========================================================
 const randomMessages = [
   { user: "Guest123", text: "Bro this is nuts 🔥" },
   { user: "ChurchDrummer", text: "Drop that in 7/4 👀" },
@@ -59,18 +59,17 @@ const randomMessages = [
   { user: "ProducerMike", text: "Loop that!!!" },
 ];
 
-// ====================================
+// ========================================================
 // PAGE COMPONENT
-// ====================================
+// ========================================================
 export default function MusicRoomPage() {
   const params = useParams();
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
 
+  // Normalize id safely
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
   const room = rooms.find((r) => r.id === id);
 
-  // ====================================
-  // ROOM DOES NOT EXIST
-  // ====================================
+  // Handle NON-EXISTENT room
   if (!room) {
     return (
       <div className="min-h-screen bg-black text-white p-10">
@@ -83,23 +82,23 @@ export default function MusicRoomPage() {
     );
   }
 
-  // ====================================
+  // ========================================================
   // STATE
-  // ====================================
+  // ========================================================
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
-  const [viewerCount, setViewerCount] = useState<number>(room.viewers);
+  const [viewerCount, setViewerCount] = useState(room.viewers);
 
-  // ====================================
+  // ========================================================
   // VIEWER COUNT SIMULATION
-  // ====================================
+  // ========================================================
   useEffect(() => {
     const interval = setInterval(() => {
       setViewerCount((prev) => {
         let delta = Math.random() < 0.5 ? -1 : 1;
         let next = prev + delta;
 
-        // Bounds
+        // Bound the viewer fluctuation
         if (next < room.viewers - 20) next = room.viewers;
         if (next > room.viewers + 40) next = room.viewers + 20;
 
@@ -110,31 +109,31 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, [room]);
 
-  // ====================================
-  // RANDOM CHAT SIM
-  // ====================================
+  // ========================================================
+  // RANDOM CHAT SIMULATION
+  // ========================================================
   useEffect(() => {
     const interval = setInterval(() => {
       const msg =
         randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      setMessages((prev) => [msg, ...prev].slice(0, 40));
+      setMessages((prev) => [msg, ...prev].slice(0, 40)); // Keep last 40 messages
     }, 8000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // ====================================
-  // SEND MESSAGE
-  // ====================================
+  // ========================================================
+  // SEND CHAT MESSAGE
+  // ========================================================
   function send() {
     if (!input.trim()) return;
     setMessages([{ user: "You", text: input }, ...messages]);
     setInput("");
   }
 
-  // ====================================
-  // UI
-  // ====================================
+  // ========================================================
+  // UI RENDER
+  // ========================================================
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
@@ -147,6 +146,7 @@ export default function MusicRoomPage() {
             src={room.avatar}
             className="w-20 h-20 rounded-full border border-white/20"
           />
+
           <div>
             <h1 className="text-3xl font-black">{room.name}</h1>
             <p className="text-gray-400 text-sm">Hosted by {room.host}</p>
@@ -157,7 +157,7 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* VIDEO PLAYER */}
+        {/* VIDEO */}
         <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl mb-8">
           <iframe
             src={room.stream}
@@ -178,7 +178,7 @@ export default function MusicRoomPage() {
           ))}
         </div>
 
-        {/* CHAT */}
+        {/* CHAT PANEL */}
         <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
 
           {/* Chat Header */}
@@ -217,7 +217,7 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* BACK */}
+        {/* BACK LINK */}
         <Link
           href="/music"
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
