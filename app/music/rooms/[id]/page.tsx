@@ -64,8 +64,8 @@ const randomMessages = [
 // ========================================================
 export default function MusicRoomPage() {
   const params = useParams();
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
 
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
   const room = rooms.find((r) => r.id === id);
 
   if (!room) {
@@ -133,7 +133,6 @@ export default function MusicRoomPage() {
           <div>
             <h1 className="text-3xl font-black">{room.name}</h1>
             <p className="text-gray-400 text-sm">Hosted by {room.host}</p>
-
             <div className="flex items-center gap-2 text-red-500 text-xs font-bold mt-1">
               <Users className="w-4 h-4" /> {viewerCount} Watching Live
             </div>
