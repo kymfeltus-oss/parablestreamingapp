@@ -4,8 +4,9 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { Users, Play } from "lucide-react";
+import { Users } from "lucide-react";
 
+// Room data source
 const rooms = [
   {
     id: "organ-drums",
@@ -46,19 +47,27 @@ const rooms = [
 ];
 
 export default function MusicRoomPage() {
-  const { id } = useParams();
+  const params = useParams();
+
+  // Convert id from string | string[] | undefined → string
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
+
   const room = rooms.find((r) => r.id === id);
 
-  const [viewerCount, setViewerCount] = useState(room?.viewers || 0);
+  const [viewerCount, setViewerCount] = useState(room?.viewers ?? 0);
 
-  // ⭐ FIXED: TypeScript requires typing "prev"
+  // Live viewer fluctuations
   useEffect(() => {
+    if (!room) return;
+
     const interval = setInterval(() => {
       setViewerCount((prev: number) => {
         let delta = Math.random() < 0.5 ? -1 : 1;
         let next = prev + delta;
 
-        if (next < Math.max(1, (room?.viewers || 10) - 20)) next = room?.viewers || 10;
+        const min = Math.max(1, room.viewers - 20);
+        if (next < min) next = room.viewers;
+
         return next;
       });
     }, 2000);
@@ -66,10 +75,14 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, [room]);
 
+  // Room Not Found
   if (!room) {
     return (
       <div className="min-h-screen bg-black text-white p-10">
         <h1 className="text-2xl font-bold">Room not found</h1>
+        <Link href="/music" className="text-gray-400 underline mt-4 block">
+          Go back
+        </Link>
       </div>
     );
   }
@@ -105,7 +118,7 @@ export default function MusicRoomPage() {
 
         {/* TAGS */}
         <div className="flex gap-3 mb-6">
-          {room.tags.map((tag) => (
+          {room.tags?.map((tag) => (
             <span
               key={tag}
               className="text-xs bg-white/10 px-3 py-1 rounded-full text-gray-300"
@@ -126,3 +139,4 @@ export default function MusicRoomPage() {
     </div>
   );
 }
+
