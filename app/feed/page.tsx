@@ -14,13 +14,9 @@ import {
   Play,
 } from "lucide-react";
 
+// ARTIST + CREATOR SLUGS
 const artistSlugs = ["lauren-daigle", "kirk-franklin", "steven-furtick"];
-const creatorSlugs = [
-  "td-jakes",
-  "mike-todd",
-  "pastor-stevenson",
-  "steven-furtick",
-];
+const creatorSlugs = ["td-jakes", "mike-todd", "pastor-stevenson", "steven-furtick"];
 
 export default function FeedPage() {
   const [content, setContent] = useState("");
@@ -128,7 +124,7 @@ export default function FeedPage() {
     }
   }, []);
 
-  // Handle new post
+  // Handle posts
   const handlePost = () => {
     if (!content.trim()) return;
 
@@ -155,6 +151,7 @@ export default function FeedPage() {
     setContent("");
   };
 
+  // Determine profile URL
   const getProfileUrl = (slug: string, live?: boolean) => {
     if (artistSlugs.includes(slug)) return `/artist/${slug}`;
     if (creatorSlugs.includes(slug))
@@ -180,7 +177,7 @@ export default function FeedPage() {
               </p>
             </div>
 
-            {/* Categories */}
+            {/* Category Filter */}
             <div className="flex gap-3 overflow-x-auto pb-2 text-xs">
               {["All", "Live", "Sermons", "Music", "Clips", "Popular"].map(
                 (tab, i) => (
@@ -287,8 +284,10 @@ export default function FeedPage() {
                     <Share2 className="w-4 h-4" /> {post.shares}
                   </button>
                 </div>
+
               </div>
             ))}
+
           </div>
         </main>
       </div>

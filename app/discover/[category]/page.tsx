@@ -10,18 +10,18 @@ import { ArrowLeft, Users } from "lucide-react";
 export default function DiscoverCategoryPage() {
   const { category } = useParams();
 
-  // Normalize category slug
+  // normalize slug
   const categorySlug = String(category || "")
     .toLowerCase()
     .replace(/\s+/g, "-");
 
-  // Merge creators + artists
+  // merge creators + artists
   const allContent = [...creators, ...artists];
 
-  // Normalize helper
+  // text normalizer
   const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
-  // Filtering
+  // filtering
   const filteredContent =
     categorySlug === "all"
       ? allContent
@@ -39,7 +39,7 @@ export default function DiscoverCategoryPage() {
           );
         });
 
-  // Pretty title for display
+  // readable UI title
   const categoryTitle = categorySlug
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -50,6 +50,8 @@ export default function DiscoverCategoryPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-10">
+
+        {/* Back Button */}
         <Link
           href="/discover"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition"
@@ -57,10 +59,12 @@ export default function DiscoverCategoryPage() {
           <ArrowLeft className="w-5 h-5" /> Back to Discover
         </Link>
 
+        {/* Title */}
         <h1 className="text-4xl font-black italic uppercase tracking-tighter mb-10">
           {categoryTitle}
         </h1>
 
+        {/* Grid of Creators / Artists */}
         {filteredContent.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredContent.map((item: any, i: number) => (
@@ -73,32 +77,35 @@ export default function DiscoverCategoryPage() {
                 }
                 className="group"
               >
-                {/* Card */}
                 <div className="relative aspect-video bg-[#111] rounded-xl overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-violet-500 transition">
+                  {/* Banner */}
                   <img
                     src={item.bannerUrl}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                   />
 
+                  {/* LIVE badge */}
                   {item.liveStream?.isLive && (
                     <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] px-2 py-0.5 rounded uppercase font-black">
                       LIVE
                     </div>
                   )}
 
+                  {/* Viewers */}
                   <div className="absolute bottom-2 left-2 bg-black/80 py-0.5 px-2 rounded text-[10px] font-bold flex items-center gap-1">
                     <Users className="w-3 h-3 text-violet-400" />
                     {item.liveStream?.viewers?.toLocaleString() || "Offline"}
                   </div>
                 </div>
 
+                {/* Metadata */}
                 <div className="flex gap-3">
                   <img
                     src={item.avatarUrl}
                     className="w-10 h-10 rounded-full object-cover bg-[#222]"
                   />
                   <div>
-                    <h3 className="text-[15px] font-bold leading-tight group-hover:text-violet-400 transition">
+                    <h3 className="text-[15px] font-bold leading-tight transition group-hover:text-violet-400">
                       {item.liveStream?.title || item.name}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1">

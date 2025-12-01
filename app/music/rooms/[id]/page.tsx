@@ -6,9 +6,9 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { Users } from "lucide-react";
 
-// ============================
+// ====================================
 // ROOM DEFINITIONS
-// ============================
+// ====================================
 const rooms = [
   {
     id: "organ-drums",
@@ -48,9 +48,9 @@ const rooms = [
   },
 ];
 
-// ============================
+// ====================================
 // RANDOM CHAT MESSAGES
-// ============================
+// ====================================
 const randomMessages = [
   { user: "Guest123", text: "Bro this is nuts 🔥" },
   { user: "ChurchDrummer", text: "Drop that in 7/4 👀" },
@@ -59,16 +59,18 @@ const randomMessages = [
   { user: "ProducerMike", text: "Loop that!!!" },
 ];
 
-// ============================
-// COMPONENT
-// ============================
+// ====================================
+// PAGE COMPONENT
+// ====================================
 export default function MusicRoomPage() {
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "";
 
   const room = rooms.find((r) => r.id === id);
 
-  // If room does not exist
+  // ====================================
+  // ROOM DOES NOT EXIST
+  // ====================================
   if (!room) {
     return (
       <div className="min-h-screen bg-black text-white p-10">
@@ -81,16 +83,16 @@ export default function MusicRoomPage() {
     );
   }
 
-  // ============================
+  // ====================================
   // STATE
-  // ============================
+  // ====================================
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
   const [viewerCount, setViewerCount] = useState<number>(room.viewers);
 
-  // ============================
+  // ====================================
   // VIEWER COUNT SIMULATION
-  // ============================
+  // ====================================
   useEffect(() => {
     const interval = setInterval(() => {
       setViewerCount((prev) => {
@@ -108,9 +110,9 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, [room]);
 
-  // ============================
-  // RANDOM CHAT SIMULATION
-  // ============================
+  // ====================================
+  // RANDOM CHAT SIM
+  // ====================================
   useEffect(() => {
     const interval = setInterval(() => {
       const msg =
@@ -121,18 +123,18 @@ export default function MusicRoomPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // ============================
+  // ====================================
   // SEND MESSAGE
-  // ============================
+  // ====================================
   function send() {
     if (!input.trim()) return;
     setMessages([{ user: "You", text: input }, ...messages]);
     setInput("");
   }
 
-  // ============================
+  // ====================================
   // UI
-  // ============================
+  // ====================================
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
@@ -148,6 +150,7 @@ export default function MusicRoomPage() {
           <div>
             <h1 className="text-3xl font-black">{room.name}</h1>
             <p className="text-gray-400 text-sm">Hosted by {room.host}</p>
+
             <div className="flex items-center gap-2 text-red-500 text-xs font-bold mt-1">
               <Users className="w-4 h-4" /> {viewerCount} Watching Live
             </div>
@@ -175,7 +178,7 @@ export default function MusicRoomPage() {
           ))}
         </div>
 
-        {/* CHAT BOX */}
+        {/* CHAT */}
         <div className="w-full lg:w-[350px] bg-[#111] border border-white/10 rounded-2xl flex flex-col overflow-hidden mb-10">
 
           {/* Chat Header */}
@@ -214,7 +217,7 @@ export default function MusicRoomPage() {
           </div>
         </div>
 
-        {/* BACK BUTTON */}
+        {/* BACK */}
         <Link
           href="/music"
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
