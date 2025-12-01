@@ -214,6 +214,46 @@ export default function FeedPage() {
           ))}
         </div>
       </section>
+{/* ==================== BREAKOUT ROOMS ==================== */}
+<section className="mt-12 px-5">
+  <h2 className="section-title">Breakout Rooms</h2>
+
+  <div className="flex gap-4 overflow-x-auto pb-3">
+    
+    <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+      <h3 className="font-bold text-lg">🔥 Global Fellowship</h3>
+      <p className="text-xs text-gray-400 mt-1">
+        Open chat for all believers
+      </p>
+      <span className="neon-tag mt-2 inline-block">Join Now</span>
+    </Link>
+
+    <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+      <h3 className="font-bold text-lg">🎮 Gaming & Faith</h3>
+      <p className="text-xs text-gray-400 mt-1">
+        Encouragement + gameplay
+      </p>
+      <span className="neon-tag mt-2 inline-block">Join Now</span>
+    </Link>
+
+    <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+      <h3 className="font-bold text-lg">🎤 Vocal Breakout</h3>
+      <p className="text-xs text-gray-400 mt-1">
+        Riffs • Runs • Harmony
+      </p>
+      <span className="neon-tag mt-2 inline-block">Join Now</span>
+    </Link>
+
+    <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+      <h3 className="font-bold text-lg">🙏 Prayer Room</h3>
+      <p className="text-xs text-gray-400 mt-1">
+        Support + encouragement
+      </p>
+      <span className="neon-tag mt-2 inline-block">Join Now</span>
+    </Link>
+
+  </div>
+</section>
 
     </div>
   );
