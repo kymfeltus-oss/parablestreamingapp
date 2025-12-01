@@ -10,18 +10,18 @@ import { ArrowLeft, Users } from "lucide-react";
 export default function DiscoverCategoryPage() {
   const { category } = useParams();
 
-  // normalize category slug
+  // Normalize category slug
   const categorySlug = String(category || "")
     .toLowerCase()
     .replace(/\s+/g, "-");
 
-  // merge all content
+  // Merge creators + artists
   const allContent = [...creators, ...artists];
 
-  // helper to normalize strings
+  // Normalize helper
   const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
-  // filter logic
+  // Filtering
   const filteredContent =
     categorySlug === "all"
       ? allContent
@@ -39,10 +39,10 @@ export default function DiscoverCategoryPage() {
           );
         });
 
-  // readable title
+  // Pretty title for display
   const categoryTitle = categorySlug
     .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
   return (
@@ -50,7 +50,6 @@ export default function DiscoverCategoryPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        {/* Back Button */}
         <Link
           href="/discover"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition"
@@ -58,12 +57,10 @@ export default function DiscoverCategoryPage() {
           <ArrowLeft className="w-5 h-5" /> Back to Discover
         </Link>
 
-        {/* Title */}
         <h1 className="text-4xl font-black italic uppercase tracking-tighter mb-10">
           {categoryTitle}
         </h1>
 
-        {/* Content Grid */}
         {filteredContent.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredContent.map((item: any, i: number) => (
@@ -83,21 +80,18 @@ export default function DiscoverCategoryPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                   />
 
-                  {/* LIVE badge */}
                   {item.liveStream?.isLive && (
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] px-2 py-0.5 rounded uppercase font-black">
                       LIVE
                     </div>
                   )}
 
-                  {/* viewer count */}
-                  <div className="absolute bottom-2 left-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                  <div className="absolute bottom-2 left-2 bg-black/80 py-0.5 px-2 rounded text-[10px] font-bold flex items-center gap-1">
                     <Users className="w-3 h-3 text-violet-400" />
                     {item.liveStream?.viewers?.toLocaleString() || "Offline"}
                   </div>
                 </div>
 
-                {/* Metadata */}
                 <div className="flex gap-3">
                   <img
                     src={item.avatarUrl}
