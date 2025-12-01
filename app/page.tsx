@@ -1,96 +1,121 @@
 "use client";
 
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Play, Zap, Users, Rocket, Star } from "lucide-react";
 
 export default function HomePage() {
-  const liveStreams = [
-    {
-      id: 1,
-      title: "Tarkov now Arc Later",
-      streamer: "gingy",
-      game: "Escape From Tarkov",
-      viewers: 296,
-      tags: ["English", "18+", "fps", "tarkov", "solo", "arcade"],
-      thumbnail: "/sample_live_thumb.jpg",
-    },
-    {
-      id: 2,
-      title: "Worship Live Tonight 🙏🔥",
-      streamer: "PastorWill",
-      game: "Worship",
-      viewers: 1221,
-      tags: ["English", "Worship", "Live"],
-      thumbnail: "/sample_live_2.jpg",
-    },
-  ];
-
-  const categories = [
-    { title: "Just Chatting", viewers: "113.2K watching", image: "/cat_chat.jpg" },
-    { title: "IRL", viewers: "102.5K watching", image: "/cat_irl.jpg" },
-    { title: "Slots & Casino", viewers: "90K watching", image: "/cat_casino.jpg" },
-    { title: "Shooter", viewers: "60.3K watching", image: "/cat_shooter.jpg" },
-  ];
-
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen w-full bg-black text-white relative overflow-hidden pb-20">
+
+      {/* BACKGROUND EFFECT */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-700/20 via-black to-green-500/10 animate-pulse"></div>
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-30 mix-blend-soft-light"></div>
+
+      {/* FLOATING GLOW ORBS */}
+      <div className="absolute top-10 left-10 w-40 h-40 bg-green-500/20 blur-3xl rounded-full animate-pulse"></div>
+      <div className="absolute bottom-20 right-5 w-52 h-52 bg-purple-500/20 blur-3xl rounded-full animate-pulse"></div>
 
       {/* HEADER */}
-      <div className="flex items-center justify-between px-4 py-4 bg-[#0f0f0f] border-b border-white/10">
-        <Link href="/" className="text-3xl font-black tracking-tight text-[#53fc18]">
-          PARABLE
-        </Link>
-
-        <div className="flex items-center gap-3">
-          <button className="bg-[#53fc18] text-black px-3 py-1 rounded-md font-bold text-xs">
-            Get SEEDS
-          </button>
-
-          <img
-            src="/td_jakes_avatar.jpg"
-            className="w-8 h-8 rounded-full border border-white/10"
-          />
+      <header className="flex items-center justify-between px-6 py-5 relative z-20">
+        <div className="flex items-center gap-2">
+          <span className="text-4xl font-black text-[#53fc18] tracking-tighter">
+            PARABLE
+          </span>
         </div>
-      </div>
 
-      {/* LIVE CAROUSEL */}
-      <div className="p-4">
-        <div className="overflow-x-auto flex gap-4 pb-2 scrollbar-none">
+        <div className="flex items-center gap-4">
+          <button className="px-3 py-1 rounded-md bg-white/10 border border-white/20 text-sm font-bold">
+            Log in
+          </button>
+          <button className="px-4 py-2 rounded-md bg-[#53fc18] text-black font-bold">
+            Sign up
+          </button>
+        </div>
+      </header>
 
-          {liveStreams.map((stream) => (
+      {/* HERO SECTION */}
+      <section className="px-6 mt-10 relative z-20 text-center">
+        <h1 className="text-4xl font-black leading-tight tracking-tight">
+          STREAM. GAME. GROW IN CHRIST.
+        </h1>
+
+        <p className="text-gray-300 mt-3 text-lg">
+          A creator home built for believers, gamers, pastors & influencers.
+        </p>
+
+        <div className="mt-6 flex justify-center gap-4">
+          <Link
+            href="/stream"
+            className="px-6 py-3 rounded-xl bg-[#53fc18] text-black font-extrabold text-lg flex items-center gap-2 shadow-lg shadow-green-500/30"
+          >
+            <Play className="w-5 h-5" />
+            Go Live
+          </Link>
+
+          <Link
+            href="/discover"
+            className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-lg flex items-center gap-2 backdrop-blur-xl"
+          >
+            <Zap className="w-5 h-5 text-yellow-400" />
+            Discover
+          </Link>
+        </div>
+      </section>
+
+      {/* FEATURE STRIP */}
+      <section className="mt-14 px-6 relative z-20 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md hover:bg-white/10 transition">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <Users className="w-6 h-6 text-green-400" /> Grow Your Audience
+          </h3>
+          <p className="text-gray-400 mt-2">
+            Connect with believers, gamers, musicians and creators from around the world.
+          </p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md hover:bg-white/10 transition">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <Rocket className="w-6 h-6 text-purple-400" /> Earn Seeds & Support
+          </h3>
+          <p className="text-gray-400 mt-2">
+            Receive donations, Seeds, and exclusive supporter perks instantly.
+          </p>
+        </div>
+      </section>
+
+      {/* FEATURED CARDS (FLASH STYLE) */}
+      <section className="mt-12 px-6 relative z-20">
+        <h2 className="text-2xl font-extrabold tracking-tight mb-4">Featured Streams</h2>
+
+        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-none">
+          {[1, 2, 3].map((i) => (
             <div
-              key={stream.id}
-              className="min-w-[330px] bg-[#111] rounded-xl overflow-hidden border border-white/10"
+              key={i}
+              className="min-w-[300px] bg-[#111] border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-green-500/10 hover:scale-[1.02] transition-transform"
             >
               <div className="relative">
                 <img
-                  src={stream.thumbnail}
+                  src="/sample_live_thumb.jpg"
                   className="w-full h-48 object-cover"
                 />
-
-                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded uppercase font-black">
+                <span className="absolute top-2 left-2 bg-red-600 text-white text-[11px] px-2 py-0.5 rounded uppercase font-black">
                   LIVE
                 </span>
-
                 <span className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 text-[11px] rounded flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  {stream.viewers} watching
+                  <Users className="w-3 h-3" /> 15.2K watching
                 </span>
               </div>
 
               <div className="p-3">
                 <p className="font-bold text-[15px] leading-tight">
-                  {stream.title}
+                  Gospel Gaming Night — Fellowship + Fun 🎮🔥
                 </p>
-
-                <p className="text-sm mt-1">{stream.game}</p>
-
-                <p className="text-xs text-gray-400">{stream.streamer}</p>
+                <p className="text-xs text-gray-400 mt-1">The Kingdom Crew</p>
 
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {stream.tags.map((tag, i) => (
+                  {["English", "Gospel", "Live", "Gaming"].map((tag, idx) => (
                     <span
-                      key={i}
+                      key={idx}
                       className="px-2 py-0.5 bg-[#222] border border-white/10 text-[10px] rounded-full text-gray-300"
                     >
                       {tag}
@@ -100,54 +125,16 @@ export default function HomePage() {
               </div>
             </div>
           ))}
-
         </div>
-      </div>
+      </section>
 
-      {/* TOP CATEGORIES */}
-      <div className="px-4 mt-4">
-        <h2 className="text-lg font-bold mb-3">Top Live Categories</h2>
-
-        <div className="overflow-x-auto flex gap-4 pb-2 scrollbar-none">
-          {categories.map((cat, i) => (
-            <div
-              key={i}
-              className="min-w-[130px] bg-[#111] rounded-lg overflow-hidden border border-white/10"
-            >
-              <img src={cat.image} className="w-full h-24 object-cover" />
-              <div className="p-2">
-                <p className="font-bold text-sm leading-tight">{cat.title}</p>
-                <p className="text-[10px] text-gray-400">{cat.viewers}</p>
-              </div>
-            </div>
-          ))}
+      {/* BADGE STRIP */}
+      <section className="mt-12 px-6 pb-10 relative z-20 text-center">
+        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-2 rounded-full backdrop-blur-xl">
+          <Star className="w-5 h-5 text-yellow-300" />
+          <span className="text-sm">New Platform • Creator Focused • Faith Powered</span>
         </div>
-      </div>
-
-      {/* JUST CHATTING SECTION */}
-      <div className="px-4 mt-6">
-        <h2 className="text-lg font-bold mb-3">Just Chatting</h2>
-
-        <div className="overflow-x-auto flex gap-4 pb-2 scrollbar-none">
-          {[1, 2, 3].map((x) => (
-            <div
-              key={x}
-              className="min-w-[330px] bg-[#111] rounded-xl overflow-hidden border border-white/10"
-            >
-              <img
-                src="/sample_chat_thumb.jpg"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-3">
-                <p className="font-bold text-[15px] leading-tight">
-                  Chatting session live right now
-                </p>
-                <p className="text-xs text-gray-400 mt-1">Host Speaker</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </section>
 
     </div>
   );
