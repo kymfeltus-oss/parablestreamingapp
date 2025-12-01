@@ -1,21 +1,32 @@
-/* ========= GLOBAL NEON GREEN THEME ========= */
+/* ============================= */
+/*      REQUIRED TAILWIND CORE   */
+/* ============================= */
 
-/* RESET */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================= */
+/*         GLOBAL RESET          */
+/* ============================= */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* BASE */
 body {
   background: #000000;
   color: white;
-  font-family: system-ui, sans-serif;
   overflow-x: hidden;
+  font-family: system-ui, sans-serif;
 }
 
-/* SCROLLBAR */
+/* ============================= */
+/*       SCROLLBAR NEON          */
+/* ============================= */
+
 ::-webkit-scrollbar {
   height: 6px;
   width: 6px;
@@ -28,25 +39,24 @@ body {
   background: #111;
 }
 
-/* NEON TEXT GLOW */
+/* ============================= */
+/*       NEON THEME UTILITIES    */
+/* ============================= */
+
 .neon-text {
   color: #53fc18;
   text-shadow:
     0 0 5px #53fc18,
-    0 0 10px #53fc18,
-    0 0 15px #53fc18;
+    0 0 10px #53fc18;
 }
 
-/* NEON BORDER */
 .neon-border {
   border: 2px solid #53fc18;
   box-shadow:
     0 0 5px #53fc18,
-    0 0 15px #53fc18,
-    inset 0 0 5px #53fc18;
+    0 0 15px #53fc18;
 }
 
-/* NEON BUTTON */
 .neon-button {
   background: #53fc18;
   color: black;
@@ -64,7 +74,6 @@ body {
     0 0 30px #53fc18;
 }
 
-/* GLASS PANEL */
 .glass {
   background: rgba(20, 20, 20, 0.65);
   backdrop-filter: blur(12px);
@@ -72,7 +81,6 @@ body {
   box-shadow: 0 0 10px rgba(83, 252, 24, 0.3);
 }
 
-/* NEON CARD */
 .neon-card {
   background: #111;
   border: 1px solid rgba(83, 252, 24, 0.2);
@@ -89,7 +97,6 @@ body {
     0 0 24px rgba(83, 252, 24, 0.3);
 }
 
-/* NEON TAGS */
 .neon-tag {
   background: #1d1d1d;
   padding: 3px 10px;
@@ -101,7 +108,6 @@ body {
     0 0 4px #53fc18;
 }
 
-/* SECTION HEADINGS */
 .section-title {
   font-size: 1.8rem;
   font-weight: 900;
