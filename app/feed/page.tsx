@@ -1,315 +1,220 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import {
-  Send,
-  MoreHorizontal,
-  Heart,
-  MessageCircle,
-  Share2,
-  Image as ImageIcon,
-  Play,
-} from "lucide-react";
+import { Users, Coins, Sparkles, Music2, Mic2 } from "lucide-react";
 
-// =========================================
-// ARTIST + CREATOR SLUGS
-// =========================================
-const artistSlugs = ["lauren-daigle", "kirk-franklin", "steven-furtick"];
-const creatorSlugs = ["td-jakes", "mike-todd", "pastor-stevenson", "steven-furtick"];
-
-// =========================================
-// PAGE COMPONENT
-// =========================================
 export default function FeedPage() {
-  const [content, setContent] = useState("");
-
-  // =========================================
-  // STATIC POSTS
-  // =========================================
-  const [posts, setPosts] = useState([
-    {
-      id: 0,
-      user: {
-        name: "Kirk Franklin",
-        handle: "@kirkfranklin",
-        avatar: "/kirk_avatar.png",
-        slug: "kirk-franklin",
-        live: false,
-      },
-      time: "1h ago",
-      content: "God is doing a new thing! Stay ready 🙌🏾🔥",
-      tags: ["#PraiseBreak", "#Testimony"],
-      media: "",
-      type: "text",
-      likes: "12.3k",
-      comments: "1.1k",
-      shares: "4.2k",
-    },
+  /* ================== LIVE STREAMS ================== */
+  const liveStreams = [
     {
       id: 1,
-      user: {
-        name: "Bishop T.D. Jakes",
-        handle: "@bishopjakes",
-        avatar: "/td_jakes_avatar.jpg",
-        slug: "td-jakes",
-        live: true,
-      },
-      time: "2h ago",
-      content: "Faith + Obedience = Miracles! 🙌🏾",
-      tags: ["#Sermon", "#Miracles"],
-      media: "https://www.youtube.com/embed/5osAqv0xkLk",
-      type: "youtube",
-      likes: "15.4k",
-      comments: "890",
-      shares: "5.2k",
+      title: "Faith + Obedience = Miracles!",
+      streamer: "Bishop T.D. Jakes",
+      viewers: 18205,
+      thumbnail: "/td-jakes.jpg",
+      tags: ["Sermon", "Faith", "Live"],
     },
     {
       id: 2,
-      user: {
-        name: "Pastor Mike Todd",
-        handle: "@miketodd",
-        avatar: "/mike-todd.jpg",
-        slug: "mike-todd",
-        live: true,
-      },
-      time: "1h ago",
-      content: "Relationship Goals is LIVE! 🔥",
-      tags: ["#RelationshipGoals", "#Live"],
-      media: "https://www.youtube.com/embed/hzjKTR1k4ps",
-      type: "youtube",
-      likes: "8.1k",
-      comments: "430",
-      shares: "1.9k",
+      title: "Praise Break • Live Worship",
+      streamer: "Kirk Franklin",
+      viewers: 12440,
+      thumbnail: "/kirk_avatar.png",
+      tags: ["Worship", "Music", "Praise"],
     },
     {
       id: 3,
-      user: {
-        name: "Pastor Steven Furtick",
-        handle: "@stevenfurtick",
-        avatar: "/steven-furtick.jpg",
-        slug: "steven-furtick",
-        live: false,
-      },
-      time: "5h ago",
-      content: "Don't stop on 6. Keep believing. 🙏",
-      tags: ["#Encouragement", "#Faith"],
-      media: "",
-      type: "text",
-      likes: "5.4k",
-      comments: "240",
-      shares: "910",
+      title: "Gospel Flow Night",
+      streamer: "Lauren Daigle",
+      viewers: 9200,
+      thumbnail: "/lauren-daigle.jpg",
+      tags: ["Gospel", "Music", "Live"],
     },
     {
       id: 4,
-      user: {
-        name: "Lauren Daigle",
-        handle: "@laurendaigle",
-        avatar: "/lauren-daigle.jpg",
-        slug: "laurendaigle",
-        live: false,
-      },
-      time: "Yesterday",
-      content: "Grateful to worship with you all ❤️🎵",
-      tags: ["#ChristianMusic", "#Worship"],
-      media: "/lauren-daigle.jpg",
-      type: "image",
-      likes: "4.8k",
-      comments: "450",
-      shares: "1.3k",
+      title: "Prayer & Prophetic Flow",
+      streamer: "Pastor Stevenson",
+      viewers: 7855,
+      thumbnail: "/steven-furtick.jpg",
+      tags: ["Prayer", "Teaching"],
     },
-  ]);
+  ];
 
-  // =========================================
-  // INSTAGRAM EMBED LOADER
-  // =========================================
-  useEffect(() => {
-    if (!document.querySelector('script[src="//www.instagram.com/embed.js"]')) {
-      const script = document.createElement("script");
-      script.src = "//www.instagram.com/embed.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
+  /* ================== SHED ROOMS ================== */
+  const shedRooms = [
+    {
+      id: 1,
+      title: "Organ + Drum Pocket Session",
+      streamer: "Jamal Keys",
+      thumbnail: "/images.jfif",
+      viewers: 1320,
+    },
+    {
+      id: 2,
+      title: "Bass Lines 101 • Gospel Grooves",
+      streamer: "Marcus Bass",
+      thumbnail: "/bass-room.jpg",
+      viewers: 880,
+    },
+    {
+      id: 3,
+      title: "Aux Keys Worship Pads",
+      streamer: "SynthLord",
+      thumbnail: "/keys-room.jpg",
+      viewers: 1670,
+    },
+  ];
 
-  // =========================================
-  // HANDLE NEW POST
-  // =========================================
-  const handlePost = () => {
-    if (!content.trim()) return;
+  /* ================== VOCAL ROOMS ================== */
+  const vocalRooms = [
+    {
+      id: 1,
+      title: "🔥 Gospel Riffs + Runs Session",
+      streamer: "Sarah Sings",
+      thumbnail: "/vocal-room1.jpg",
+      viewers: 2020,
+    },
+    {
+      id: 2,
+      title: "Choir Blending Workshop",
+      streamer: "Voices United",
+      thumbnail: "/vocal-room2.jpg",
+      viewers: 920,
+    },
+    {
+      id: 3,
+      title: "Vocal Warmups Live",
+      streamer: "Coach Harmony",
+      thumbnail: "/vocal-room3.jpg",
+      viewers: 1420,
+    },
+  ];
 
-    const newPost = {
-      id: Date.now(),
-      user: {
-        name: "You",
-        handle: "@you",
-        avatar: "/td_jakes_avatar.jpg",
-        slug: "you",
-        live: false,
-      },
-      time: "Just now",
-      content,
-      tags: ["#MyTestimony"],
-      media: "",
-      type: "text",
-      likes: "0",
-      comments: "0",
-      shares: "0",
-    };
-
-    setPosts([newPost, ...posts]);
-    setContent("");
-  };
-
-  // =========================================
-  // PROFILE ROUTING
-  // =========================================
-  const getProfileUrl = (slug: string, live?: boolean) => {
-    if (artistSlugs.includes(slug)) return `/artist/${slug}`;
-    if (creatorSlugs.includes(slug))
-      return live ? `/creator/${slug}#live` : `/creator/${slug}`;
-    return `/creator/${slug}`;
-  };
-
-  // =========================================
-  // UI RENDER
-  // =========================================
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white">
-      <Navbar />
-      <div className="flex">
-        <Sidebar resolveProfileUrl={getProfileUrl} />
+    <div className="min-h-screen bg-black text-white pb-24">
 
-        <main className="flex-1 lg:ml-64 p-6 flex justify-center">
-          <div className="w-full max-w-2xl space-y-8">
+      {/* ============================= HEADER ============================= */}
+      <header className="flex items-center justify-between px-5 py-4 bg-[#0f0f0f] border-b border-white/10">
+        <span className="text-5xl font-black tracking-tight text-[#53fc18] neon-text">
+          PARABLE
+        </span>
 
-            {/* TITLE */}
-            <div>
-              <h1 className="text-3xl font-black">Your Feed</h1>
-              <p className="text-gray-400 text-sm mt-1">
-                Stay connected. Stay inspired.
-              </p>
-            </div>
+        <Link
+          href="/monetization"
+          className="bg-[#53fc18] text-black font-bold px-4 py-2 rounded-xl shadow-[0_0_10px_#53fc18] text-sm flex items-center gap-1"
+        >
+          <Coins className="w-4 h-4" />
+          GET SEEDS
+        </Link>
+      </header>
 
-            {/* CATEGORY FILTER */}
-            <div className="flex gap-3 overflow-x-auto pb-2 text-xs">
-              {["All", "Live", "Sermons", "Music", "Clips", "Popular"].map(
-                (tab, i) => (
-                  <button
-                    key={i}
-                    className={`px-4 py-2 rounded-full border border-white/10 transition ${
-                      i === 0 ? "bg-violet-600 text-white" : "text-gray-300"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                )
-              )}
-            </div>
+      {/* ======================= FLASH HERO / BANNER ======================= */}
+      <section className="relative mt-4 mx-5 rounded-2xl overflow-hidden neon-card h-40 flex items-center px-6">
+        <div>
+          <h2 className="text-3xl font-black">Streaming. Creating. Believing.</h2>
+          <p className="text-gray-300 mt-1 text-sm">
+            A home for believers, creators & GOSPEL musicians.
+          </p>
+        </div>
+        <Sparkles className="absolute right-6 bottom-6 w-10 h-10 text-[#53fc18]" />
+      </section>
 
-            {/* CREATE POST */}
-            <div className="bg-[#1a1a1a] border border-white/10 p-4 rounded-xl">
-              <div className="flex items-center gap-4">
+      {/* =========================== LIVE NOW ============================= */}
+      <section className="mt-8 px-5">
+        <h2 className="section-title">Live Now</h2>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {liveStreams.map((s) => (
+            <div key={s.id} className="neon-card overflow-hidden rounded-xl">
+              <div className="relative">
                 <img
-                  src="/td_jakes_avatar.jpg"
-                  className="w-10 h-10 rounded-full"
+                  src={s.thumbnail}
+                  className="w-full h-32 object-cover"
                 />
 
-                <input
-                  placeholder="Drop a testimony or share a clip..."
-                  className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
+                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">
+                  LIVE
+                </span>
 
-                <button
-                  onClick={handlePost}
-                  className="bg-violet-600 px-6 py-1.5 rounded-full text-xs font-bold"
-                >
-                  Post <Send className="w-3 h-3 inline" />
-                </button>
+                <span className="absolute bottom-1 left-2 bg-black/70 px-2 py-0.5 text-[11px] rounded flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {s.viewers.toLocaleString()}
+                </span>
               </div>
-            </div>
 
-            {/* FEED SECTION */}
-            <h2 className="text-xl font-bold">For You</h2>
+              <div className="p-2">
+                <p className="font-bold text-sm">{s.title}</p>
+                <p className="text-[11px] text-gray-400">{s.streamer}</p>
 
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                className="bg-[#111] border border-white/10 rounded-xl overflow-hidden"
-              >
-                {/* HEADER */}
-                <div className="p-4 flex justify-between">
-                  <Link
-                    href={getProfileUrl(post.user.slug, post.user.live)}
-                    className="flex gap-3"
-                  >
-                    <img
-                      src={post.user.avatar}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="font-bold text-sm">{post.user.name}</p>
-                      <p className="text-[10px] text-gray-500">{post.time}</p>
-                    </div>
-                  </Link>
-
-                  <MoreHorizontal className="text-gray-500" />
-                </div>
-
-                {/* CONTENT */}
-                <div className="px-4 pb-3 text-sm">{post.content}</div>
-
-                {/* TAGS */}
-                <div className="px-4 pb-2 flex gap-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-violet-400 text-xs cursor-pointer"
-                    >
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {s.tags.map((tag, idx) => (
+                    <span key={idx} className="neon-tag">
                       {tag}
                     </span>
                   ))}
                 </div>
-
-                {/* MEDIA */}
-                {post.media && post.type !== "text" && (
-                  <div className="bg-black">
-                    {post.type === "youtube" ? (
-                      <iframe
-                        title="YouTube player"
-                        src={post.media}
-                        className="w-full aspect-video"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <img src={post.media} className="w-full" />
-                    )}
-                  </div>
-                )}
-
-                {/* FOOTER */}
-                <div className="p-4 flex gap-6 border-t border-white/10 text-gray-400 text-xs">
-                  <button className="flex items-center gap-1">
-                    <Heart className="w-4 h-4" /> {post.likes}
-                  </button>
-                  <button className="flex items-center gap-1">
-                    <MessageCircle className="w-4 h-4" /> {post.comments}
-                  </button>
-                  <button className="flex items-center gap-1">
-                    <Share2 className="w-4 h-4" /> {post.shares}
-                  </button>
-                </div>
-
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+      </section>
 
-          </div>
-        </main>
-      </div>
+      {/* ======================== SHED ROOMS ========================= */}
+      <section className="mt-10 px-5">
+        <h2 className="section-title flex items-center gap-2">
+          <Music2 className="w-6 h-6 text-[#53fc18]" />
+          Shed Rooms (Musicians)
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {shedRooms.map((room) => (
+            <div
+              key={room.id}
+              className="min-w-[200px] neon-card rounded-xl overflow-hidden"
+            >
+              <img src={room.thumbnail} className="w-full h-32 object-cover" />
+
+              <div className="p-2">
+                <p className="font-bold text-sm">{room.title}</p>
+                <p className="text-[11px] text-gray-400">{room.streamer}</p>
+
+                <span className="neon-tag mt-2 inline-block">
+                  {room.viewers.toLocaleString()} watching
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================== VOCAL ROOMS ========================= */}
+      <section className="mt-10 px-5">
+        <h2 className="section-title flex items-center gap-2">
+          <Mic2 className="w-6 h-6 text-[#53fc18]" />
+          Vocal Rooms
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {vocalRooms.map((room) => (
+            <div
+              key={room.id}
+              className="min-w-[200px] neon-card rounded-xl overflow-hidden"
+            >
+              <img src={room.thumbnail} className="w-full h-32 object-cover" />
+
+              <div className="p-2">
+                <p className="font-bold text-sm">{room.title}</p>
+                <p className="text-[11px] text-gray-400">{room.streamer}</p>
+
+                <span className="neon-tag mt-2 inline-block">
+                  {room.viewers.toLocaleString()} watching
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
