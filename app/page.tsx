@@ -13,7 +13,7 @@ export default function FlashLandingPage() {
     setMounted(true);
     const timer = setTimeout(() => {
       router.push("/feed");
-    }, 2500);
+    }, 5000); // now lasts 5 seconds
     return () => clearTimeout(timer);
   }, [router]);
 
@@ -36,7 +36,7 @@ export default function FlashLandingPage() {
       {/* GLOWING AURA */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(83,252,24,0.2),_transparent_70%)] animate-[spin_20s_linear_infinite] opacity-60" />
 
-      {/* SCANLINE OVERLAY (OPTIONAL TEXTURE) */}
+      {/* SCANLINE OVERLAY */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.09] bg-[url('/scanline.png')] mix-blend-soft-light" />
 
       {/* FLOATING ICON */}
@@ -60,7 +60,6 @@ export default function FlashLandingPage() {
           A home for believers, creators, and gospel musicians.
         </p>
 
-        {/* BUTTON (EVEN THOUGH AUTO REDIRECTS) */}
         <Link
           href="/feed"
           className="neon-button inline-flex items-center gap-3 px-10 py-3 rounded-2xl text-xl"
