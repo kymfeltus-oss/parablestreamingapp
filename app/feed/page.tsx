@@ -6,9 +6,11 @@ import { useState } from "react";
 
 export default function FeedPage() {
   // helper to hide broken images
-  const [brokenImages, setBrokenImages] = useState({});
+  const [brokenImages, setBrokenImages] = useState<{ [key: number]: boolean }>(
+    {}
+  );
 
-  const handleError = (id) => {
+  const handleError = (id: number) => {
     setBrokenImages((prev) => ({ ...prev, [id]: true }));
   };
 
@@ -45,6 +47,54 @@ export default function FeedPage() {
       viewers: 7855,
       tags: ["Prayer", "Teaching"],
       thumbnail: "/steven-furtick.jpg",
+    },
+  ];
+
+  const shedRooms = [
+    {
+      id: 1,
+      title: "Organ + Drum Pocket Session",
+      streamer: "Jamal Keys",
+      thumbnail: "/images.jfif",
+      viewers: 1320,
+    },
+    {
+      id: 2,
+      title: "Bass Lines 101 • Gospel Grooves",
+      streamer: "Marcus Bass",
+      thumbnail: "/bass-room.jpg",
+      viewers: 880,
+    },
+    {
+      id: 3,
+      title: "Aux Keys Worship Pads",
+      streamer: "SynthLord",
+      thumbnail: "/keys-room.jpg",
+      viewers: 1670,
+    },
+  ];
+
+  const vocalRooms = [
+    {
+      id: 1,
+      title: "🔥 Gospel Riffs + Runs Session",
+      streamer: "Sarah Sings",
+      thumbnail: "/vocal-room1.jpg",
+      viewers: 2020,
+    },
+    {
+      id: 2,
+      title: "Choir Blending Workshop",
+      streamer: "Voices United",
+      thumbnail: "/vocal-room2.jpg",
+      viewers: 920,
+    },
+    {
+      id: 3,
+      title: "Vocal Warmups Live",
+      streamer: "Coach Harmony",
+      thumbnail: "/vocal-room3.jpg",
+      viewers: 1420,
     },
   ];
 
@@ -131,4 +181,141 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* (The rest of your file remains unchanged) */}
+      {/* SHED ROOMS */}
+      <div className="mt-12 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
+          <Music2 className="w-6 h-6 text-[#53fc18]" />
+          Shed Rooms (Musicians)
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {shedRooms.map((room) => (
+            <div
+              key={room.id}
+              className="min-w-[200px] neon-card rounded-xl overflow-hidden border border-white/10"
+            >
+              <img
+                src={room.thumbnail}
+                className="w-full h-32 object-cover"
+              />
+              <div className="p-2">
+                <p className="font-bold text-sm">{room.title}</p>
+                <p className="text-[11px] text-gray-400">{room.streamer}</p>
+                <span className="neon-tag mt-2 inline-block">
+                  {room.viewers.toLocaleString()} watching
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* VOCAL ROOMS */}
+      <div className="mt-10 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
+          <Mic2 className="w-6 h-6 text-[#53fc18]" />
+          Vocal Rooms
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {vocalRooms.map((room) => (
+            <div
+              key={room.id}
+              className="min-w-[200px] neon-card rounded-xl overflow-hidden border border-white/10"
+            >
+              <img
+                src={room.thumbnail}
+                className="w-full h-32 object-cover"
+              />
+              <div className="p-2">
+                <p className="font-bold text-sm">{room.title}</p>
+                <p className="text-[11px] text-gray-400">{room.streamer}</p>
+                <span className="neon-tag mt-2 inline-block">
+                  {room.viewers.toLocaleString()} watching
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CREATOR TOOLS */}
+      <div className="mt-12 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">
+          Creator Tools
+        </h2>
+
+        <div className="grid grid-cols-2 gap-5 text-center">
+          <Link href="/creator/tools" className="neon-card p-5 rounded-xl">
+            <h3 className="text-lg font-bold">Stream Setup</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Go live &amp; manage overlays
+            </p>
+          </Link>
+
+          <Link href="/dashboard/analytics" className="neon-card p-5 rounded-xl">
+            <h3 className="text-lg font-bold">Analytics</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Track performance
+            </p>
+          </Link>
+
+          <Link href="/monetization" className="neon-card p-5 rounded-xl">
+            <h3 className="text-lg font-bold">Monetization</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Earn Seeds &amp; Gifts
+            </p>
+          </Link>
+
+          <Link href="/library" className="neon-card p-5 rounded-xl">
+            <h3 className="text-lg font-bold">Library</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Saved content
+            </p>
+          </Link>
+        </div>
+      </div>
+
+      {/* BREAKOUT ROOMS */}
+      <section className="mt-12 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">
+          Breakout Rooms
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+            <h3 className="font-bold text-lg">🔥 Global Fellowship</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Open chat for all believers
+            </p>
+            <span className="neon-tag mt-2 inline-block">Join Now</span>
+          </Link>
+
+          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+            <h3 className="font-bold text-lg">🎮 Gaming &amp; Faith</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Encouragement + gameplay
+            </p>
+            <span className="neon-tag mt-2 inline-block">Join Now</span>
+          </Link>
+
+          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+            <h3 className="font-bold text-lg">🎤 Vocal Breakout</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Riffs • Runs • Harmony
+            </p>
+            <span className="neon-tag mt-2 inline-block">Join Now</span>
+          </Link>
+
+          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+            <h3 className="font-bold text-lg">🙏 Prayer Room</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Support + encouragement
+            </p>
+            <span className="neon-tag mt-2 inline-block">Join Now</span>
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
