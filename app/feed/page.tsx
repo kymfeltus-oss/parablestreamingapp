@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import { Users, Sparkles, Coins, Music2, Mic2 } from "lucide-react";
-import { useState } from "react";
 
 export default function FeedPage() {
-  const [brokenImages, setBrokenImages] = useState<{ [key: number]: boolean }>({});
-
-  const handleError = (id: number) => {
-    setBrokenImages((prev) => ({ ...prev, [id]: true }));
-  };
-
-  // LIVE STREAMS (with slugs)
   const liveStreams = [
     {
       id: 1,
@@ -30,7 +22,6 @@ export default function FeedPage() {
       viewers: 12440,
       tags: ["Worship", "Music", "Praise"],
       thumbnail: "/kirk_avatar.png",
-      album: "/kirk-franklin-album.jpg",
     },
     {
       id: 3,
@@ -52,13 +43,12 @@ export default function FeedPage() {
     },
   ];
 
-  // SHED ROOMS
   const shedRooms = [
     {
       id: 1,
       title: "Organ + Drum Pocket Session",
       streamer: "Jamal Keys",
-      thumbnail: "/images.jfif",
+      thumbnail: "/images/placeholder.jpg",
       viewers: 1320,
     },
     {
@@ -77,7 +67,6 @@ export default function FeedPage() {
     },
   ];
 
-  // VOCAL ROOMS
   const vocalRooms = [
     {
       id: 1,
@@ -107,7 +96,7 @@ export default function FeedPage() {
 
       {/* HEADER */}
       <div className="flex items-center justify-between w-full px-6 py-5 bg-[#0f0f0f] border-b border-white/10">
-        <span className="text-6xl font-black tracking-tight text-[#53fc18] neon-text">PARABLE</span>
+        <span className="text-6xl font-black tracking-tight text-[#53fc18]">PARABLE</span>
 
         <Link
           href="/monetization"
@@ -134,48 +123,37 @@ export default function FeedPage() {
         <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">Live Now</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
           {liveStreams.map((s) => (
             <Link
               key={s.id}
               href={`/creator/${s.slug}`}
-              className="neon-card rounded-xl overflow-hidden border border-white/10 flex flex-col hover:scale-[1.02] transition-all duration-200 h-[300px]"
+              className="rounded-xl overflow-hidden border border-white/10 flex flex-col hover:scale-[1.02] transition duration-200 bg-[#0d0d0d]"
             >
-              {/* TOP: THUMBNAIL */}
               <div className="relative h-36 w-full">
                 <img src={s.thumbnail} className="w-full h-full object-cover" />
 
-                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">LIVE</span>
+                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black">LIVE</span>
+
                 <span className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[11px] flex items-center gap-1">
                   <Users className="w-3 h-3" /> {s.viewers.toLocaleString()}
                 </span>
               </div>
 
-              {/* MIDDLE: TEXT */}
-              <div className="px-3 py-2 flex flex-col h-[80px]">
+              <div className="p-3 flex flex-col grow">
                 <p className="font-bold text-sm leading-tight">{s.title}</p>
-                <p className="text-[12px] text-gray-300 mt-1 leading-tight">{s.streamer}</p>
-
-                <div className="flex flex-wrap gap-1 mt-1">
+                <p className="text-[12px] text-gray-300 mt-1">{s.streamer}</p>
+                <div className="flex flex-wrap gap-1 mt-2">
                   {s.tags.map((tag, i) => (
-                    <span key={i} className="neon-tag text-[10px]">{tag}</span>
+                    <span key={i} className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px]">
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
-
-              {/* BOTTOM: ALBUM OR PLACEHOLDER */}
-              <div className="h-[60px] w-full mt-auto">
-                {s.album && !brokenImages[s.id] ? (
-                  <img
-                    src={s.album}
-                    className="w-full h-full object-cover rounded-b-xl border-t border-white/10"
-                    onError={() => handleError(s.id)}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-transparent" />
-                )}
-              </div>
             </Link>
           ))}
+
         </div>
       </div>
 
@@ -189,14 +167,14 @@ export default function FeedPage() {
           {shedRooms.map((room) => (
             <div
               key={room.id}
-              className="min-w-[200px] neon-card rounded-xl overflow-hidden border border-white/10"
+              className="min-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d]"
             >
               <img src={room.thumbnail} className="w-full h-32 object-cover" />
 
               <div className="p-2">
                 <p className="font-bold text-sm">{room.title}</p>
                 <p className="text-[11px] text-gray-400">{room.streamer}</p>
-                <span className="neon-tag mt-2 inline-block">
+                <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
                   {room.viewers.toLocaleString()} watching
                 </span>
               </div>
@@ -213,16 +191,12 @@ export default function FeedPage() {
 
         <div className="flex gap-4 overflow-x-auto pb-3">
           {vocalRooms.map((room) => (
-            <div
-              key={room.id}
-              className="min-w-[200px] neon-card rounded-xl overflow-hidden border border-white/10"
-            >
+            <div key={room.id} className="min-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d]">
               <img src={room.thumbnail} className="w-full h-32 object-cover" />
-
               <div className="p-2">
                 <p className="font-bold text-sm">{room.title}</p>
                 <p className="text-[11px] text-gray-400">{room.streamer}</p>
-                <span className="neon-tag mt-2 inline-block">
+                <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
                   {room.viewers.toLocaleString()} watching
                 </span>
               </div>
@@ -233,27 +207,25 @@ export default function FeedPage() {
 
       {/* CREATOR TOOLS */}
       <div className="mt-12 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">
-          Creator Tools
-        </h2>
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">Creator Tools</h2>
 
-        <div className="grid grid-cols-2 gap-5 text-center">
-          <Link href="/creator/tools" className="neon-card p-5 rounded-xl">
+        <div className="grid grid-cols-2 gap-5">
+          <Link href="/creator/tools" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Stream Setup</h3>
-            <p className="text-xs text-gray-400 mt-1">Go live &amp; manage overlays</p>
+            <p className="text-xs text-gray-400 mt-1">Go live & manage overlays</p>
           </Link>
 
-          <Link href="/dashboard/analytics" className="neon-card p-5 rounded-xl">
+          <Link href="/dashboard/analytics" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Analytics</h3>
             <p className="text-xs text-gray-400 mt-1">Track performance</p>
           </Link>
 
-          <Link href="/monetization" className="neon-card p-5 rounded-xl">
+          <Link href="/monetization" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Monetization</h3>
-            <p className="text-xs text-gray-400 mt-1">Earn Seeds &amp; Gifts</p>
+            <p className="text-xs text-gray-400 mt-1">Earn Seeds & Gifts</p>
           </Link>
 
-          <Link href="/library" className="neon-card p-5 rounded-xl">
+          <Link href="/library" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Library</h3>
             <p className="text-xs text-gray-400 mt-1">Saved content</p>
           </Link>
@@ -265,28 +237,36 @@ export default function FeedPage() {
         <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">Breakout Rooms</h2>
 
         <div className="flex gap-4 overflow-x-auto pb-3">
-          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🔥 Global Fellowship</h3>
             <p className="text-xs text-gray-400 mt-1">Open chat for all believers</p>
-            <span className="neon-tag mt-2 inline-block">Join Now</span>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
+              Join Now
+            </span>
           </Link>
 
-          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
-            <h3 className="font-bold text-lg">🎮 Gaming &amp; Faith</h3>
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
+            <h3 className="font-bold text-lg">🎮 Gaming & Faith</h3>
             <p className="text-xs text-gray-400 mt-1">Encouragement + gameplay</p>
-            <span className="neon-tag mt-2 inline-block">Join Now</span>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
+              Join Now
+            </span>
           </Link>
 
-          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🎤 Vocal Breakout</h3>
             <p className="text-xs text-gray-400 mt-1">Riffs • Runs • Harmony</p>
-            <span className="neon-tag mt-2 inline-block">Join Now</span>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
+              Join Now
+            </span>
           </Link>
 
-          <Link href="/social" className="min-w-[200px] neon-card rounded-xl p-4">
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🙏 Prayer Room</h3>
             <p className="text-xs text-gray-400 mt-1">Support + encouragement</p>
-            <span className="neon-tag mt-2 inline-block">Join Now</span>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
+              Join Now
+            </span>
           </Link>
         </div>
       </section>

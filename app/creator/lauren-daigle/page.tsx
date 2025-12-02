@@ -1,167 +1,76 @@
 "use client";
 
-import { useState } from "react";
 import Navbar from "@/components/Navbar";
-import { Users, Sparkles, Gift, Crown, Video, Play } from "lucide-react";
+import Image from "next/image";
 
-const tabs = ["Home", "Videos", "Clips", "About", "Chat"] as const;
-type TabKey = (typeof tabs)[number];
-
-export default function LaurenDaigleProfile() {
-  const [activeTab, setActiveTab] = useState<TabKey>("Home");
-
+export default function LaurenDaiglePage() {
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen bg-[#0a0a0a] text-white pb-20">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-8">
-        {/* HERO PLAYER */}
-        <section className="rounded-2xl overflow-hidden border border-white/10">
-          <div className="relative w-full pt-[56.25%] bg-black">
-            <iframe
-              src="https://www.youtube.com/embed/Aj3dfAnUxyk"
-              className="absolute inset-0 w-full h-full object-cover"
-              allowFullScreen
-            ></iframe>
+      {/* HERO */}
+      <div className="relative h-80 w-full overflow-hidden">
+        <Image
+          src="/lauren-daigle-banner.jpg"
+          alt="Lauren Daigle Banner"
+          fill
+          className="object-cover opacity-80"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/60 to-[#0a0a0a]" />
+      </div>
 
-            <div className="absolute top-3 left-3 flex items-center gap-2">
-              <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase animate-pulse">
-                LIVE
-              </span>
-              <span className="bg-black/60 text-white text-[10px] px-2 py-0.5 rounded flex items-center gap-1">
-                <Users className="w-3 h-3" /> 4,520 watching
-              </span>
-            </div>
-          </div>
-        </section>
+      {/* PROFILE */}
+      <div className="max-w-7xl mx-auto px-6 -mt-20 relative z-10 flex items-end gap-6">
+        <Image
+          src="/lauren-daigle.jpg"
+          alt="Lauren Daigle"
+          width={150}
+          height={150}
+          className="rounded-full border-4 border-[#0a0a0a] shadow-2xl object-cover"
+        />
+        <div className="pb-4">
+          <h1 className="text-4xl font-bold">Lauren Daigle</h1>
+          <p className="text-gray-300 mt-1">CCM Artist • Worship Leader</p>
+        </div>
+      </div>
 
-        {/* CREATOR BAR */}
-        <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <img
-              src="/lauren-daigle.jpg"
-              className="w-16 h-16 rounded-full border-2 border-white/20 object-cover"
-            />
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                Lauren Daigle <Sparkles className="w-4 h-4 text-blue-400" />
-              </h1>
-              <p className="text-xs text-gray-400">@laurendaigle • Worship Artist</p>
-              <div className="text-[11px] text-gray-400 flex items-center gap-3 mt-1">
-                <span className="flex items-center gap-1">
-                  <Users className="w-3 h-3" /> 850k followers
-                </span>
-                <span className="flex items-center gap-1">
-                  <Crown className="w-3 h-3 text-yellow-400" /> Level 15
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* ACTIONS */}
-          <div className="flex gap-2 flex-wrap">
-            <button className="bg-white text-black px-4 py-2 rounded-full text-xs font-bold">
-              Follow
-            </button>
-            <button className="bg-green-500 text-black px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1">
-              <Crown className="w-3 h-3" /> Subscribe
-            </button>
-            <button className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1">
-              <Gift className="w-3 h-3" /> Send Seeds
-            </button>
-          </div>
-        </section>
-
-        {/* TABS */}
-        <section className="border-b border-white/10 pb-2 flex gap-4 text-xs font-bold uppercase tracking-wide">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-1 ${
-                activeTab === tab ? "text-blue-400 border-b-2 border-blue-500" : "text-gray-400 hover:text-white"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </section>
-
-        {/* TAB CONTENT */}
-        <section>
-          {activeTab === "Home" && (
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 space-y-4">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Play className="w-4 h-4" /> Featured Worship
-                </h2>
-
-                <div className="aspect-video border border-white/10 rounded-xl overflow-hidden">
-                  <iframe
-                    src="https://www.youtube.com/embed/Aj3dfAnUxyk"
-                    className="w-full h-full"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-
-                <p className="text-sm text-gray-300">
-                  <span className="font-bold">Deliver Me (Live)</span> — A raw, heartfelt worship moment with Lauren Daigle.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-[#111] border border-white/10 p-4 rounded-xl text-xs text-gray-300">
-                  <h3 className="font-bold text-gray-400 mb-2 uppercase tracking-wide">
-                    About Lauren
-                  </h3>
-                  Lauren Daigle is a worship artist known for blending soulful vocals with intimate worship and CCM.
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Videos" && (
-            <div>
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Video className="w-4 h-4" /> Worship Videos
-              </h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-[#111] rounded-xl overflow-hidden border border-white/10">
-                  <div className="aspect-video">
-                    <iframe src="https://www.youtube.com/embed/Aj3dfAnUxyk" className="w-full h-full" />
-                  </div>
-                  <div className="p-3">
-                    <p className="text-sm font-bold">Deliver Me (Live)</p>
-                    <p className="text-[11px] text-gray-400">5 days ago • 320k views</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Clips" && (
-            <p className="text-xs text-gray-400">
-              More worship clips will appear here as they’re added.
+      {/* BODY */}
+      <div className="max-w-7xl mx-auto px-6 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2 space-y-10">
+          <section>
+            <h2 className="text-xl font-bold mb-4">About Lauren Daigle</h2>
+            <p className="text-gray-300 leading-relaxed">
+              Lauren Daigle is a Grammy-winning worship artist known for her soulful
+              voice and inspiring message.
             </p>
-          )}
+          </section>
 
-          {activeTab === "About" && (
-            <div className="text-sm text-gray-300 space-y-2 max-w-2xl">
-              <h2 className="text-lg font-bold">About Lauren Daigle</h2>
-              <p>
-                Lauren’s music is passionately worshipful while reaching a broad audience.
-                She blends soulful melodies with powerful lyrics rooted in faith.
-              </p>
+          <section>
+            <h2 className="text-xl font-bold mb-4">Featured</h2>
+            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+              <Image
+                src="/lauren-daigle-banner.jpg"
+                alt="Lauren Featured"
+                width={1200}
+                height={600}
+                className="rounded-xl object-cover"
+              />
             </div>
-          )}
+          </section>
+        </div>
 
-          {activeTab === "Chat" && (
-            <div className="bg-[#111] border border-white/10 p-4 rounded-xl">
-              <p className="text-xs text-gray-400">Chat will go live when Lauren is streaming.</p>
-            </div>
-          )}
-        </section>
-      </main>
+        <div className="space-y-8">
+          <div className="bg-gradient-to-br from-violet-900/40 to-black p-6 rounded-2xl border border-violet-600/30">
+            <h3 className="text-lg font-bold mb-2">Support Lauren Daigle</h3>
+            <p className="text-sm text-gray-300 mb-4">
+              Support Lauren's music, worship, and global mission.
+            </p>
+            <button className="w-full py-2.5 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition">
+              Support Artist
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
