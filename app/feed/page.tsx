@@ -5,14 +5,12 @@ import { Users, Sparkles, Coins, Music2, Mic2 } from "lucide-react";
 import { useState } from "react";
 
 export default function FeedPage() {
-  // Hide broken album images
   const [brokenImages, setBrokenImages] = useState<{ [key: number]: boolean }>({});
 
   const handleError = (id: number) => {
     setBrokenImages((prev) => ({ ...prev, [id]: true }));
   };
 
-  // LIVE STREAMS — now with SLUGS for creator linking
   const liveStreams = [
     {
       id: 1,
@@ -71,7 +69,7 @@ export default function FeedPage() {
         </Link>
       </div>
 
-      {/* FLASH HERO BANNER */}
+      {/* HERO */}
       <div className="relative mt-5 mx-6 rounded-2xl overflow-hidden border border-white/10 h-44 bg-gradient-to-r from-[#53fc18]/20 via-black to-[#3bff95]/20 flex items-center justify-start">
         <div className="px-6">
           <h2 className="text-4xl font-black">Streaming. Creating. Believing.</h2>
@@ -82,7 +80,7 @@ export default function FeedPage() {
         <Sparkles className="absolute right-6 bottom-6 w-12 h-12 text-[#53fc18]" />
       </div>
 
-      {/* LIVE NOW SECTION */}
+      {/* LIVE NOW */}
       <div className="mt-10 px-6 w-full">
         <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">Live Now</h2>
 
@@ -92,47 +90,49 @@ export default function FeedPage() {
             <Link
               key={s.id}
               href={`/creator/${s.slug}`}
-              className="neon-card rounded-xl overflow-hidden border border-white/10 flex flex-col cursor-pointer hover:scale-[1.02] transition-transform duration-200 h-[300px]"
+              className="neon-card rounded-xl overflow-hidden border border-white/10 flex flex-col hover:scale-[1.02] transition-all duration-200 h-[300px]"
             >
-              {/* Thumbnail */}
-              <div className="relative">
-                <img src={s.thumbnail} className="w-full h-36 object-cover" />
+              {/* TOP: THUMBNAIL */}
+              <div className="relative h-36 w-full">
+                <img src={s.thumbnail} className="w-full h-full object-cover" />
 
                 <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">
                   LIVE
                 </span>
 
                 <span className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[11px] flex items-center gap-1">
-                  <Users className="w-3 h-3" /> {s.viewers.toLocaleString()}
+                  <Users className="w-3 h-3" />
+                  {s.viewers.toLocaleString()}
                 </span>
               </div>
 
-              {/* Content */}
-              <div className="p-3 flex flex-col flex-grow">
+              {/* MIDDLE: TEXT + TAGS */}
+              <div className="px-3 py-2 flex flex-col h-[80px] justify-start">
                 <p className="font-bold text-sm leading-tight">{s.title}</p>
+                <p className="text-[12px] text-gray-300 mt-1 leading-tight">{s.streamer}</p>
 
-                <p className="text-[12px] text-gray-300 mt-1 leading-tight">
-                  {s.streamer}
-                </p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mt-2 mb-auto">
+                <div className="flex flex-wrap gap-1 mt-1">
                   {s.tags.map((tag, i) => (
                     <span key={i} className="neon-tag text-[10px]">
                       {tag}
                     </span>
                   ))}
                 </div>
+              </div>
 
-                {/* Album (optional) */}
-                {s.album && !brokenImages[s.id] && (
+              {/* BOTTOM: ALBUM OR PLACEHOLDER */}
+              <div className="h-[60px] w-full mt-auto">
+                {s.album && !brokenImages[s.id] ? (
                   <img
                     src={s.album}
-                    className="w-full h-20 object-cover rounded-lg border border-white/10"
+                    className="w-full h-full object-cover rounded-b-xl border-t border-white/10"
                     onError={() => handleError(s.id)}
                   />
+                ) : (
+                  <div className="w-full h-full bg-transparent" />
                 )}
               </div>
+
             </Link>
           ))}
 
