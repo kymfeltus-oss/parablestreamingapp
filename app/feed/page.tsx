@@ -1,9 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, Sparkles, Coins, Music2, Mic2 } from "lucide-react";
+import FlashLandingPage from "@/components/FlashLandingPage";
 
 export default function FeedPage() {
+  const [showFlash, setShowFlash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowFlash(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showFlash) {
+    return <FlashLandingPage />;
+  }
+
   const liveStreams = [
     {
       id: 1,
