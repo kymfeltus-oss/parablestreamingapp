@@ -178,7 +178,8 @@ export default function FeedPage() {
             >
               {/* IMAGE */}
               <div className="relative h-36 w-full">
-                <img src={s.thumbnail} className="w-full h-full object-cover" />
+                {/* FIXED: added object-top */}
+                <img src={s.thumbnail} className="w-full h-full object-cover object-top" />
                 <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black">
                   LIVE
                 </span>
@@ -229,7 +230,8 @@ export default function FeedPage() {
               className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[220px]"
             >
               <div className="relative h-28 w-full">
-                <img src={v.thumbnail} className="w-full h-full object-cover" />
+                 {/* FIXED: added object-top */}
+                <img src={v.thumbnail} className="w-full h-full object-cover object-top" />
               </div>
               <div className="flex flex-col justify-between flex-1 p-3">
                 <div>
