@@ -9,12 +9,14 @@ export default function FeedPage() {
   const [showFlash, setShowFlash] = useState(true);
 
   useEffect(() => {
+    // Auto-hide after 5 seconds
     const timer = setTimeout(() => setShowFlash(false), 5000);
     return () => clearTimeout(timer);
   }, []);
 
   if (showFlash) {
-    return <FlashLandingPage />;
+    // FIXED: Passing the "onEnter" function so the button works
+    return <FlashLandingPage onEnter={() => setShowFlash(false)} />;
   }
 
   const liveStreams = [
@@ -176,7 +178,6 @@ export default function FeedPage() {
               href={`/creator/${s.slug}`}
               className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[300px]"
             >
-              {/* IMAGE */}
               <div className="relative h-36 w-full">
                 {/* FIXED: added object-top */}
                 <img src={s.thumbnail} className="w-full h-full object-cover object-top" />
@@ -189,7 +190,6 @@ export default function FeedPage() {
                 </span>
               </div>
 
-              {/* TEXT */}
               <div className="flex flex-col justify-between flex-1 p-3">
                 <div>
                   <p className="font-bold text-sm leading-tight line-clamp-2 text-center">
