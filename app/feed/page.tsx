@@ -59,48 +59,54 @@ export default function FeedPage() {
   const shedRooms = [
     {
       id: 1,
-      title: "Organ + Drum Pocket Session",
-      streamer: "Jamal Keys",
-      thumbnail: "/images/placeholder.jpg",
+      title: "Combined Music Shed • Full Band",
+      subtitle: "Keys • Drums • Bass • Guitar",
       viewers: 1320,
     },
     {
       id: 2,
-      title: "Bass Lines 101 • Gospel Grooves",
-      streamer: "Marcus Bass",
-      thumbnail: "/bass-room.jpg",
+      title: "Keys + Organ Session",
+      subtitle: "Chord voicings • Flow • Pads",
       viewers: 880,
     },
     {
       id: 3,
-      title: "Aux Keys Worship Pads",
-      streamer: "SynthLord",
-      thumbnail: "/keys-room.jpg",
+      title: "Drums + Bass Lock-In",
+      subtitle: "Pocket • Groove • Timing",
       viewers: 1670,
+    },
+    {
+      id: 4,
+      title: "Guitar + Aux Collab",
+      subtitle: "Atmosphere • Textures • FX",
+      viewers: 740,
     },
   ];
 
   const vocalRooms = [
     {
       id: 1,
-      title: "🔥 Gospel Riffs + Runs Session",
-      streamer: "Sarah Sings",
-      thumbnail: "/vocal-room1.jpg",
+      title: "🔥 Combined Vocal Shed",
+      subtitle: "Leads • Harmony • Ad-libs",
       viewers: 2020,
     },
     {
       id: 2,
-      title: "Choir Blending Workshop",
-      streamer: "Voices United",
-      thumbnail: "/vocal-room2.jpg",
+      title: "Lead Vocal Session",
+      subtitle: "Tone • Control • Emotion",
       viewers: 920,
     },
     {
       id: 3,
-      title: "Vocal Warmups Live",
-      streamer: "Coach Harmony",
-      thumbnail: "/vocal-room3.jpg",
+      title: "Harmony Stack Room",
+      subtitle: "Parts • Blends • Stacks",
       viewers: 1420,
+    },
+    {
+      id: 4,
+      title: "Choir & Ensemble Lab",
+      subtitle: "Sections • Dynamics • Flow",
+      viewers: 1100,
     },
   ];
 
@@ -182,51 +188,57 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* SHED ROOMS */}
+      {/* SHED ROOMS (TEXT BOXES) */}
       <div className="mt-12 px-6 w-full">
         <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
           <Music2 className="w-6 h-6 text-[#53fc18]" /> Shed Rooms (Musicians)
         </h2>
 
-        <div className="flex gap-4 overflow-x-auto pb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {shedRooms.map((room) => (
             <div
               key={room.id}
-              className="min-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d]"
+              className="rounded-xl border border-white/10 bg-[#0d0d0d] p-4 flex flex-col justify-between h-[140px]"
             >
-              <img src={room.thumbnail} className="w-full h-32 object-cover" />
-              <div className="p-2">
-                <p className="font-bold text-sm">{room.title}</p>
-                <p className="text-[11px] text-gray-400">{room.streamer}</p>
-                <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-                  {room.viewers.toLocaleString()} watching
-                </span>
+              <div>
+                <p className="font-bold text-sm text-center leading-tight">
+                  {room.title}
+                </p>
+                <p className="text-[11px] text-gray-300 mt-1 text-center">
+                  {room.subtitle}
+                </p>
               </div>
+              <p className="text-[11px] text-gray-400 text-center mt-2">
+                {room.viewers.toLocaleString()} in room
+              </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* VOCAL ROOMS */}
+      {/* VOCAL ROOMS (TEXT BOXES) */}
       <div className="mt-10 px-6 w-full">
         <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
           <Mic2 className="w-6 h-6 text-[#53fc18]" /> Vocal Rooms
         </h2>
 
-        <div className="flex gap-4 overflow-x-auto pb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {vocalRooms.map((room) => (
             <div
               key={room.id}
-              className="min-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d]"
+              className="rounded-xl border border-white/10 bg-[#0d0d0d] p-4 flex flex-col justify-between h-[140px]"
             >
-              <img src={room.thumbnail} className="w-full h-32 object-cover" />
-              <div className="p-2">
-                <p className="font-bold text-sm">{room.title}</p>
-                <p className="text-[11px] text-gray-400">{room.streamer}</p>
-                <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-                  {room.viewers.toLocaleString()} watching
-                </span>
+              <div>
+                <p className="font-bold text-sm text-center leading-tight">
+                  {room.title}
+                </p>
+                <p className="text-[11px] text-gray-300 mt-1 text-center">
+                  {room.subtitle}
+                </p>
               </div>
+              <p className="text-[11px] text-gray-400 text-center mt-2">
+                {room.viewers.toLocaleString()} in room
+              </p>
             </div>
           ))}
         </div>
