@@ -9,14 +9,28 @@ export default function FeedPage() {
   const [showFlash, setShowFlash] = useState(true);
 
   useEffect(() => {
-    // Auto-hide after 5 seconds
-    const timer = setTimeout(() => setShowFlash(false), 5000);
-    return () => clearTimeout(timer);
+    // 1. Check if user has ALREADY seen the flash screen this session
+    // This fixes the "Back Button" issue.
+    const hasSeenFlash = sessionStorage.getItem("hasSeenFlash");
+    
+    if (hasSeenFlash === "true") {
+      setShowFlash(false); // Hide immediately if already seen
+    } else {
+      // If not seen, start the auto-hide timer
+      const timer = setTimeout(() => handleEnter(), 5000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
+  // Function to handle entering the site (works for Timer AND Button)
+  const handleEnter = () => {
+    // Save to storage so it doesn't show again when hitting "Back"
+    sessionStorage.setItem("hasSeenFlash", "true");
+    setShowFlash(false);
+  };
+
   if (showFlash) {
-    // FIXED: Passing the "onEnter" function so the button works
-    return <FlashLandingPage onEnter={() => setShowFlash(false)} />;
+    return <FlashLandingPage onEnter={handleEnter} />;
   }
 
   const liveStreams = [
@@ -179,7 +193,7 @@ export default function FeedPage() {
               className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[300px]"
             >
               <div className="relative h-36 w-full">
-                {/* FIXED: added object-top */}
+                {/* FIXED: object-top prevents head cut-off */}
                 <img src={s.thumbnail} className="w-full h-full object-cover object-top" />
                 <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black">
                   LIVE
@@ -230,7 +244,7 @@ export default function FeedPage() {
               className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[220px]"
             >
               <div className="relative h-28 w-full">
-                 {/* FIXED: added object-top */}
+                 {/* FIXED: object-top */}
                 <img src={v.thumbnail} className="w-full h-full object-cover object-top" />
               </div>
               <div className="flex flex-col justify-between flex-1 p-3">
@@ -248,7 +262,7 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* SHED ROOMS (TEXT BOXES) */}
+      {/* SHED ROOMS */}
       <div className="mt-12 px-6 w-full">
         <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
           <Music2 className="w-6 h-6 text-[#53fc18]" /> Shed Rooms (Musicians)
@@ -276,7 +290,7 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* VOCAL ROOMS (TEXT BOXES) */}
+      {/* VOCAL ROOMS */}
       <div className="mt-10 px-6 w-full">
         <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
           <Mic2 className="w-6 h-6 text-[#53fc18]" /> Vocal Rooms
@@ -311,46 +325,23 @@ export default function FeedPage() {
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-          <Link
-            href="/tools/sermon-prep"
-            className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/tools/sermon-prep" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">AI Sermons</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Draft, refine, and prep sermons with AI assist.
-            </p>
+            <p className="text-xs text-gray-400 mt-1">Draft, refine, and prep sermons with AI assist.</p>
           </Link>
-
-          <Link
-            href="/creator/tools"
-            className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/creator/tools" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Stream Setup</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Go live & manage overlays
-            </p>
+            <p className="text-xs text-gray-400 mt-1">Go live & manage overlays</p>
           </Link>
-
-          <Link
-            href="/dashboard/analytics"
-            className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/dashboard/analytics" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Analytics</h3>
             <p className="text-xs text-gray-400 mt-1">Track performance</p>
           </Link>
-
-          <Link
-            href="/monetization"
-            className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/monetization" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Monetization</h3>
             <p className="text-xs text-gray-400 mt-1">Earn Seeds & Gifts</p>
           </Link>
-
-          <Link
-            href="/library"
-            className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/library" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
             <h3 className="text-lg font-bold">Library</h3>
             <p className="text-xs text-gray-400 mt-1">Saved content</p>
           </Link>
@@ -359,61 +350,27 @@ export default function FeedPage() {
 
       {/* BREAKOUT ROOMS */}
       <section className="mt-12 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">
-          Breakout Rooms
-        </h2>
-
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">Breakout Rooms</h2>
         <div className="flex gap-4 overflow-x-auto pb-3">
-          <Link
-            href="/social"
-            className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🔥 Global Fellowship</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Open chat for all believers
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-              Join Now
-            </span>
+            <p className="text-xs text-gray-400 mt-1">Open chat for all believers</p>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">Join Now</span>
           </Link>
-
-          <Link
-            href="/social"
-            className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🎮 Gaming &amp; Faith</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Encouragement + gameplay
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-              Join Now
-            </span>
+            <p className="text-xs text-gray-400 mt-1">Encouragement + gameplay</p>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">Join Now</span>
           </Link>
-
-          <Link
-            href="/social"
-            className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🎤 Vocal Breakout</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Riffs • Runs • Harmony
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-              Join Now
-            </span>
+            <p className="text-xs text-gray-400 mt-1">Riffs • Runs • Harmony</p>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">Join Now</span>
           </Link>
-
-          <Link
-            href="/social"
-            className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10"
-          >
+          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
             <h3 className="font-bold text-lg">🙏 Prayer Room</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Support + encouragement
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-              Join Now
-            </span>
+            <p className="text-xs text-gray-400 mt-1">Support + encouragement</p>
+            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">Join Now</span>
           </Link>
         </div>
       </section>

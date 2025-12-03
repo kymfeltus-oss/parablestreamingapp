@@ -2,7 +2,6 @@
 
 import { Sparkles, Play } from "lucide-react";
 
-// This defines that the component accepts an "onEnter" function
 type FlashLandingPageProps = {
   onEnter?: () => void;
 };
@@ -44,10 +43,10 @@ export default function FlashLandingPage({ onEnter }: FlashLandingPageProps) {
           A home for believers, creators, and gospel musicians.
         </p>
 
-        {/* FIXED: Changed from Link to Button */}
+        {/* FIXED: Button instead of Link */}
         <button
           onClick={onEnter}
-          className="bg-[#53fc18] hover:bg-[#46d615] text-black font-bold inline-flex items-center gap-3 px-10 py-3 rounded-2xl text-xl transition-transform hover:scale-105 shadow-[0_0_15px_#53fc18]"
+          className="bg-[#53fc18] hover:bg-[#46d615] text-black font-bold inline-flex items-center gap-3 px-10 py-3 rounded-2xl text-xl transition-transform hover:scale-105 shadow-[0_0_15px_#53fc18] cursor-pointer"
         >
           Enter Parable
           <Play className="w-5 h-5 fill-black" />
