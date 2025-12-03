@@ -56,6 +56,33 @@ export default function FeedPage() {
     },
   ];
 
+  const featuredVideos = [
+    {
+      id: "tdjakes-clip-1",
+      title: "Clip • When Faith Meets Obedience",
+      creator: "Bishop T.D. Jakes",
+      thumbnail: "/td-jakes.jpg",
+    },
+    {
+      id: "kirk-clip-1",
+      title: "Clip • Praise Break Moment",
+      creator: "Kirk Franklin",
+      thumbnail: "/kirk_avatar.png",
+    },
+    {
+      id: "lauren-clip-1",
+      title: "Clip • You Say (Live Snippet)",
+      creator: "Lauren Daigle",
+      thumbnail: "/lauren-daigle.jpg",
+    },
+    {
+      id: "stevenson-clip-1",
+      title: "Clip • Prophetic Flow Moment",
+      creator: "Pastor Stevenson",
+      thumbnail: "/steven-furtick.jpg",
+    },
+  ];
+
   const shedRooms = [
     {
       id: 1,
@@ -188,6 +215,37 @@ export default function FeedPage() {
         </div>
       </div>
 
+      {/* FEATURED VIDEOS */}
+      <div className="mt-10 px-6 w-full">
+        <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">
+          Featured Videos
+        </h2>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {featuredVideos.map((v) => (
+            <Link
+              key={v.id}
+              href={`/watch/${v.id}`}
+              className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[220px]"
+            >
+              <div className="relative h-28 w-full">
+                <img src={v.thumbnail} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex flex-col justify-between flex-1 p-3">
+                <div>
+                  <p className="font-bold text-sm leading-tight line-clamp-2">
+                    {v.title}
+                  </p>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    {v.creator}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* SHED ROOMS (TEXT BOXES) */}
       <div className="mt-12 px-6 w-full">
         <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
@@ -250,7 +308,17 @@ export default function FeedPage() {
           Creator Tools
         </h2>
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+          <Link
+            href="/tools/sermon-prep"
+            className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
+          >
+            <h3 className="text-lg font-bold">AI Sermons</h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Draft, refine, and prep sermons with AI assist.
+            </p>
+          </Link>
+
           <Link
             href="/creator/tools"
             className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10"
