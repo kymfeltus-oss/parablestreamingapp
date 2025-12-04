@@ -1,321 +1,228 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import {
-  Users,
-  Music2,
-  Gamepad2,
-  Sparkles,
-  Play,
-  BookOpen,
-  Clock,
-  Heart,
-} from "lucide-react";
-import ParableCard from "@/components/ParableCard";
+import { Users, Coins, Sparkles, Music2, Mic2 } from "lucide-react";
 
-// TYPES
-type Episode = {
-  id: string;
-  title: string;
-  thumbnail?: string;
-  seriesTitle?: string;
-  episodeNumber?: number;
-  scriptureRef?: string;
-};
-
-export default function HomePage() {
-  const [parables, setParables] = useState<Episode[]>([]);
-  const [loadingParables, setLoadingParables] = useState(true);
-
-  // Placeholder personalized sections
-  const continueWatching = [
+export default function FeedPage() {
+  /* ================== LIVE STREAMS ================== */
+  const liveStreams = [
     {
-      id: "p1",
-      title: "He Missed Church for a Game…",
-      thumbnail: "/sample-parable.jpg",
-      seriesTitle: "Gaming Addiction Parable",
+      id: 1,
+      slug: "td-jakes",
+      title: "Faith + Obedience = Miracles!",
+      streamer: "Bishop T.D. Jakes",
+      viewers: 18205,
+      thumbnail: "/td-jakes.jpg",
+      tags: ["Sermon", "Faith", "Live"],
+    },
+    {
+      id: 2,
+      slug: "kirk-franklin",
+      title: "Praise Break • Live Worship",
+      streamer: "Kirk Franklin",
+      viewers: 12440,
+      thumbnail: "/kirk_avatar.png",
+      tags: ["Worship", "Music", "Praise"],
+    },
+    {
+      id: 3,
+      slug: "lauren-daigle",
+      title: "Gospel Flow Night",
+      streamer: "Lauren Daigle",
+      viewers: 9200,
+      thumbnail: "/lauren-daigle.jpg",
+      tags: ["Gospel", "Music", "Live"],
+    },
+    {
+      id: 4,
+      slug: "pastor-stevenson",
+      title: "Prayer & Prophetic Flow",
+      streamer: "Pastor Stevenson",
+      viewers: 7855,
+      thumbnail: "/steven-furtick.jpg",
+      tags: ["Prayer", "Teaching"],
     },
   ];
 
-  const followedCreators = [
+  /* ================== SHED ROOMS ================== */
+  const shedRooms = [
     {
-      id: "creator1",
-      name: "PastorPlays",
-      avatar: "/creator1.jpg",
-      followers: "12.5K",
+      id: 1,
+      title: "Organ + Drum Pocket Session",
+      streamer: "Jamal Keys",
+      thumbnail: "/images.jfif",
+      viewers: 1320,
     },
     {
-      id: "creator2",
-      name: "HolyHooper",
-      avatar: "/creator2.jpg",
-      followers: "8.1K",
+      id: 2,
+      title: "Bass Lines 101 • Gospel Grooves",
+      streamer: "Marcus Bass",
+      thumbnail: "/bass-room.jpg",
+      viewers: 880,
     },
-  ];
-
-  const trendingParables = [
     {
-      id: "tr1",
-      title: "The Lost Phone Parable",
-      thumbnail: "/parable-trending.jpg",
-    },
-  ];
-
-  const recommendedParables = [
-    {
-      id: "rp1",
-      title: "The Graceful Comeback",
-      thumbnail: "/parable-recommended.jpg",
+      id: 3,
+      title: "Aux Keys Worship Pads",
+      streamer: "SynthLord",
+      thumbnail: "/keys-room.jpg",
+      viewers: 1670,
     },
   ];
 
-  const liveStreamers = [
+  /* ================== VOCAL ROOMS ================== */
+  const vocalRooms = [
     {
-      id: "stream1",
-      name: "HolyHooper",
-      game: "NBA 2K25",
-      thumb: "/gaming-2k.jpg",
-      viewers: 420,
+      id: 1,
+      title: "🔥 Gospel Riffs + Runs Session",
+      streamer: "Sarah Sings",
+      thumbnail: "/vocal-room1.jpg",
+      viewers: 2020,
+    },
+    {
+      id: 2,
+      title: "Choir Blending Workshop",
+      streamer: "Voices United",
+      thumbnail: "/vocal-room2.jpg",
+      viewers: 920,
+    },
+    {
+      id: 3,
+      title: "Vocal Warmups Live",
+      streamer: "Coach Harmony",
+      thumbnail: "/vocal-room3.jpg",
+      viewers: 1420,
     },
   ];
-
-  const musicCreators = [
-    {
-      id: "m1",
-      name: "Kirk Franklin",
-      thumb: "/kirk_avatar.png",
-    },
-  ];
-
-  const gamingCreators = [
-    {
-      id: "g1",
-      name: "PastorPlays",
-      thumb: "/gaming-fortnite.jpg",
-    },
-  ];
-
-  useEffect(() => {
-    async function loadParables() {
-      try {
-        const res = await fetch("/api/microdramas/list", { cache: "no-store" });
-        const data = await res.json();
-        setParables((data.episodes || []) as Episode[]);
-      } catch (e) {
-        setParables([]);
-      } finally {
-        setLoadingParables(false);
-      }
-    }
-    loadParables();
-  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white pb-24">
-      <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 pt-24 space-y-12">
+      {/* ============================= HEADER ============================= */}
+      <header className="flex items-center justify-between px-5 py-4 bg-[#0f0f0f] border-b border-white/10">
+        <span className="text-5xl font-black tracking-tight text-[#53fc18]">
+          PARABLE
+        </span>
 
-        {/* HERO */}
-        <section className="relative rounded-2xl overflow-hidden h-44 bg-gradient-to-r from-[#53fc18]/20 to-black border border-white/10 flex items-center px-6">
-          <div>
-            <h1 className="text-4xl font-black">Welcome to Parable</h1>
-            <p className="text-sm text-gray-300">
-              Stream • Create • Watch Parables • Connect
-            </p>
-          </div>
-          <Sparkles className="absolute bottom-4 right-4 w-12 h-12 text-[#53fc18]" />
-        </section>
+        <Link
+          href="/monetization"
+          className="bg-[#53fc18] text-black font-bold px-4 py-2 rounded-xl shadow-[0_0_10px_#53fc18] text-sm flex items-center gap-1"
+        >
+          <Coins className="w-4 h-4" />
+          GET SEEDS
+        </Link>
+      </header>
 
-        {/* CONTINUE WATCHING */}
-        {continueWatching.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Clock className="w-6 h-6 text-[#53fc18]" /> Continue Watching
-            </h2>
+      {/* ======================= HERO BANNER ======================= */}
+      <section className="relative mt-4 mx-5 rounded-2xl overflow-hidden neon-card h-40 flex items-center px-6">
+        <div>
+          <h2 className="text-3xl font-black">Streaming. Creating. Believing.</h2>
+          <p className="text-gray-300 mt-1 text-sm">
+            A home for believers, creators & GOSPEL musicians.
+          </p>
+        </div>
+        <Sparkles className="absolute right-6 bottom-6 w-10 h-10 text-[#53fc18]" />
+      </section>
 
-            <div className="space-y-3">
-              {continueWatching.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/parables/${item.id}`}
-                  className="
-                    flex items-center gap-4 bg-[#111] p-4 border border-white/10 
-                    rounded-xl hover:border-[#53fc18]/40 transition
-                  "
-                >
-                  <div className="w-24 h-16 rounded-lg overflow-hidden border border-white/10">
-                    <img
-                      src={item.thumbnail}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-sm">{item.title}</p>
-                    <p className="text-[11px] text-gray-400">{item.seriesTitle}</p>
-                  </div>
-                  <Play className="w-5 h-5 text-gray-300" />
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+      {/* =========================== LIVE NOW ============================= */}
+      <section className="mt-8 px-5">
+        <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">Live Now</h2>
 
-        {/* FOLLOWING */}
-        {followedCreators.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Heart className="w-6 h-6 text-[#53fc18]" /> Creators You Follow
-            </h2>
-
-            <div className="flex gap-4 overflow-x-auto pb-3">
-              {followedCreators.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/creator/${c.id}`}
-                  className="
-                    min-w-[140px] bg-[#111] p-4 rounded-2xl border border-white/10
-                    hover:border-[#53fc18]/40 transition text-center
-                  "
-                >
-                  <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2 border border-white/10">
-                    <img src={c.avatar} className="w-full h-full object-cover" />
-                  </div>
-                  <p className="font-bold text-sm">{c.name}</p>
-                  <p className="text-[11px] text-gray-400">{c.followers} followers</p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* FEATURED PARABLES */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-[#53fc18]" /> Featured Parables
-          </h2>
-
-          {loadingParables && (
-            <p className="text-sm text-gray-400">Loading Parables…</p>
-          )}
-
-          {!loadingParables && parables.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {parables.slice(0, 6).map((ep) => (
-                <ParableCard key={ep.id} ep={ep} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* TRENDING PARABLES */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-[#53fc18]" /> Trending Parables
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trendingParables.map((p) => (
-              <ParableCard key={p.id} ep={p} />
-            ))}
-          </div>
-        </section>
-
-        {/* RECOMMENDED FOR YOU */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Play className="w-6 h-6 text-[#53fc18]" /> Recommended For You
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendedParables.map((p) => (
-              <ParableCard key={p.id} ep={p} />
-            ))}
-          </div>
-        </section>
-
-        {/* LIVE STREAMERS */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Users className="w-6 h-6 text-[#53fc18]" /> Live Streamers
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {liveStreamers.map((s) => (
-              <Link
-                key={s.id}
-                href={`/watch/${s.id}`}
-                className="rounded-2xl bg-[#111] border border-white/10 overflow-hidden hover:border-[#53fc18]/40 transition"
-              >
-                <div className="relative h-40">
-                  <img src={s.thumb} className="w-full h-full object-cover" />
-
-                  <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded font-bold">
-                    LIVE
-                  </span>
-
-                  <span className="absolute bottom-2 left-2 bg-black/70 text-xs px-2 py-1 rounded flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    {s.viewers.toLocaleString()}
-                  </span>
-                </div>
-                <div className="p-3">
-                  <p className="font-bold text-sm">{s.name}</p>
-                  <p className="text-[11px] text-gray-400">{s.game}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* GAMING CREATORS */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Gamepad2 className="w-6 h-6 text-[#53fc18]" /> Gaming Creators
-          </h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {gamingCreators.map((g) => (
-              <Link
-                key={g.id}
-                href={`/gaming/creator/${g.id}`}
-                className="bg-[#111] rounded-xl border border-white/10 overflow-hidden hover:border-[#53fc18]/40 transition"
-              >
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {liveStreams.map((s) => (
+            <Link
+              key={s.id}
+              href={`/creator/${s.slug}`}
+              className="neon-card overflow-hidden rounded-xl"
+            >
+              <div className="relative">
                 <img
-                  src={g.thumb}
+                  src={s.thumbnail}
                   className="w-full h-32 object-cover"
                 />
-                <p className="p-3 font-bold text-xs">{g.name}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
 
-        {/* MUSIC */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Music2 className="w-6 h-6 text-[#53fc18]" /> Featured Music Artists
-          </h2>
+                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">
+                  LIVE
+                </span>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {musicCreators.map((m) => (
-              <Link
-                key={m.id}
-                href={`/music`}
-                className="bg-[#111] rounded-xl border border:white/10 overflow-hidden hover:border-[#53fc18]/40 transition"
-              >
-                <img
-                  src={m.thumb}
-                  className="w-full h-32 object-cover"
-                />
-                  <p className="p-3 font-bold text-xs">{m.name}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
+                <span className="absolute bottom-1 left-2 bg-black/70 px-2 py-0.5 text-[11px] rounded flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {s.viewers.toLocaleString()}
+                </span>
+              </div>
 
-      </main>
+              <div className="p-2">
+                <p className="font-bold text-sm">{s.title}</p>
+                <p className="text-[11px] text-gray-400">{s.streamer}</p>
+
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {s.tags.map((tag, idx) => (
+                    <span key={idx} className="neon-tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================== SHED ROOMS ========================= */}
+      <section className="mt-10 px-5">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
+          <Music2 className="w-6 h-6 text-[#53fc18]" />
+          Shed Rooms (Musicians)
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {shedRooms.map((room) => (
+            <div
+              key={room.id}
+              className="min-w-[200px] neon-card rounded-xl overflow-hidden"
+            >
+              <img src={room.thumbnail} className="w-full h-32 object-cover" />
+
+              <div className="p-2">
+                <p className="font-bold text-sm">{room.title}</p>
+                <p className="text-[11px] text-gray-400">{room.streamer}</p>
+
+                <span className="neon-tag mt-2 inline-block">
+                  {room.viewers.toLocaleString()} watching
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================== VOCAL ROOMS ========================= */}
+      <section className="mt-10 px-5">
+        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
+          <Mic2 className="w-6 h-6 text-[#53fc18]" />
+          Vocal Rooms
+        </h2>
+
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {vocalRooms.map((room) => (
+            <div
+              key={room.id}
+              className="min-w-[200px] neon-card rounded-xl overflow-hidden"
+            >
+              <img src={room.thumbnail} className="w-full h-32 object-cover" />
+
+              <div className="p-2">
+                <p className="font-bold text-sm">{room.title}</p>
+                <p className="text-[11px] text-gray-400">{room.streamer}</p>
+
+                <span className="neon-tag mt-2 inline-block">
+                  {room.viewers.toLocaleString()} watching
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
