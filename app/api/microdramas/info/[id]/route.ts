@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-// Correct relative path for Amplify:
-import { readMicrodramas } from "../../../../../../lib/microdramas";
+import { readMicrodramas } from "../../../../../lib/microdramas"; // FIXED PATH
 
 export async function GET(
   req: Request,

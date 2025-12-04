@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-// Correct relative path:
-import { readMicrodramas } from "../../../../../lib/microdramas";
+import { readMicrodramas } from "../../../../lib/microdramas"; // FIXED PATH
 
 export async function GET() {
   const episodes = readMicrodramas();
