@@ -1,443 +1,321 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { Users, Sparkles, Coins, Music2, Mic2 } from "lucide-react";
-import FlashLandingPage from "@/components/FlashLandingPage";
+import {
+  Users,
+  Music2,
+  Gamepad2,
+  Sparkles,
+  Play,
+  BookOpen,
+  Clock,
+  Heart,
+} from "lucide-react";
+import ParableCard from "@/components/ParableCard";
 
-// Static fallback data (your existing content)
-const STATIC_LIVE_STREAMS = [
-  {
-    id: 1,
-    slug: "td-jakes",
-    title: "Faith + Obedience = Miracles!",
-    streamer: "Bishop T.D. Jakes",
-    viewers: 18205,
-    tags: ["Sermon", "Faith", "Live"],
-    thumbnail: "/td-jakes.jpg",
-  },
-  {
-    id: 2,
-    slug: "kirk-franklin",
-    title: "Praise Break • Live Worship",
-    streamer: "Kirk Franklin",
-    viewers: 12440,
-    tags: ["Worship", "Music", "Praise"],
-    thumbnail: "/kirk_avatar.png",
-  },
-  {
-    id: 3,
-    slug: "lauren-daigle",
-    title: "Late Night Gospel Flow",
-    streamer: "Lauren Daigle",
-    viewers: 9200,
-    tags: ["Gospel", "Live", "Music"],
-    thumbnail: "/lauren-daigle.jpg",
-  },
-  {
-    id: 4,
-    slug: "pastor-stevenson",
-    title: "Prayer & Prophetic Flow",
-    streamer: "Pastor Stevenson",
-    viewers: 7855,
-    tags: ["Prayer", "Teaching"],
-    thumbnail: "/steven-furtick.jpg",
-  },
-];
+// TYPES
+type Episode = {
+  id: string;
+  title: string;
+  thumbnail?: string;
+  seriesTitle?: string;
+  episodeNumber?: number;
+  scriptureRef?: string;
+};
 
-const STATIC_FEATURED_VIDEOS = [
-  {
-    id: "tdjakes-clip-1",
-    title: "Clip • When Faith Meets Obedience",
-    creator: "Bishop T.D. Jakes",
-    thumbnail: "/td-jakes.jpg",
-  },
-  {
-    id: "kirk-clip-1",
-    title: "Clip • Praise Break Moment",
-    creator: "Kirk Franklin",
-    thumbnail: "/kirk_avatar.png",
-  },
-  {
-    id: "lauren-clip-1",
-    title: "Clip • You Say (Live Snippet)",
-    creator: "Lauren Daigle",
-    thumbnail: "/lauren-daigle.jpg",
-  },
-  {
-    id: "stevenson-clip-1",
-    title: "Clip • Prophetic Flow Moment",
-    creator: "Pastor Stevenson",
-    thumbnail: "/steven-furtick.jpg",
-  },
-];
+export default function HomePage() {
+  const [parables, setParables] = useState<Episode[]>([]);
+  const [loadingParables, setLoadingParables] = useState(true);
 
-const STATIC_SHED_ROOMS = [
-  {
-    id: 1,
-    title: "Combined Music Shed • Full Band",
-    subtitle: "Keys • Drums • Bass • Guitar",
-    viewers: 1320,
-  },
-  {
-    id: 2,
-    title: "Keys + Organ Session",
-    subtitle: "Chord voicings • Flow • Pads",
-    viewers: 880,
-  },
-  {
-    id: 3,
-    title: "Drums + Bass Lock-In",
-    subtitle: "Pocket • Groove • Timing",
-    viewers: 1670,
-  },
-  {
-    id: 4,
-    title: "Guitar + Aux Collab",
-    subtitle: "Atmosphere • Textures • FX",
-    viewers: 740,
-  },
-];
+  // Placeholder personalized sections
+  const continueWatching = [
+    {
+      id: "p1",
+      title: "He Missed Church for a Game…",
+      thumbnail: "/sample-parable.jpg",
+      seriesTitle: "Gaming Addiction Parable",
+    },
+  ];
 
-const STATIC_VOCAL_ROOMS = [
-  {
-    id: 1,
-    title: "🔥 Combined Vocal Shed",
-    subtitle: "Leads • Harmony • Ad-libs",
-    viewers: 2020,
-  },
-  {
-    id: 2,
-    title: "Lead Vocal Session",
-    subtitle: "Tone • Control • Emotion",
-    viewers: 920,
-  },
-  {
-    id: 3,
-    title: "Harmony Stack Room",
-    subtitle: "Parts • Blends • Stacks",
-    viewers: 1420,
-  },
-  {
-    id: 4,
-    title: "Choir & Ensemble Lab",
-    subtitle: "Sections • Dynamics • Flow",
-    viewers: 1100,
-  },
-];
+  const followedCreators = [
+    {
+      id: "creator1",
+      name: "PastorPlays",
+      avatar: "/creator1.jpg",
+      followers: "12.5K",
+    },
+    {
+      id: "creator2",
+      name: "HolyHooper",
+      avatar: "/creator2.jpg",
+      followers: "8.1K",
+    },
+  ];
 
-export default function FeedPage() {
-  const [showFlash, setShowFlash] = useState(true);
+  const trendingParables = [
+    {
+      id: "tr1",
+      title: "The Lost Phone Parable",
+      thumbnail: "/parable-trending.jpg",
+    },
+  ];
 
-  // Live streams state: STARTS with your static content
-  const [liveStreams, setLiveStreams] = useState<any[]>(STATIC_LIVE_STREAMS);
-  const [loadingStreams, setLoadingStreams] = useState(true);
+  const recommendedParables = [
+    {
+      id: "rp1",
+      title: "The Graceful Comeback",
+      thumbnail: "/parable-recommended.jpg",
+    },
+  ];
+
+  const liveStreamers = [
+    {
+      id: "stream1",
+      name: "HolyHooper",
+      game: "NBA 2K25",
+      thumb: "/gaming-2k.jpg",
+      viewers: 420,
+    },
+  ];
+
+  const musicCreators = [
+    {
+      id: "m1",
+      name: "Kirk Franklin",
+      thumb: "/kirk_avatar.png",
+    },
+  ];
+
+  const gamingCreators = [
+    {
+      id: "g1",
+      name: "PastorPlays",
+      thumb: "/gaming-fortnite.jpg",
+    },
+  ];
 
   useEffect(() => {
-    // 1. Check if user has ALREADY seen the flash screen this session
-    const hasSeenFlash = sessionStorage.getItem("hasSeenFlash");
-
-    if (hasSeenFlash === "true") {
-      setShowFlash(false); // Hide immediately if already seen
-    } else {
-      // If not seen, start the auto-hide timer
-      const timer = setTimeout(() => handleEnter(), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  // Function to handle entering (timer + button)
-  const handleEnter = () => {
-    sessionStorage.setItem("hasSeenFlash", "true");
-    setShowFlash(false);
-  };
-
-  // 🔄 Poll API for real streams every 10 seconds
-  useEffect(() => {
-    async function loadStreams() {
+    async function loadParables() {
       try {
-        const res = await fetch("/api/streams/list", { cache: "no-store" });
+        const res = await fetch("/api/microdramas/list", { cache: "no-store" });
         const data = await res.json();
-
-        if (Array.isArray(data.streams) && data.streams.length > 0) {
-          setLiveStreams(data.streams);
-        } else {
-          // If no live streams in backend, fall back to static
-          setLiveStreams(STATIC_LIVE_STREAMS);
-        }
-      } catch (err) {
-        console.error("Error loading streams:", err);
-        setLiveStreams(STATIC_LIVE_STREAMS);
+        setParables((data.episodes || []) as Episode[]);
+      } catch (e) {
+        setParables([]);
       } finally {
-        setLoadingStreams(false);
+        setLoadingParables(false);
       }
     }
-
-    loadStreams();
-    const intervalId = setInterval(loadStreams, 10000); // 10s
-
-    return () => clearInterval(intervalId);
+    loadParables();
   }, []);
 
-  if (showFlash) {
-    return <FlashLandingPage onEnter={handleEnter} />;
-  }
-
-  const featuredVideos = STATIC_FEATURED_VIDEOS;
-  const shedRooms = STATIC_SHED_ROOMS;
-  const vocalRooms = STATIC_VOCAL_ROOMS;
-
   return (
-    <div className="min-h-screen bg-black text-white pb-28">
-      {/* HEADER */}
-      <div className="flex items-center justify-between w-full px-6 py-5 bg-[#0f0f0f] border-b border-white/10">
-        <span className="text-6xl font-black tracking-tight text-[#53fc18]">
-          PARABLE
-        </span>
+    <div className="min-h-screen bg-black text-white pb-24">
+      <Navbar />
 
-        <Link
-          href="/monetization"
-          className="bg-[#53fc18] text-black font-bold px-5 py-2 rounded-xl flex items-center gap-2 shadow-[0_0_12px_#53fc18]"
-        >
-          <Coins className="w-5 h-5" />
-          GET SEEDS
-        </Link>
-      </div>
+      <main className="max-w-6xl mx-auto px-6 pt-24 space-y-12">
 
-      {/* HERO */}
-      <div className="relative mt-5 mx-6 rounded-2xl overflow-hidden border border-white/10 h-44 bg-gradient-to-r from-[#53fc18]/20 via-black to-[#3bff95]/20 flex items-center justify-start">
-        <div className="px-6">
-          <h2 className="text-4xl font-black">Streaming. Creating. Believing.</h2>
-          <p className="text-gray-300 mt-2 text-sm max-w-xs">
-            A community for believers, creators & gospel influencers.
-          </p>
-        </div>
-        <Sparkles className="absolute right-6 bottom-6 w-12 h-12 text-[#53fc18]" />
-      </div>
+        {/* HERO */}
+        <section className="relative rounded-2xl overflow-hidden h-44 bg-gradient-to-r from-[#53fc18]/20 to-black border border-white/10 flex items-center px-6">
+          <div>
+            <h1 className="text-4xl font-black">Welcome to Parable</h1>
+            <p className="text-sm text-gray-300">
+              Stream • Create • Watch Parables • Connect
+            </p>
+          </div>
+          <Sparkles className="absolute bottom-4 right-4 w-12 h-12 text-[#53fc18]" />
+        </section>
 
-      {/* LIVE NOW */}
-      <div className="mt-10 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">Live Now</h2>
+        {/* CONTINUE WATCHING */}
+        {continueWatching.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Clock className="w-6 h-6 text-[#53fc18]" /> Continue Watching
+            </h2>
 
-        {loadingStreams ? (
-          <p className="text-sm text-gray-400">Loading live streams…</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {liveStreams.map((s) => (
+            <div className="space-y-3">
+              {continueWatching.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/parables/${item.id}`}
+                  className="
+                    flex items-center gap-4 bg-[#111] p-4 border border-white/10 
+                    rounded-xl hover:border-[#53fc18]/40 transition
+                  "
+                >
+                  <div className="w-24 h-16 rounded-lg overflow-hidden border border-white/10">
+                    <img
+                      src={item.thumbnail}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-sm">{item.title}</p>
+                    <p className="text-[11px] text-gray-400">{item.seriesTitle}</p>
+                  </div>
+                  <Play className="w-5 h-5 text-gray-300" />
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* FOLLOWING */}
+        {followedCreators.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Heart className="w-6 h-6 text-[#53fc18]" /> Creators You Follow
+            </h2>
+
+            <div className="flex gap-4 overflow-x-auto pb-3">
+              {followedCreators.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/creator/${c.id}`}
+                  className="
+                    min-w-[140px] bg-[#111] p-4 rounded-2xl border border-white/10
+                    hover:border-[#53fc18]/40 transition text-center
+                  "
+                >
+                  <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2 border border-white/10">
+                    <img src={c.avatar} className="w-full h-full object-cover" />
+                  </div>
+                  <p className="font-bold text-sm">{c.name}</p>
+                  <p className="text-[11px] text-gray-400">{c.followers} followers</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* FEATURED PARABLES */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-[#53fc18]" /> Featured Parables
+          </h2>
+
+          {loadingParables && (
+            <p className="text-sm text-gray-400">Loading Parables…</p>
+          )}
+
+          {!loadingParables && parables.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {parables.slice(0, 6).map((ep) => (
+                <ParableCard key={ep.id} ep={ep} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* TRENDING PARABLES */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-[#53fc18]" /> Trending Parables
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {trendingParables.map((p) => (
+              <ParableCard key={p.id} ep={p} />
+            ))}
+          </div>
+        </section>
+
+        {/* RECOMMENDED FOR YOU */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Play className="w-6 h-6 text-[#53fc18]" /> Recommended For You
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recommendedParables.map((p) => (
+              <ParableCard key={p.id} ep={p} />
+            ))}
+          </div>
+        </section>
+
+        {/* LIVE STREAMERS */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Users className="w-6 h-6 text-[#53fc18]" /> Live Streamers
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {liveStreamers.map((s) => (
               <Link
                 key={s.id}
-                href={s.slug ? `/creator/${s.slug}` : `/watch/${s.id}`}
-                className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[300px]"
+                href={`/watch/${s.id}`}
+                className="rounded-2xl bg-[#111] border border-white/10 overflow-hidden hover:border-[#53fc18]/40 transition"
               >
-                <div className="relative h-36 w-full">
-                  <img
-                    src={s.thumbnail}
-                    className="w-full h-full object-contain"
-                  />
-                  <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black">
+                <div className="relative h-40">
+                  <img src={s.thumb} className="w-full h-full object-cover" />
+
+                  <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded font-bold">
                     LIVE
                   </span>
-                  <span className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[11px] flex items-center gap-1">
+
+                  <span className="absolute bottom-2 left-2 bg-black/70 text-xs px-2 py-1 rounded flex items-center gap-1">
                     <Users className="w-3 h-3" />
                     {s.viewers.toLocaleString()}
                   </span>
                 </div>
-
-                <div className="flex flex-col justify-between flex-1 p-3">
-                  <div>
-                    <p className="font-bold text-sm leading-tight line-clamp-2 text-center">
-                      {s.title}
-                    </p>
-                    <p className="text-[12px] text-gray-300 mt-1 text-center">
-                      {s.streamer || `Creator: ${s.creatorId || "Unknown"}`}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap justify-center gap-1 mt-2">
-                    {(s.tags || []).map((tag: string, i: number) => (
-                      <span
-                        key={i}
-                        className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px]"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                <div className="p-3">
+                  <p className="font-bold text-sm">{s.name}</p>
+                  <p className="text-[11px] text-gray-400">{s.game}</p>
                 </div>
               </Link>
             ))}
           </div>
-        )}
-      </div>
+        </section>
 
-      {/* FEATURED VIDEOS */}
-      <div className="mt-10 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">
-          Featured Videos
-        </h2>
+        {/* GAMING CREATORS */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Gamepad2 className="w-6 h-6 text-[#53fc18]" /> Gaming Creators
+          </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {featuredVideos.map((v) => (
-            <Link
-              key={v.id}
-              href={`/watch/${v.id}`}
-              className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d0d] hover:scale-[1.02] transition duration-200 flex flex-col h-[220px]"
-            >
-              <div className="relative h-28 w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {gamingCreators.map((g) => (
+              <Link
+                key={g.id}
+                href={`/gaming/creator/${g.id}`}
+                className="bg-[#111] rounded-xl border border-white/10 overflow-hidden hover:border-[#53fc18]/40 transition"
+              >
                 <img
-                  src={v.thumbnail}
-                  className="w-full h-full object-cover object-top"
+                  src={g.thumb}
+                  className="w-full h-32 object-cover"
                 />
-              </div>
-              <div className="flex flex-col justify-between flex-1 p-3">
-                <div>
-                  <p className="font-bold text-sm leading-tight line-clamp-2">
-                    {v.title}
-                  </p>
-                  <p className="text-[11px] text-gray-400 mt-1">{v.creator}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
+                <p className="p-3 font-bold text-xs">{g.name}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-      {/* SHED ROOMS */}
-      <div className="mt-12 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
-          <Music2 className="w-6 h-6 text-[#53fc18]" /> Shed Rooms (Musicians)
-        </h2>
+        {/* MUSIC */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Music2 className="w-6 h-6 text-[#53fc18]" /> Featured Music Artists
+          </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {shedRooms.map((room) => (
-            <div
-              key={room.id}
-              className="rounded-xl border border-white/10 bg-[#0d0d0d] p-4 flex flex-col justify-between h-[140px]"
-            >
-              <div>
-                <p className="font-bold text-sm text-center leading-tight">
-                  {room.title}
-                </p>
-                <p className="text-[11px] text-gray-300 mt-1 text-center">
-                  {room.subtitle}
-                </p>
-              </div>
-              <p className="text-[11px] text-gray-400 text-center mt-2">
-                {room.viewers.toLocaleString()} in room
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {musicCreators.map((m) => (
+              <Link
+                key={m.id}
+                href={`/music`}
+                className="bg-[#111] rounded-xl border border:white/10 overflow-hidden hover:border-[#53fc18]/40 transition"
+              >
+                <img
+                  src={m.thumb}
+                  className="w-full h-32 object-cover"
+                />
+                  <p className="p-3 font-bold text-xs">{m.name}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-      {/* VOCAL ROOMS */}
-      <div className="mt-10 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18] flex items-center gap-2">
-          <Mic2 className="w-6 h-6 text-[#53fc18]" /> Vocal Rooms
-        </h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {vocalRooms.map((room) => (
-            <div
-              key={room.id}
-              className="rounded-xl border border-white/10 bg-[#0d0d0d] p-4 flex flex-col justify-between h-[140px]"
-            >
-              <div>
-                <p className="font-bold text-sm text-center leading-tight">
-                  {room.title}
-                </p>
-                <p className="text-[11px] text-gray-300 mt-1 text-center">
-                  {room.subtitle}
-                </p>
-              </div>
-              <p className="text-[11px] text-gray-400 text-center mt-2">
-                {room.viewers.toLocaleString()} in room
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CREATOR TOOLS */}
-      <div className="mt-12 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">
-          Creator Tools
-        </h2>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-          <Link href="/tools/sermon-prep" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
-            <h3 className="text-lg font-bold">AI Sermons</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Draft, refine, and prep sermons with AI assist.
-            </p>
-          </Link>
-          <Link href="/creator/tools" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
-            <h3 className="text-lg font-bold">Stream Setup</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Go live & manage overlays
-            </p>
-          </Link>
-          <Link href="/dashboard/analytics" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
-            <h3 className="text-lg font-bold">Analytics</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Track performance
-            </p>
-          </Link>
-          <Link href="/monetization" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
-            <h3 className="text-lg font-bold">Monetization</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Earn Seeds & Gifts
-            </p>
-          </Link>
-          <Link href="/library" className="rounded-xl p-5 bg-[#0d0d0d] border border-white/10">
-            <h3 className="text-lg font-bold">Library</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Saved content
-            </p>
-          </Link>
-        </div>
-      </div>
-
-      {/* BREAKOUT ROOMS */}
-      <section className="mt-12 px-6 w-full">
-        <h2 className="text-3xl font-extrabold mb-3 text-[#53fc18]">Breakout Rooms</h2>
-        <div className="flex gap-4 overflow-x-auto pb-3">
-          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border-white/10">
-            <h3 className="font-bold text-lg">🔥 Global Fellowship</h3>
-            <p className="text-xs text-gray-400 mt-1">Open chat for all believers</p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text-[10px] inline-block mt-1">
-              Join Now
-            </span>
-          </Link>
-          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border:white/10">
-            <h3 className="font-bold text-lg">🎮 Gaming &amp; Faith</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Encouragement + gameplay
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text:[10px] inline-block mt-1">
-              Join Now
-            </span>
-          </Link>
-          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border:white/10">
-            <h3 className="font-bold text-lg">🎤 Vocal Breakout</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Riffs • Runs • Harmony
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text:[10px] inline-block mt-1">
-              Join Now
-            </span>
-          </Link>
-          <Link href="/social" className="min-w-[200px] rounded-xl p-4 bg-[#0d0d0d] border border:white/10">
-            <h3 className="font-bold text-lg">🙏 Prayer Room</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Support + encouragement
-            </p>
-            <span className="bg-[#53fc18]/20 px-2 py-0.5 rounded text:[10px] inline-block mt-1">
-              Join Now
-            </span>
-          </Link>
-        </div>
-      </section>
+      </main>
     </div>
   );
 }
