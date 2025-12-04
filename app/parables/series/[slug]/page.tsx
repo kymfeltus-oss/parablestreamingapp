@@ -94,8 +94,9 @@ export default function ParableSeriesPage({ params }: { params: { slug: string }
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {series.episodes.map((ep: any) => (
-              <ParableCard key={ep.id} ep={ep} />
-            ))}
+  <ParableCard key={ep.id} ep={ep} unlocked={true} />
+))}
+
           </div>
         </section>
 

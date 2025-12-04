@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Play } from "lucide-react";
+import { Play, Lock } from "lucide-react";
 
-export default function ParableCard({ ep }: { ep: any }) {
+export default function ParableCard({ ep, unlocked }: { ep: any; unlocked?: boolean }) {
   return (
     <Link
       href={`/parables/${ep.id}`}
@@ -14,14 +14,26 @@ export default function ParableCard({ ep }: { ep: any }) {
         transition-all duration-200 flex-shrink-0
       "
     >
-      {/* Thumbnail */}
       <img
         src={ep.thumbnail || "/placeholder.jpg"}
         className="w-full h-full object-cover"
       />
 
-      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black" />
+
+      {/* Locked overlay */}
+      {!unlocked && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div
+            className="
+              w-14 h-14 rounded-full bg-black/60 border border-white/20
+              flex items-center justify-center shadow-[0_0_15px_black]
+            "
+          >
+            <Lock className="w-6 h-6 text-white" />
+          </div>
+        </div>
+      )}
 
       {/* Episode ribbon */}
       <span className="
@@ -31,24 +43,22 @@ export default function ParableCard({ ep }: { ep: any }) {
         Episode {ep.episodeNumber || 1}
       </span>
 
-      {/* Play button */}
-      <div className="
-        absolute inset-0 flex items-center justify-center
-      ">
-        <div className="
-          w-14 h-14 rounded-full bg-black/50 border border-white/20 
-          flex items-center justify-center hover:scale-110 transition
-        ">
-          <Play className="w-6 h-6 text-white" />
+      {/* Play button (if unlocked) */}
+      {unlocked && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="
+            w-14 h-14 rounded-full bg-black/50 border border-white/20 
+            flex items-center justify-center hover:scale-110 transition
+          ">
+            <Play className="w-6 h-6 text-white" />
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Text section */}
+      {/* Text */}
       <div className="absolute bottom-4 left-4 right-4 text-white">
         <p className="font-bold text-lg leading-tight mb-1">{ep.title}</p>
-        {ep.scriptureRef && (
-          <p className="text-xs text-[#53fc18]">{ep.scriptureRef}</p>
-        )}
+        {ep.scriptureRef && <p className="text-xs text-[#53fc18]">{ep.scriptureRef}</p>}
         <p className="text-[11px] text-gray-400">{ep.seriesTitle}</p>
       </div>
     </Link>
