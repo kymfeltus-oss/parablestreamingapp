@@ -16,7 +16,7 @@ export default function ClientBottomNav() {
   const pathname = usePathname();
 
   const isActive = (route: string) =>
-    pathname === route ? "text-[#53fc18]" : "text-gray-500";
+    pathname === route ? "text-[#53fc18]" : "text-gray-400";
 
   const glow = (route: string) =>
     pathname === route ? "shadow-[0_0_12px_#53fc18]" : "";
@@ -31,10 +31,11 @@ export default function ClientBottomNav() {
         z-50
       "
     >
-
       {/* HOME */}
       <Link href="/feed" className="flex flex-col items-center text-xs">
-        <Home className={`w-6 h-6 mb-1 ${isActive("/feed")} ${glow("/feed")}`} />
+        <Home
+          className={`w-6 h-6 mb-1 ${isActive("/feed")} ${glow("/feed")}`}
+        />
         <span className={isActive("/feed")}>Home</span>
       </Link>
 
@@ -70,7 +71,7 @@ export default function ClientBottomNav() {
         <span className={isActive("/follow")}>Follow</span>
       </Link>
 
-      {/* GAMING (NEW) */}
+      {/* GAMING */}
       <Link href="/gaming" className="flex flex-col items-center text-xs">
         <Gamepad2
           className={`w-6 h-6 mb-1 ${isActive("/gaming")} ${glow("/gaming")}`}
@@ -81,14 +82,10 @@ export default function ClientBottomNav() {
       {/* DASHBOARD */}
       <Link href="/dashboard" className="flex flex-col items-center text-xs">
         <GaugeCircle
-          className={`w-6 h-6 mb-1 ${isActive("/dashboard")} ${glow(
-            "/dashboard"
-          )}`}
+          className={`w-6 h-6 mb-1 ${isActive("/dashboard")} ${glow("/dashboard")}`}
         />
         <span className={isActive("/dashboard")}>Dashboard</span>
       </Link>
-
-      {/* PROFILE REMOVED FROM NAV — lives in Dashboard now */}
     </nav>
   );
 }
