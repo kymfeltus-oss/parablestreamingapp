@@ -1,0 +1,49 @@
+import { NextResponse } from "next/server";
+// Correct relative import:
+import { readMicrodramas, writeMicrodramas } from "../../../../../lib/microdramas";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const {
+      videoId,
+      title,
+      seriesTitle,
+      episodeNumber,
+      description,
+      scriptureRef,
+      tags,
+    } = body;
+
+    if (!videoId || !title) {
+      return NextResponse.json(
+        { ok: false, error: "Missing videoId or title" },
+        { status: 400 }
+      );
+    }
+
+    const episodes = readMicrodramas();
+
+    const newEp = {
+      id: videoId,
+      videoId,
+      title,
+      seriesTitle: seriesTitle || "",
+      episodeNumber: Number(episodeNumber) || 1,
+      description: description || "",
+      scriptureRef: scriptureRef || "",
+      tags: tags ? tags.split(",").map((t: string) => t.trim()) : [],
+      createdAt: new Date().toISOString(),
+    };
+
+    writeMicrodramas([...episodes, newEp]);
+
+    return NextResponse.json({ ok: true, episode: newEp });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json(
+      { ok: false, error: "Failed to save episode" },
+      { status: 500 }
+    );
+  }
+}

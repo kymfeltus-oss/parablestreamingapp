@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
-import { readMicrodramas } from "@/lib/microdramas";
+// Correct relative path for Amplify:
+import { readMicrodramas } from "../../../../../../lib/microdramas";
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   const episodes = readMicrodramas();
-  const ep = episodes.find((e: any) => e.id === params.id || e.videoId === params.id);
+  const ep = episodes.find(
+    (e: any) => e.id === params.id || e.videoId === params.id
+  );
 
   if (!ep) {
     return NextResponse.json(
