@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Users,
-  Film,
+  BookOpen,
   Music2,
   Heart,
+  Gamepad2,
   GaugeCircle,
-  User,
 } from "lucide-react";
 
 export default function ClientBottomNav() {
@@ -40,44 +40,55 @@ export default function ClientBottomNav() {
 
       {/* STREAMERS */}
       <Link href="/stream" className="flex flex-col items-center text-xs">
-        <Users className={`w-6 h-6 mb-1 ${isActive("/stream")} ${glow("/stream")}`} />
+        <Users
+          className={`w-6 h-6 mb-1 ${isActive("/stream")} ${glow("/stream")}`}
+        />
         <span className={isActive("/stream")}>Streamers</span>
       </Link>
 
-      {/* DRAMA */}
-      <Link href="/dramas" className="flex flex-col items-center text-xs">
-        <Film className={`w-6 h-6 mb-1 ${isActive("/dramas")} ${glow("/dramas")}`} />
-        <span className={isActive("/dramas")}>Drama</span>
+      {/* PARABLES */}
+      <Link href="/parables" className="flex flex-col items-center text-xs">
+        <BookOpen
+          className={`w-6 h-6 mb-1 ${isActive("/parables")} ${glow("/parables")}`}
+        />
+        <span className={isActive("/parables")}>Parables</span>
       </Link>
 
       {/* MUSIC */}
       <Link href="/music" className="flex flex-col items-center text-xs">
-        <Music2 className={`w-6 h-6 mb-1 ${isActive("/music")} ${glow("/music")}`} />
+        <Music2
+          className={`w-6 h-6 mb-1 ${isActive("/music")} ${glow("/music")}`}
+        />
         <span className={isActive("/music")}>Music</span>
       </Link>
 
-      {/* FOLLOW (BOOKMARK/SAVED) */}
+      {/* FOLLOW */}
       <Link href="/follow" className="flex flex-col items-center text-xs">
-        <Heart className={`w-6 h-6 mb-1 ${isActive("/follow")} ${glow("/follow")}`} />
+        <Heart
+          className={`w-6 h-6 mb-1 ${isActive("/follow")} ${glow("/follow")}`}
+        />
         <span className={isActive("/follow")}>Follow</span>
       </Link>
 
-      {/* DASHBOARD - MONETIZATION */}
-      <Link
-        href="/monetization"
-        className="flex flex-col items-center text-xs"
-      >
-        <GaugeCircle
-          className={`w-6 h-6 mb-1 ${isActive("/monetization")} ${glow("/monetization")}`}
+      {/* GAMING (NEW) */}
+      <Link href="/gaming" className="flex flex-col items-center text-xs">
+        <Gamepad2
+          className={`w-6 h-6 mb-1 ${isActive("/gaming")} ${glow("/gaming")}`}
         />
-        <span className={isActive("/monetization")}>Dashboard</span>
+        <span className={isActive("/gaming")}>Gaming</span>
       </Link>
 
-      {/* PROFILE */}
-      <Link href="/profile" className="flex flex-col items-center text-xs">
-        <User className={`w-6 h-6 mb-1 ${isActive("/profile")} ${glow("/profile")}`} />
-        <span className={isActive("/profile")}>Profile</span>
+      {/* DASHBOARD */}
+      <Link href="/dashboard" className="flex flex-col items-center text-xs">
+        <GaugeCircle
+          className={`w-6 h-6 mb-1 ${isActive("/dashboard")} ${glow(
+            "/dashboard"
+          )}`}
+        />
+        <span className={isActive("/dashboard")}>Dashboard</span>
       </Link>
+
+      {/* PROFILE REMOVED FROM NAV — lives in Dashboard now */}
     </nav>
   );
 }

@@ -18,16 +18,16 @@ export default function ParablesHub() {
           </div>
           <h1 className="text-4xl font-black mb-3">Parables</h1>
           <p className="text-gray-300 text-sm leading-relaxed">
-            Short-form stories. Big lessons. Parables are vertical mini-dramas designed to teach, inspire, 
-            and move people — in under 2 minutes. 
+            Short-form stories. Big lessons. Parables are vertical mini-dramas designed to teach, inspire,
+            and move people — in under 2 minutes.
           </p>
         </section>
 
         {/* WHAT ARE PARABLES */}
         <section className="bg-[#111] p-6 rounded-2xl border border-white/10 space-y-3">
-          <h2 classclassName="text-xl font-bold">What Are Parables?</h2>
+          <h2 className="text-xl font-bold">What Are Parables?</h2>
           <p className="text-gray-300 text-sm leading-relaxed">
-            Parables are short, vertical video stories created by pastors, influencers, ministries, and 
+            Parables are short, vertical video stories created by pastors, influencers, ministries, and
             storytellers. Each parable teaches a principle through a modern, cinematic microdrama.
           </p>
 
@@ -53,7 +53,7 @@ export default function ParablesHub() {
           <ul className="text-gray-400 text-sm space-y-2 mt-4">
             <li>• Earn from episode unlocks</li>
             <li>• Earn from gifts & reactions</li>
-            <li>• Earn from Shares & Saves</li>
+            <li>• Earn from shares & saves</li>
             <li>• Earn ad-revenue from popular parables</li>
           </ul>
         </section>
@@ -65,8 +65,8 @@ export default function ParablesHub() {
           </h2>
 
           <p className="text-gray-300 text-sm leading-relaxed">
-            Whether you're a pastor, storyteller, actor, musician, or influencer — Parables give you a
-            powerful way to reach people with faith-based stories that matter.
+            Whether you're a pastor, storyteller, actor, musician, or influencer — Parables give you a powerful
+            way to reach people with faith-based stories that matter.
           </p>
 
           <ul className="text-gray-400 text-sm space-y-2 mt-4">
