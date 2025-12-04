@@ -194,7 +194,7 @@ export default function FeedPage() {
             >
               <div className="relative h-36 w-full">
                 {/* FIXED: object-top prevents head cut-off */}
-                <img src={s.thumbnail} className="w-full h-full object-cover object-top" />
+                <img src={s.thumbnail} className="w-full h-full object-contain" />
                 <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black">
                   LIVE
                 </span>
