@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
+import { readStreams, writeStreams } from "@/lib/streams";
 
-export async function POST(request: Request) {
-  const body = await request.json();
+export async function POST(req: Request) {
+  const { creatorId } = await req.json();
 
-  // Expected: { creatorId }
-  console.log("STOP STREAM", body);
+  const streams = readStreams();
+  const updated = streams.filter((s: any) => s.creatorId !== creatorId);
 
-  // TODO: update backend to mark stream as offline.
-  return NextResponse.json({
-    ok: true,
-    status: "offline",
-    received: body,
-  });
+  writeStreams(updated);
+
+  return NextResponse.json({ ok: true });
 }

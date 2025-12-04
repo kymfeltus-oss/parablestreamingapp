@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
+import { readStreams, writeStreams } from "@/lib/streams";
 
-export async function POST(request: Request) {
-  const body = await request.json();
+export async function POST(req: Request) {
+  const { creatorId, title, thumbnail } = await req.json();
 
-  // Expected: { creatorId, title, thumbnail }
-  console.log("START STREAM", body);
+  const streams = readStreams();
 
-  // TODO: call real backend or external streaming service here.
-  // For now, just return success so UI can update.
+  const newStream = {
+    id: Date.now().toString(),
+    creatorId,
+    title,
+    thumbnail,
+    isLive: true,
+    viewers: Math.floor(Math.random() * 1000) + 100,
+    startedAt: new Date().toISOString()
+  };
 
-  return NextResponse.json({
-    ok: true,
-    status: "live",
-    received: body,
-  });
+  writeStreams([...streams, newStream]);
+
+  return NextResponse.json({ ok: true, stream: newStream });
 }
