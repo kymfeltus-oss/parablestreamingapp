@@ -1,23 +1,70 @@
 "use client";
 
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabaseClient";
 import { useParams } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Music, Radio } from "lucide-react";
+
+type Artist = {
+  id: string;
+  name: string;
+  genre: string;
+  avatarUrl: string;
+  bannerUrl: string;
+  bio?: string;
+  isLive: boolean;
+  slug: string;
+};
 
 export default function ArtistPage() {
   const params = useParams();
-  const slug = params.slug;
+  const slug = params.slug as string;
 
-  // FIX: Explicit type annotation to satisfy Amplify TypeScript
-  const artistList: any[] = []; // Replace with Supabase fetch later
+  const [artist, setArtist] = useState<Artist | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const artist = artistList.find((a: any) => a.slug === slug);
+  useEffect(() => {
+    loadArtist();
+  }, []);
+
+  async function loadArtist() {
+    const { data, error } = await supabase
+      .from("artists")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (!error && data) {
+      setArtist({
+        id: data.id,
+        name: data.name,
+        genre: data.genre,
+        avatarUrl: data.avatar_url,
+        bannerUrl: data.banner_url,
+        bio: data.bio,
+        isLive: data.is_live,
+        slug: data.slug,
+      });
+    }
+
+    setLoading(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white p-10">
+        <Navbar />
+        <p className="text-gray-400">Loading artist...</p>
+      </div>
+    );
+  }
 
   if (!artist) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-gray-400">Artist not found.</p>
+        <Navbar />
+        <p className="text-gray-400 text-sm mt-10">Artist not found.</p>
       </div>
     );
   }
@@ -26,6 +73,7 @@ export default function ArtistPage() {
     <div className="min-h-screen bg-black text-white pb-24">
       <Navbar />
 
+      {/* HERO */}
       <div className="relative h-72 md:h-96 w-full border-b border-white/10 overflow-hidden">
         <img
           src={artist.bannerUrl}
@@ -36,10 +84,7 @@ export default function ArtistPage() {
         <div className="absolute bottom-6 left-6 flex items-center gap-6">
           <img
             src={artist.avatarUrl}
-            className="
-              w-28 h-28 md:w-32 md:h-32 rounded-full object-cover
-              border-4 border-[#53fc18] shadow-[0_0_20px_#53fc18]
-            "
+            className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-[#53fc18] shadow-[0_0_20px_#53fc18]"
           />
 
           <div>
@@ -57,18 +102,19 @@ export default function ArtistPage() {
         </div>
       </div>
 
+      {/* ABOUT */}
       <main className="max-w-6xl mx-auto px-6 space-y-16 mt-10">
 
         <section className="space-y-4">
           <h2 className="text-xl font-bold">About</h2>
 
-          <div className="parable-card parable-card-hover leading-relaxed text-sm text-gray-300 hover:shadow-[0_0_20px_#53fc18] transition">
-            {artist.bio ||
-              "This artist brings powerful faith-driven performances, worship anthems, and gospel excellence to the Parable community."}
+          <div className="parable-card p-5 text-sm text-gray-300 leading-relaxed border border-white/10 rounded-xl bg-[#111]">
+            {artist.bio || "This artist shares powerful performances and worship."}
           </div>
         </section>
 
-        <section className="space-y-6">
+        {/* FEATURED MUSIC */}
+        <section className="space-y-6 pb-16">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Music className="w-5 h-5 text-[#53fc18]" /> Featured Music
           </h2>
@@ -77,9 +123,9 @@ export default function ArtistPage() {
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="parable-card parable-card-hover hover:shadow-[0_0_15px_#53fc18] transition"
+                className="parable-card hover:shadow-[0_0_15px_#53fc18] p-3 rounded-xl border border-white/10"
               >
-                <div className="aspect-square bg-black rounded-xl border border-white/10 overflow-hidden"></div>
+                <div className="aspect-square bg-black rounded-xl border border-white/10"></div>
                 <p className="mt-2 font-bold text-sm">Track {i}</p>
                 <p className="text-xs text-gray-400">Single</p>
               </div>
