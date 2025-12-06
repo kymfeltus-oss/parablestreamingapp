@@ -1,53 +1,142 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { events } from "@/lib/events";
-import { Calendar, MapPin, Ticket } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+import { Calendar, MapPin, Ticket, Music, Mic2, Sparkles } from "lucide-react";
+
+type EventItem = {
+  id: string;
+  artist: string;
+  title: string;
+  date: string;
+  venue: string;
+  banner_url: string;
+  url: string;
+};
 
 export default function EventsPage() {
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const categories = [
+    { name: "Concerts", icon: Music },
+    { name: "Worship Nights", icon: Mic2 },
+    { name: "Conferences", icon: Sparkles },
+    { name: "Live Streams", icon: Calendar },
+  ];
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  async function loadEvents() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .order("date", { ascending: true });
+
+    if (!error && data) setEvents(data as EventItem[]);
+    setLoading(false);
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen bg-black text-white pb-24">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-        <h1 className="text-3xl font-black mb-6">Upcoming Events</h1>
+      <main className="max-w-7xl mx-auto px-6 pt-24 space-y-16">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {events.map((ev) => (
-            <Link
-              key={ev.id}
-              href={`/events/${ev.id}`}
-              className="bg-[#111] border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition"
-            >
-              <div className="relative h-48 w-full">
-                <img
-                  src={ev.imageUrl}
-                  className="w-full h-full object-cover opacity-80"
-                />
-              </div>
+        {/* HEADER */}
+        <section>
+          <h1 className="parable-heading">Events</h1>
+          <p className="parable-subtext">
+            Concerts, worship nights, conferences, and gospel events happening around you.
+          </p>
+        </section>
 
-              <div className="p-4">
-                <h3 className="font-bold text-lg">{ev.title}</h3>
-                <p className="text-sm text-gray-400">{ev.artist}</p>
+        {/* CATEGORY FILTERS */}
+        <section>
+          <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
 
-                <div className="flex items-center gap-2 text-[12px] text-gray-400 mt-2">
-                  <Calendar className="w-3 h-3" />
-                  {ev.date}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            {categories.map((c, i) => {
+              const Icon = c.icon;
+              return (
+                <div
+                  key={i}
+                  className="
+                    parable-card parable-card-hover flex flex-col items-center justify-center gap-3 py-10
+                    hover:shadow-[0_0_18px_#53fc18] transition
+                  "
+                >
+                  <Icon className="w-8 h-8 text-[#53fc18]" />
+                  <p className="font-bold text-sm">{c.name}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* UPCOMING EVENTS */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-bold">🔥 Upcoming Events</h2>
+
+          {loading && <p className="text-xs text-gray-500">Loading events...</p>}
+
+          {!loading && events.length === 0 && (
+            <p className="text-xs text-gray-500">No events available.</p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {events.map((ev) => (
+              <Link
+                key={ev.id}
+                href={ev.url}
+                className="
+                  parable-card parable-card-hover overflow-hidden
+                  hover:shadow-[0_0_20px_#53fc18] transition block
+                "
+              >
+                {/* Banner */}
+                <div className="aspect-video rounded-xl overflow-hidden border border-white/10">
+                  <img
+                    src={ev.banner_url}
+                    className="w-full h-full object-cover opacity-90 hover:scale-110 transition duration-500"
+                  />
                 </div>
 
-                <div className="flex items-center gap-2 text-[12px] text-gray-400">
-                  <MapPin className="w-3 h-3" />
-                  {ev.city} • {ev.venue}
+                <div className="mt-3 space-y-1">
+                  <p className="text-[#53fc18] text-xs font-bold uppercase">
+                    {ev.artist}
+                  </p>
+
+                  <p className="font-bold text-sm hover:text-[#53fc18] transition">
+                    {ev.title}
+                  </p>
+
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Calendar className="w-3 h-3" />
+                    {ev.date}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <MapPin className="w-3 h-3" />
+                    {ev.venue}
+                  </div>
                 </div>
 
-                <button className="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded">
-                  View Details
+                <button className="mt-4 w-full bg-violet-600 hover:bg-violet-700 py-2 rounded-lg text-xs font-bold shadow-[0_0_12px_#7c3aed]">
+                  <span className="inline-flex items-center gap-2 justify-center">
+                    <Ticket className="w-3 h-3" /> Get Tickets
+                  </span>
                 </button>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );

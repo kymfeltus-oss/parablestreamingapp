@@ -2,6 +2,9 @@
 
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
 import {
   Play,
   Radio,
@@ -17,6 +20,25 @@ import {
 } from "lucide-react";
 
 export default function StreamHub() {
+  const [streamers, setStreamers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStreamers();
+  }, []);
+
+  async function loadStreamers() {
+    const { data, error } = await supabase
+      .from("streamers")
+      .select("*")
+      .order("viewers", { ascending: false });
+
+    if (!error && data) {
+      setStreamers(data);
+    }
+    setLoading(false);
+  }
+
   return (
     <div className="min-h-screen bg-black text-white font-sans pb-24">
       <Navbar />
@@ -24,7 +46,7 @@ export default function StreamHub() {
       <main className="max-w-7xl mx-auto px-6 py-16 space-y-20">
 
         {/* ======================================================
-            HEADER + SUBTITLE
+            HEADER 
         ======================================================= */}
         <section className="text-center space-y-4 max-w-3xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter drop-shadow-[0_0_25px_#53fc18]">
@@ -39,15 +61,66 @@ export default function StreamHub() {
           </p>
         </section>
 
+
         {/* ======================================================
-            TWO-COLUMN MAIN GRID
+            DYNAMIC FEATURED STREAMERS SECTION (NEW)
+        ======================================================= */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-bold">🔥 Live & Featured Creators</h2>
+
+          {loading && (
+            <p className="text-gray-400 text-sm">Loading streamers...</p>
+          )}
+
+          {!loading && streamers.length === 0 && (
+            <p className="text-gray-500 text-sm">
+              No live or featured creators yet.
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {streamers.map((s) => (
+              <div
+                key={s.id}
+                className="parable-card parable-card-hover hover:shadow-[0_0_20px_#53fc18] transition"
+              >
+                {/* Thumbnail */}
+                <div className="aspect-video rounded-xl border border-white/10 overflow-hidden bg-black">
+                  <img
+                    src={s.thumbnail_url}
+                    className="w-full h-full object-cover opacity-90 hover:scale-110 transition duration-500"
+                  />
+                </div>
+
+                {/* Name */}
+                <p className="font-bold mt-3 text-sm">{s.name}</p>
+
+                {/* Live indicator */}
+                <p className="text-xs flex items-center gap-2 text-gray-400 mt-1">
+                  <Radio
+                    className={`w-3 h-3 ${
+                      s.is_live ? "text-[#53fc18]" : "text-gray-600"
+                    }`}
+                  />
+                  {s.is_live ? `${s.viewers} watching` : "Offline"}
+                </p>
+
+                {/* Category */}
+                <p className="text-[11px] text-gray-500">{s.category}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
+        {/* ======================================================
+            TWO-COLUMN MAIN GRID 
+            (YOUR ORIGINAL UI — FULLY RETAINED)
         ======================================================= */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
           {/* LEFT COLUMN — GO LIVE */}
           <div className="space-y-10">
-
-            {/* SECTION TITLE */}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-red-600 rounded-lg shadow-[0_0_12px_rgba(255,0,0,0.4)]">
                 <Radio className="w-6 h-6 text-white" />
@@ -112,7 +185,6 @@ export default function StreamHub() {
           {/* RIGHT COLUMN — AI SANCTUARY */}
           <div className="space-y-10">
 
-            {/* SECTION TITLE */}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-violet-600 rounded-lg shadow-[0_0_12px_#7c3aed]">
                 <Sparkles className="w-6 h-6 text-white" />
@@ -180,12 +252,11 @@ export default function StreamHub() {
           </div>
         </section>
 
+
         {/* ======================================================
             MUSIC SESSIONS
         ======================================================= */}
         <section className="space-y-10">
-
-          {/* TITLE */}
           <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-600 rounded-lg shadow-[0_0_12px_rgba(255,128,0,0.4)]">
               <Music className="w-6 h-6 text-white" />
@@ -195,7 +266,6 @@ export default function StreamHub() {
             </h2>
           </div>
 
-          {/* MAIN HERO BOX */}
           <Link
             href="/music/shed"
             className="
@@ -206,7 +276,6 @@ export default function StreamHub() {
           >
             <div className="absolute inset-0 bg-[url('/pexels-photo-7586656.webp')] bg-cover bg-center opacity-40 group-hover:scale-105 transition duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-
             <div className="absolute top-6 left-6 bg-orange-600 text-white text-[10px] font-black px-3 py-1 rounded uppercase tracking-wider">
               Shed Sessions
             </div>
@@ -221,7 +290,6 @@ export default function StreamHub() {
             </div>
           </Link>
 
-          {/* START NEW SHED ROOM */}
           <Link
             href="/music/shed/start"
             className="
@@ -231,26 +299,22 @@ export default function StreamHub() {
             Start New Shed Room
           </Link>
 
-          {/* MUSIC QUICK ACTIONS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
             <button className="bg-[#111] border border-white/10 p-6 rounded-2xl hover:bg-[#222] hover:shadow-[0_0_15px_rgba(255,128,0,0.3)] transition text-left group">
               <Headphones className="w-8 h-8 text-orange-400 mb-4 group-hover:scale-110 transition" />
               <h4 className="font-bold text-lg">Live Sheds</h4>
               <p className="text-xs text-gray-500 mt-1">Musicians live</p>
             </button>
-
             <button className="bg-[#111] border border-white/10 p-6 rounded-2xl hover:bg-[#222] hover:shadow-[0_0_15px_rgba(255,0,0,0.3)] transition text-left group">
               <Video className="w-8 h-8 text-red-400 mb-4 group-hover:scale-110 transition" />
               <h4 className="font-bold text-lg">Loop Packs</h4>
               <p className="text-xs text-gray-500 mt-1">CDub & Whoop</p>
             </button>
-
             <button className="bg-[#111] border border-white/10 p-6 rounded-2xl hover:bg-[#222] hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition text-left group">
               <Mic2 className="w-8 h-8 text-blue-400 mb-4 group-hover:scale-110 transition" />
               <h4 className="font-bold text-lg">Vocals</h4>
               <p className="text-xs text-gray-500 mt-1">Runs & riffs</p>
             </button>
-
             <button className="bg-[#111] border border-white/10 p-6 rounded-2xl hover:bg-[#222] hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition text-left group">
               <Scissors className="w-8 h-8 text-pink-400 mb-4 group-hover:scale-110 transition" />
               <h4 className="font-bold text-lg">Stitch</h4>
