@@ -1,14 +1,16 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { artists } from "@/lib/artists";
 import Navbar from "@/components/Navbar";
-import { Mic2, Music, Video, Calendar } from "lucide-react";
+import { useParams } from "next/navigation";
+import { artists } from "@/lib/artists";
+import Link from "next/link";
+import { Music, Calendar, MapPin, Heart, Radio } from "lucide-react";
 
-export default function ArtistProfilePage() {
-  const { slug } = useParams();
+export default function ArtistPage() {
+  const params = useParams();
+  const slug = params.slug;
 
+  // find the artist
   const artist = artists.find((a) => a.slug === slug);
 
   if (!artist) {
@@ -20,118 +22,123 @@ export default function ArtistProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white">
+    <div className="min-h-screen bg-black text-white pb-24">
       <Navbar />
 
-      {/* BANNER */}
-      <div className="relative w-full h-64 md:h-80 overflow-hidden">
+      {/* HERO BANNER */}
+      <div className="relative h-72 md:h-96 w-full border-b border-white/10 overflow-hidden">
         <img
-          src={artist.bannerUrl || "/default_banner.jpg"}
+          src={artist.bannerUrl || "/default-banner.jpg"}
           className="w-full h-full object-cover opacity-80"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
-        
-        {/* AVATAR + NAME */}
-        <div className="flex items-center gap-6 mb-6">
+        {/* ARTIST INFO OVERLAY */}
+        <div className="absolute bottom-6 left-6 flex items-center gap-6">
           <img
             src={artist.avatarUrl}
-            className="w-28 h-28 rounded-full border-4 border-black object-cover"
+            className="
+              w-28 h-28 md:w-32 md:h-32 rounded-full object-cover
+              border-4 border-[#53fc18] shadow-[0_0_20px_#53fc18]
+            "
           />
+
           <div>
-            <h1 className="text-4xl font-black">{artist.name}</h1>
-            <p className="text-gray-400 text-sm uppercase">{artist.genre}</p>
+            <h1 className="text-3xl md:text-4xl font-black">{artist.name}</h1>
+            <p className="text-sm text-gray-300 uppercase tracking-wide">
+              {artist.genre}
+            </p>
+
+            {artist.isLive && (
+              <div className="mt-2 inline-flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                <Radio className="w-3 h-3" /> LIVE NOW
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* BIO */}
-        {artist.bio && (
-          <p className="text-gray-300 max-w-2xl mb-10 leading-relaxed">
-            {artist.bio}
-          </p>
-        )}
+      <main className="max-w-6xl mx-auto px-6 space-y-16 mt-10">
 
-        {/* LIVE STATUS */}
-        {artist.isLive && (
+        {/* ACTION BUTTONS */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <button className="px-6 py-2 bg-violet-600 hover:bg-violet-700 rounded-full font-bold text-sm shadow-[0_0_12px_#7c3aed]">
+            Follow Artist
+          </button>
+
+          <button className="px-6 py-2 bg-[#53fc18] text-black rounded-full font-bold text-sm hover:brightness-110 shadow-[0_0_12px_#53fc18]">
+            Support
+          </button>
+
           <Link
-            href={`/live/${artist.slug}`}
-            className="block bg-red-600 hover:bg-red-500 text-white px-6 py-4 rounded-xl font-bold text-center mb-10"
+            href="/events"
+            className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full font-bold text-sm"
           >
-            🔴 Watch {artist.name} Live
+            View Events
           </Link>
-        )}
-
-        {/* NAVIGATION SECTIONS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
-
-          {/* MUSIC */}
-          <Link
-            href="#music"
-            className="bg-[#161616] border border-white/10 p-6 rounded-2xl hover:border-blue-500/50 transition"
-          >
-            <Music className="w-7 h-7 mb-3 text-blue-400" />
-            <h3 className="font-bold text-xl mb-1">Music & Sessions</h3>
-            <p className="text-gray-400 text-sm">Watch recorded sets & live music rooms</p>
-          </Link>
-
-          {/* VIDEOS */}
-          <Link
-            href="#videos"
-            className="bg-[#161616] border border-white/10 p-6 rounded-2xl hover:border-purple-500/50 transition"
-          >
-            <Video className="w-7 h-7 mb-3 text-purple-400" />
-            <h3 className="font-bold text-xl mb-1">Videos & Clips</h3>
-            <p className="text-gray-400 text-sm">Behind-the-scenes & worship moments</p>
-          </Link>
-
-          {/* EVENTS */}
-          <Link
-            href="#events"
-            className="bg-[#161616] border border-white/10 p-6 rounded-2xl hover:border-green-500/50 transition"
-          >
-            <Calendar className="w-7 h-7 mb-3 text-green-400" />
-            <h3 className="font-bold text-xl mb-1">Upcoming Events</h3>
-            <p className="text-gray-400 text-sm">Concerts & worship nights</p>
-          </Link>
-
         </div>
 
-        {/* MUSIC SECTION */}
-        <section id="music" className="mb-20">
-          <h2 className="text-3xl font-black mb-4 flex items-center gap-2">
-            <Mic2 className="w-6 h-6 text-blue-400" /> Music Sessions
-          </h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Streams, rehearsals, shed rooms & worship sessions
-          </p>
+        {/* ABOUT ARTIST */}
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold">About</h2>
 
-          <div className="bg-[#151515] border border-white/10 p-6 rounded-2xl text-gray-400">
-            Coming soon…
+          <div className="parable-card parable-card-hover hover:shadow-[0_0_20px_#53fc18] leading-relaxed text-sm text-gray-300">
+            {artist.bio ||
+              "This artist brings powerful faith-driven performances, worship anthems, and gospel excellence to the Parable community."}
           </div>
         </section>
 
-        {/* VIDEOS SECTION */}
-        <section id="videos" className="mb-20">
-          <h2 className="text-3xl font-black mb-4 flex items-center gap-2">
-            <Video className="w-6 h-6 text-purple-400" /> Videos & Clips
+        {/* FEATURED MUSIC / VIDEOS */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Music className="w-5 h-5 text-[#53fc18]" /> Featured Music
           </h2>
-          <div className="bg-[#151515] border border-white/10 p-6 rounded-2xl text-gray-400">
-            Coming soon…
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="parable-card parable-card-hover hover:shadow-[0_0_15px_#53fc18]"
+              >
+                <div className="aspect-square bg-black rounded-xl border border-white/10 overflow-hidden"></div>
+                <p className="mt-2 font-bold text-sm">Track {i}</p>
+                <p className="text-xs text-gray-400">Single</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* EVENTS SECTION */}
-        <section id="events" className="mb-20">
-          <h2 className="text-3xl font-black mb-4 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-green-400" /> Upcoming Events
-          </h2>
-          <div className="bg-[#151515] border border-white/10 p-6 rounded-2xl text-gray-400">
-            Coming soon…
-          </div>
-        </section>
+        {/* UPCOMING EVENTS */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-bold">Upcoming Events</h2>
 
+          {artist.events && artist.events.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {artist.events.map((ev, idx) => (
+                <div
+                  key={idx}
+                  className="parable-card parable-card-hover hover:shadow-[0_0_18px_#53fc18]"
+                >
+                  <p className="text-[#53fc18] text-xs font-bold uppercase mb-1">
+                    {ev.title}
+                  </p>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
+                    <Calendar className="w-4 h-4" />
+                    {ev.date}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <MapPin className="w-4 h-4" />
+                    {ev.venue}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No upcoming events.</p>
+          )}
+        </section>
       </main>
     </div>
   );

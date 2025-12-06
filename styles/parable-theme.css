@@ -1,0 +1,41 @@
+/* Parable Global Theme */
+
+/* Global backgrounds */
+.parable-bg {
+  @apply bg-black text-white;
+}
+
+/* Standard card */
+.parable-card {
+  @apply bg-[#111] border border-white/10 rounded-2xl p-5 transition;
+}
+
+/* Hover glow for cards */
+.parable-card-hover {
+  @apply hover:border-[#53fc18]/60;
+}
+
+/* Main button style (violet) */
+.parable-button {
+  @apply bg-violet-600 hover:bg-violet-700 text-sm font-bold rounded-lg py-3;
+}
+
+/* Green neon text */
+.parable-green {
+  color: #53fc18;
+}
+
+/* Green neon background use for badges */
+.parable-green-bg {
+  background-color: #53fc18;
+}
+
+/* Heading style */
+.parable-heading {
+  @apply text-3xl font-extrabold;
+}
+
+/* Subtext style */
+.parable-subtext {
+  @apply text-xs text-gray-400;
+}

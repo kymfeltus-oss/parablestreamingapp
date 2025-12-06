@@ -117,3 +117,19 @@ body {
     0 0 10px rgba(83, 252, 24, 0.6),
     0 0 25px rgba(83, 252, 24, 0.3);
 }
+@import "../styles/parable-theme.css";
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUpFade {
+  animation: slideUpFade 0.9s ease forwards;
+}
+
