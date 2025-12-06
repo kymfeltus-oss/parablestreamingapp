@@ -4,53 +4,59 @@ import { useEffect, useRef } from "react";
 
 export default function ParableParticles() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const particles: { x: number; y: number; size: number; dx: number; dy: number }[] = [];
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
-    let animationFrame: number;
+    if (!canvas) return; // TS FIX: ensure canvas exists before using
 
-    const particles = Array.from({ length: 40 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 3 + 1,
-      dx: (Math.random() - 0.5) * 0.4,
-      dy: (Math.random() - 0.5) * 0.4,
-    }));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
     function resize() {
+      if (!canvas) return; // TS FIX
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight * 0.6;
     }
 
+    resize();
+    window.addEventListener("resize", resize);
+
+    // create particles
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight * 0.6,
+        size: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5,
+      });
+    }
+
     function animate() {
+      if (!ctx || !canvas) return; // TS FIX
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#53fc18";
 
       particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#53fc18";
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = "#53fc18";
-        ctx.fill();
-
         p.x += p.dx;
         p.y += p.dy;
 
         if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
       });
 
-      animationFrame = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     }
 
-    resize();
     animate();
-    window.addEventListener("resize", resize);
 
     return () => {
-      cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
     };
   }, []);
@@ -58,7 +64,7 @@ export default function ParableParticles() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full opacity-[0.28] pointer-events-none"
-    ></canvas>
+      className="pointer-events-none fixed top-0 left-0 z-0 opacity-20"
+    />
   );
 }
