@@ -5,16 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Music, Radio } from "lucide-react";
 
-// Updated Artist type signature assumptions:
-// bannerUrl, avatarUrl, isLive — camelCase
-
 export default function ArtistPage() {
   const params = useParams();
   const slug = params.slug;
 
-  // TEMP FIX: Artists are loaded from Supabase or imported earlier
-  // You MUST update this import to match your actual data source.
-  const artistList = []; // Replace with real fetch logic later
+  // FIX: Explicit type annotation to satisfy Amplify TypeScript
+  const artistList: any[] = []; // Replace with Supabase fetch later
 
   const artist = artistList.find((a: any) => a.slug === slug);
 
