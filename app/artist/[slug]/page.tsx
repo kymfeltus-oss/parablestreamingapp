@@ -2,16 +2,21 @@
 
 import Navbar from "@/components/Navbar";
 import { useParams } from "next/navigation";
-import { artists } from "@/lib/artists";
 import Link from "next/link";
-import { Music, Calendar, MapPin, Heart, Radio } from "lucide-react";
+import { Music, Radio } from "lucide-react";
+
+// Updated Artist type signature assumptions:
+// bannerUrl, avatarUrl, isLive — camelCase
 
 export default function ArtistPage() {
   const params = useParams();
   const slug = params.slug;
 
-  // find the artist
-  const artist = artists.find((a) => a.slug === slug);
+  // TEMP FIX: Artists are loaded from Supabase or imported earlier
+  // You MUST update this import to match your actual data source.
+  const artistList = []; // Replace with real fetch logic later
+
+  const artist = artistList.find((a: any) => a.slug === slug);
 
   if (!artist) {
     return (
@@ -25,18 +30,16 @@ export default function ArtistPage() {
     <div className="min-h-screen bg-black text-white pb-24">
       <Navbar />
 
-      {/* HERO BANNER */}
       <div className="relative h-72 md:h-96 w-full border-b border-white/10 overflow-hidden">
         <img
-          src={artist.banner_url}
+          src={artist.bannerUrl}
           className="w-full h-full object-cover opacity-80"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
 
-        {/* ARTIST INFO */}
         <div className="absolute bottom-6 left-6 flex items-center gap-6">
           <img
-            src={artist.avatar_url}
+            src={artist.avatarUrl}
             className="
               w-28 h-28 md:w-32 md:h-32 rounded-full object-cover
               border-4 border-[#53fc18] shadow-[0_0_20px_#53fc18]
@@ -49,7 +52,7 @@ export default function ArtistPage() {
               {artist.genre}
             </p>
 
-            {artist.is_live && (
+            {artist.isLive && (
               <div className="mt-2 inline-flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                 <Radio className="w-3 h-3" /> LIVE NOW
               </div>
@@ -60,7 +63,6 @@ export default function ArtistPage() {
 
       <main className="max-w-6xl mx-auto px-6 space-y-16 mt-10">
 
-        {/* ABOUT */}
         <section className="space-y-4">
           <h2 className="text-xl font-bold">About</h2>
 
@@ -70,7 +72,6 @@ export default function ArtistPage() {
           </div>
         </section>
 
-        {/* FEATURED MUSIC */}
         <section className="space-y-6">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Music className="w-5 h-5 text-[#53fc18]" /> Featured Music
