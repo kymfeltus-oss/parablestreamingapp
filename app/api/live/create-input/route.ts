@@ -5,23 +5,22 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const cookieStore = cookies();
   
-  // FIX: Pass the URL, Anon Key, and then the cookies options as separate arguments
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name) {
+        get(name: string) { // FIX: Explicitly type 'name' as string
           return cookieStore.get(name)?.value;
         },
-        set(name, value, options) {
+        set(name: string, value: string, options) { // FIX: Explicitly type 'name' and 'value' as string
           try {
               cookieStore.set({ name, value, ...options });
           } catch (error) {
               // Handle cases where cookies might not be writable (e.g. static export)
           }
         },
-        remove(name, options) {
+        remove(name: string, options) { // FIX: Explicitly type 'name' as string
            try {
               cookieStore.set({ name, value: "", ...options });
           } catch (error) {
