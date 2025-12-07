@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Import the function, not a default object
+import { createClient } from "@/lib/supabaseClient"; 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  // FIX: Initialize the client here
+  const supabase = createClient(); 
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,7 +37,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    // STRATEGY: Send to Onboarding to capture data, not Dashboard
+    router.push("/onboarding"); 
   }
 
   return (
