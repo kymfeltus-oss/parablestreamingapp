@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient"; // <--- CHANGED THIS IMPORT
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Music, Radio } from "lucide-react";
@@ -18,6 +18,7 @@ type Artist = {
 };
 
 export default function ArtistPage() {
+  const supabase = createClient(); // <--- ADDED THIS LINE
   const params = useParams();
   const slug = params.slug as string;
 
