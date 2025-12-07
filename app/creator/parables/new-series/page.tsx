@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient"; 
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 
 export default function NewSeriesPage() {
   const router = useRouter();
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient(); 
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
