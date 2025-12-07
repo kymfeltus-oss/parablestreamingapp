@@ -4,9 +4,13 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { PlusCircle, Gauge, Coins, BookOpen, Radio, Video } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient";
 
 export default function ParablesDashboard() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+
   const [profileId, setProfileId] = useState<string | null>(null);
   const [parables, setParables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
