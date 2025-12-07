@@ -1,11 +1,132 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-};
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================= */
+/*         GLOBAL RESET          */
+/* ============================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000000;
+  color: white;
+  overflow-x: hidden;
+  font-family: system-ui, sans-serif;
+}
+
+/* ============================= */
+/*       SCROLLBAR NEON          */
+/* ============================= */
+
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #53fc18;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #111;
+}
+
+/* ============================= */
+/*       NEON THEME UTILITIES    */
+/* ============================= */
+
+.neon-text {
+  color: #53fc18;
+  text-shadow:
+    0 0 5px #53fc18,
+    0 0 10px #53fc18;
+}
+
+.neon-border {
+  border: 2px solid #53fc18;
+  box-shadow:
+    0 0 5px #53fc18,
+    0 0 15px #53fc18;
+}
+
+.neon-button {
+  background: #53fc18;
+  color: black;
+  font-weight: bold;
+  padding: 12px 22px;
+  border-radius: 10px;
+  box-shadow:
+    0 0 10px #53fc18,
+    0 0 20px #53fc18;
+  transition: 0.25s ease;
+}
+.neon-button:hover {
+  box-shadow:
+    0 0 15px #53fc18,
+    0 0 30px #53fc18;
+}
+
+.glass {
+  background: rgba(20, 20, 20, 0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(83, 252, 24, 0.25);
+  box-shadow: 0 0 10px rgba(83, 252, 24, 0.3);
+}
+
+.neon-card {
+  background: #111;
+  border: 1px solid rgba(83, 252, 24, 0.2);
+  border-radius: 15px;
+  box-shadow:
+    0 0 8px rgba(83, 252, 24, 0.2),
+    0 0 15px rgba(83, 252, 24, 0.15);
+  transition: 0.25s ease;
+}
+.neon-card:hover {
+  transform: scale(1.03);
+  box-shadow:
+    0 0 12px rgba(83, 252, 24, 0.4),
+    0 0 24px rgba(83, 252, 24, 0.3);
+}
+
+.neon-tag {
+  background: #1d1d1d;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(83, 252, 24, 0.3);
+  font-size: 10px;
+  color: #53fc18;
+  text-shadow:
+    0 0 4px #53fc18;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: #53fc18;
+  text-shadow:
+    0 0 10px rgba(83, 252, 24, 0.6),
+    0 0 25px rgba(83, 252, 24, 0.3);
+}
+
+@import "../styles/parable-theme.css";
+
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUpFade {
+  animation: slideUpFade 0.9s ease forwards;
+}
