@@ -1,8 +1,10 @@
-"use client";
+// app/dashboard/page.tsx
+'use client';
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // <-- NEW: Import useRouter for redirects
 import {
   User,
   Coins,
@@ -13,12 +15,13 @@ import {
   Gamepad2,
   Clock,
   Heart,
+  LogOut, // <-- NEW: Import LogOut icon
 } from "lucide-react";
-// FIX: Change import from named export 'supabase' to named export 'createClient'
-import { createClient } from "@/lib/supabaseClient";
+// FIX: Ensure correct path for the client utility
+import { createClient } from "@/utils/supabase/client"; 
 
 export default function DashboardPage() {
-  // FIX: Instantiate the client by calling the createClient function
+  const router = useRouter(); // <-- Initialize router
   const supabase = createClient();
   
   const [profile, setProfile] = useState<any>(null);
@@ -30,6 +33,8 @@ export default function DashboardPage() {
 
   async function loadProfile() {
     const { data: userData } = await supabase.auth.getUser();
+    
+    // Check 1: User is NOT authenticated (middleware should catch this, but this is a fail-safe)
     if (!userData.user) {
       setLoading(false);
       return;
@@ -41,8 +46,22 @@ export default function DashboardPage() {
       .eq("id", userData.user.id)
       .single();
 
+    // Check 2: Profile row is MISSING (The user has logged in but hasn't run the /profile-setup Server Action)
+    // PGRST116 is the standard PostgREST error code for 'no rows found for a single query'.
+    if (error && error.code === 'PGRST116') {
+      // Redirect to the mandatory profile setup page
+      router.push('/profile-setup');
+      return; 
+    }
+    
     if (!error) setProfile(data);
     setLoading(false);
+  }
+
+  // NEW: Logout handler
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push('/login'); // Redirect to login page after signing out
   }
 
   if (loading) {
@@ -67,11 +86,21 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="text-right">
-            <p className="text-[11px] text-gray-400">Seeds Balance</p>
-            <p className="text-xl font-black text-[#53fc18]">
-              {profile?.seeds ?? 0}
-            </p>
+          <div className="text-right flex items-center gap-4">
+            <div>
+                <p className="text-[11px] text-gray-400">Seeds Balance</p>
+                <p className="text-xl font-black text-[#53fc18]">
+                {profile?.seeds ?? 0}
+                </p>
+            </div>
+            {/* NEW: LOGOUT BUTTON */}
+            <button 
+                onClick={handleLogout} 
+                className="p-2 border border-red-500/50 rounded-lg text-red-500 hover:bg-red-500/10 transition"
+                title="Log Out"
+            >
+                <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </section>
 
@@ -221,7 +250,6 @@ export default function DashboardPage() {
               </p>
             </Link>
             
-             {/* Settings Link - completing the truncated script */}
             <Link
               href="/dashboard/settings"
               className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
