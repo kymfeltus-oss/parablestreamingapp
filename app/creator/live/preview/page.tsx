@@ -1,156 +1,178 @@
 "use client";
 
-import { useEffect, useState } from "react";
-// FIX: Change import from named export 'supabase' to named export 'createClient'
+// FIX: Removed the extra '=' sign here
+import { useState, useEffect } from "react"; 
+
+// FIX: Use a named import for the createClient function
 import { createClient } from "@/lib/supabaseClient"; 
 import Navbar from "@/components/Navbar";
-import { Radio, Video } from "lucide-react";
+import { Upload, Radio } from "lucide-react";
+import { useRouter } from "next/navigation"; // Added router import back in
 
-export default function LivePreviewPage() {
-  // FIX: Instantiate the client by calling the createClient function inside the component
-  const supabase = createClient(); 
+export default function GoLiveSetupPage() {
+  const router = useRouter(); // Initialize router
 
-  const [stream, setStream] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Sermons");
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [creatorId, setCreatorId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const categories = ["Sermons", "Worship", "Music", "Gaming", "Encouragement", "Live Podcast"];
 
   useEffect(() => {
-    loadCreatorAndStream();
+    loadProfile();
   }, []);
 
-  async function loadCreatorAndStream() {
+  async function loadProfile() {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
     setCreatorId(userData.user.id);
-
-    // Fetch most recent stream configuration
-    const { data, error } = await supabase
-      .from("live_streams")
-      .select("*")
-      .eq("creator_id", userData.user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (!error && data) {
-      setStream(data);
-    }
-
-    setLoading(false);
   }
 
-  async function goLive() {
-    if (!stream) return;
+  async function uploadThumbnail() {
+    if (!thumbnail || !creatorId) return "";
 
-    const { error } = await supabase
-      .from("live_streams")
-      .update({ is_live: true })
-      .eq("id", stream.id);
+    const filePath = `live_thumbs/${creatorId}-${Date.now()}.jpg`;
+
+    const { data, error } = await supabase.storage
+      .from("thumbnails")
+      .upload(filePath, thumbnail);
 
     if (error) {
-      alert("Failed to go live");
+      console.error(error);
+      return "";
+    }
+
+    const url = supabase.storage.from("thumbnails").getPublicUrl(filePath).data.publicUrl;
+    setThumbnailUrl(url);
+    return url;
+  }
+
+  async function createStream() {
+    if (!title || !creatorId) {
+      alert("Please enter a title");
       return;
     }
 
-    // Redirect to broadcast panel
-    window.location.href = "/creator/live/broadcast";
-  }
+    setLoading(true);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white p-10">
-        <Navbar />
-        <p className="text-gray-400 text-sm mt-10">Loading preview...</p>
-      </div>
-    );
-  }
+    let uploadedThumbUrl = thumbnailUrl;
 
-  if (!stream) {
-    return (
-      <div className="min-h-screen bg-black text-white p-10">
-        <Navbar />
-        <p className="text-gray-400 text-sm mt-10">No stream configuration found.</p>
-      </div>
-    );
+    if (thumbnail && !uploadedThumbUrl) {
+      uploadedThumbUrl = await uploadThumbnail();
+    }
+
+    const rtmpUrl = "rtmp://live.cloudflare.com";
+    const streamKey = `cf_stream_${creatorId}_${Date.now()}`;
+
+    const { error } = await supabase.from("live_streams").insert({
+      creator_id: creatorId,
+      title,
+      category,
+      thumbnail_url: uploadedThumbUrl,
+      is_live: false,
+      rtmp_url: rtmpUrl,
+      stream_key: streamKey,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      console.error(error);
+      alert("Failed to create stream");
+      return;
+    }
+
+    // Redirect to the preview page using Next.js router
+    router.push("/creator/live/preview");
   }
 
   return (
     <div className="min-h-screen bg-black text-white pb-24">
       <Navbar />
-      
-      <main className="max-w-4xl mx-auto px-6 pt-24 space-y-12">
 
-        <h1 className="text-4xl font-black drop-shadow-[0_0_12px_#53fc18]">
-          Live Preview
+      <main className="max-w-3xl mx-auto px-6 pt-24 space-y-10">
+
+        <h1 className="text-4xl font-black mb-6 drop-shadow-[0_0_12px_#53fc18]">
+          Go Live Setup
         </h1>
-        <p className="text-gray-400 text-sm">
-          Review your stream details before going live.
-        </p>
 
-        {/* STREAM DATA CARD */}
         <div className="parable-card space-y-6">
-
-          {/* THUMBNAIL */}
-          {stream.thumbnail_url ? (
-            <img
-              src={stream.thumbnail_url}
-              className="w-full rounded-xl border border-white/10"
-            />
-          ) : (
-            <div className="w-full h-48 bg-[#111] rounded-xl border border-white/10 flex items-center justify-center text-gray-500">
-              No Thumbnail
-            </div>
-          )}
 
           {/* TITLE */}
           <div>
-            <p className="text-xs text-gray-400">Stream Title</p>
-            <p className="text-lg font-bold">{stream.title}</p>
+            <label className="text-xs text-gray-400">Stream Title</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full mt-1 p-3 rounded-lg bg-[#111] border border-white/10 text-sm"
+              placeholder="Ex: Sunday Morning Service"
+            />
           </div>
 
           {/* CATEGORY */}
           <div>
-            <p className="text-xs text-gray-400">Category</p>
-            <p className="text-sm text-gray-300">{stream.category}</p>
+            <label className="text-xs text-gray-400">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full mt-1 p-3 rounded-lg bg-[#111] border border-white/10 text-sm"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
-          {/* RTMP INFO */}
-          <div className="space-y-1">
-            <p className="text-xs text-gray-400">RTMP URL</p>
-            <p className="text-sm select-all">{stream.rtmp_url}</p>
+          {/* THUMBNAIL */}
+          <div>
+            <label className="text-xs text-gray-400">Thumbnail</label>
+            <div className="mt-2 flex flex-col gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setThumbnail(e.target.files?.[0] || null)}
+                className="text-sm"
+              />
+              {thumbnailUrl && (
+                <img
+                  src={thumbnailUrl}
+                  className="w-full rounded-lg border border-white/10"
+                />
+              )}
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-xs text-gray-400">Stream Key</p>
-            <p className="text-sm select-all text-[#53fc18]">
-              {stream.stream_key}
-            </p>
-          </div>
-
-          {/* GO LIVE BUTTON */}
+          {/* SUBMIT BUTTON */}
           <button
-            onClick={goLive}
-            className="
-              w-full bg-[#53fc18] text-black font-bold py-3 rounded-xl
-              shadow-[0_0_12px_#53fc18] hover:brightness-110 transition
-              flex items-center justify-center gap-2
-            "
+            onClick={createStream}
+            disabled={loading}
+            className="w-full bg-[#53fc18] text-black font-bold rounded-xl py-3 shadow-[0_0_12px_#53fc18] hover:brightness-110 transition"
           >
-            <Radio className="w-5 h-5" />
-            Go Live Now
+            {loading ? "Saving..." : "Continue to Live Preview"}
           </button>
         </div>
 
-        {/* NEXT STEPS DESCRIPTION */}
-        <div className="parable-card text-sm text-gray-400 leading-relaxed">
-          <p>
-            Once you click <span className="text-[#53fc18] font-bold">Go Live Now</span>, 
-            your stream becomes active. You’ll be redirected to the broadcast page 
-            where the Cloudflare live player and creator tools will appear.
+        {/* STREAM KEY PREVIEW */}
+        <div className="mt-10">
+          <h2 className="text-lg font-bold mb-2 flex items-center gap-2">
+            <Radio className="w-5 h-5 text-[#53fc18]" /> RTMP Ingest Information
+          </h2>
+
+          <p className="text-xs text-gray-400 mb-1">RTMP URL:</p>
+          <p className="text-sm mb-3 select-all">rtmp://live.cloudflare.com</p>
+
+          <p className="text-xs text-gray-400 mb-1">Stream Key:</p>
+          <p className="text-sm select-all text-[#53fc18]">
+            Generated after saving setup
           </p>
         </div>
-
       </main>
     </div>
   );
