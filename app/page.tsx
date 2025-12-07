@@ -2,12 +2,12 @@
 'use client'; 
 
 import { useEffect, useState } from "react";
-// REVERTED: Using your original component import path
+// Restoring your original import for the content page/component
 import WelcomePage from "./welcome/page"; 
 import FlashLandingPage from "@/components/FlashLandingPage";
 
 export default function HomePage() {
-  // REVERTED: Using your original state names "flash" | "welcome"
+  // Restoring your original state names
   const [stage, setStage] = useState<"flash" | "welcome">("flash"); 
 
   useEffect(() => {
@@ -22,14 +22,14 @@ export default function HomePage() {
   if (stage === "flash") {
     return (
       <FlashLandingPage
-        // FIX: The prop name is 'onEnter' (to resolve the TypeScript error)
+        // FIX: Prop name must be 'onEnter' to resolve the TypeScript error
         onEnter={() => { 
-          setStage("welcome"); // Set to your original state name
+          setStage("welcome");
         }}
       />
     );
   }
 
-  // After the flash stage is complete, render the original WelcomePage component.
+  // Render the permanent WelcomePage component.
   return <WelcomePage />;
 }

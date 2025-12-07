@@ -3,21 +3,20 @@
 
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { useRouter, useSearchParams } from 'next/navigation'; // <-- UPDATED: Added useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams(); // <-- NEW: To read URL parameters
+  const searchParams = useSearchParams(); 
   const supabase = createClient();
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    // Call the core Supabase Sign-In method
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -26,13 +25,8 @@ export default function LoginPage() {
     if (signInError) {
       setError(`Login failed: ${signInError.message}`);
     } else {
-      // SUCCESS!
-      
-      // 1. Check for the 'redirect_to' parameter set by the middleware
-      //    (e.g., if the user tried to access /dashboard/settings first)
+      // Check for redirect_to parameter set by middleware
       const redirectTo = searchParams.get('redirect_to') || '/dashboard'; 
-      
-      // 2. Redirect the user to the intended destination or the default dashboard
       router.push(redirectTo);
     }
   };
@@ -41,22 +35,8 @@ export default function LoginPage() {
     <div className="flex justify-center items-center min-h-screen">
       <form onSubmit={handleSignIn} className="p-6 border rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-4">Log In</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full p-2 mb-3 border rounded"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full p-2 mb-4 border rounded"
-        />
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2 mb-3 border rounded" />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full p-2 mb-4 border rounded" />
         <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
           Log In
         </button>
