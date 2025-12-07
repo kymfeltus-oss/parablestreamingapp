@@ -4,26 +4,27 @@
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-// 1. FIX: Import the actual Server Action (updateProfile)
 import { updateProfile } from '@/app/actions/profile'; 
+import { Camera, User as UserIcon } from 'lucide-react'; // Added icons
 
 export default function ProfileSetupPage() {
   const router = useRouter();
   const supabase = createClient();
+  
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
-  // NEW: State for displaying errors from the server action
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Check current session/user status
+  // NEW STATES FOR IMAGE HANDLING
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+
   useEffect(() => {
     async function getUser() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        
-        // Optional: Check if profile already exists and redirect if necessary
         const { data: profile } = await supabase
           .from('profiles')
           .select('username')
@@ -31,53 +32,98 @@ export default function ProfileSetupPage() {
           .single();
 
         if (profile?.username) {
-          router.replace('/dashboard'); // Already set up, skip onboarding
+          router.replace('/dashboard'); 
         }
       } else {
-        router.replace('/login'); // Not logged in
+        router.replace('/login'); 
       }
       setLoading(false);
     }
     getUser();
   }, [router, supabase]);
 
-  if (loading || !userId) {
-    return <div className="p-8">Loading profile check...</div>;
-  }
-  
-  // 2. Client-side form handler (Updated to call imported Server Action)
-  // We use the 'action' attribute on the form for the cleanest Server Action call.
-  // Note: We keep the separate handler here to capture errors before submission.
+  // NEW FUNCTION: Handles file selection and creates a local preview
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    
+    if (avatarPreviewUrl) {
+      URL.revokeObjectURL(avatarPreviewUrl); // Clean up old preview URL
+    }
+
+    if (file) {
+      setAvatarFile(file);
+      // Create a local URL for immediate display
+      const newPreviewUrl = URL.createObjectURL(file);
+      setAvatarPreviewUrl(newPreviewUrl);
+    } else {
+      setAvatarFile(null);
+      setAvatarPreviewUrl(null);
+    }
+  };
+
+
+  // Client-side form handler (Updated to include file data if necessary)
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setError(null);
       
       const formData = new FormData(event.currentTarget);
       
-      // Call the server action
+      // OPTIONAL: Append the file to the FormData if you want the Server Action 
+      // to handle the upload logic.
+      if (avatarFile) {
+        formData.append('avatar', avatarFile); 
+      }
+      
       const result = await updateProfile(formData);
       
       if (result.error) {
-          // Display error received from the server action
           setError(`Failed to update profile: ${result.error}`);
       }
-      // CRITICAL FIX: If successful, the server action handles the redirect.
-      // We do NOT use router.push('/dashboard') here.
+      // Server Action handles the redirect on success
   };
 
+  if (loading || !userId) {
+    return <div className="p-8">Loading profile check...</div>;
+  }
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Welcome! Finish Your Profile</h1>
         
-        {/* NEW: Error Display */}
         {error && (
             <div className="p-3 mb-4 bg-red-100 text-red-700 rounded-md text-sm">
                 {error}
             </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
+          {/* IMAGE UPLOAD SECTION */}
+          <div className="mb-6 flex justify-center">
+            <label htmlFor="avatar-upload" className="cursor-pointer relative group">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-4 border-indigo-400/80">
+                {avatarPreviewUrl ? (
+                  <img src={avatarPreviewUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <UserIcon className="w-12 h-12 text-gray-500" />
+                )}
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
+              <input
+                type="file"
+                id="avatar-upload"
+                name="avatar-file"
+                accept="image/*" // Restrict to image files
+                onChange={handleFileChange}
+                className="hidden" // Hide the default file input
+              />
+            </label>
+          </div>
+
+          {/* USERNAME INPUT SECTION */}
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
               Username
@@ -85,7 +131,7 @@ export default function ProfileSetupPage() {
             <input
               type="text"
               id="username"
-              name="username" // Name is CRITICAL for formData
+              name="username" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
