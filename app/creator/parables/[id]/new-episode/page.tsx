@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient"; 
 import Navbar from "@/components/Navbar";
 import { useParams, useRouter } from "next/navigation";
 
 export default function NewEpisodePage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+
   const params = useParams();
   const parableId = params.id;
   const router = useRouter();
