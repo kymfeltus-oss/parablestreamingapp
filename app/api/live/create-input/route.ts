@@ -1,8 +1,11 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"; // Use this
+import { cookies } from "next/headers"; // Use this
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function POST(req: Request) {
-  const supabase = await supabaseServer();
+  // Use the standard Next.js method to get cookies and create the client
+  const cookieStore = cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   const {
     data: { user },
@@ -12,7 +15,7 @@ export async function POST(req: Request) {
   if (userError || !user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
-
+  
   const body = await req.json();
 
   const { title, description, visibility } = body;
