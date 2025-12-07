@@ -26,17 +26,15 @@ export async function GET(request: NextRequest) { 
       }
     );
 
-    // Exchange the verification code for a user session (logs the user in)
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Success! Redirect directly to the mandatory profile setup page
-      return NextResponse.redirect(new URL('/profile-setup', request.url));
+      // SUCCESS: Redirect to an intermediate client page to stabilize the session
+      return NextResponse.redirect(new URL('/auth/landing', request.url));
     }
   }
 
-  // Handle error or missing code by redirecting to the login page
-  // FIX: Hardcode the correct live host to prevent the 'localhost' leak
+  // FAILURE: Use the hardcoded host fix
   const liveHost = 'https://main.dqugj22h6x51v.amplifyapp.com';
   return NextResponse.redirect(new URL(`${liveHost}/login?error=verification_failed`));
 }
