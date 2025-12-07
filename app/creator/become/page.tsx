@@ -1,23 +1,29 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
+// UPDATED: Use a named import for the createClient function
+import { createClient } from "@/lib/supabaseClient"; 
 import { useState, useEffect } from "react";
 
 export default function BecomeCreatorPage() {
+  // Call the function inside the component to get the supabase client instance
+  const supabase = createClient(); 
+
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState("");
 
   useEffect(() => {
     async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Use the local 'supabase' constant here
+      const { data: { user } } = await supabase.auth.getUser(); 
       if (user) setUserId(user.id);
     }
     loadUser();
-  }, []);
+  }, []); // Note: useEffect dependencies can be tricky with supabase instance, but this pattern is common for client components
 
   async function submit() {
     if (!userId || !selectedType) return;
 
+    // Use the local 'supabase' constant here
     await supabase
       .from("profiles")
       .update({
