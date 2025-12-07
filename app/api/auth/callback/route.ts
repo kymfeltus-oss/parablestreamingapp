@@ -1,29 +1,37 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function GET(request: Request) {
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const supabase = supabaseServer();
 
-  if (error || !user) {
-    return NextResponse.json({ error: error?.message || "No user found" }, { status: 400 });
+  // Read the URL, Supabase sends access_token, refresh_token, etc.
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+
+  if (!code) {
+    return NextResponse.redirect("/auth?error=missing_code");
   }
 
-  // check if profile exists
-  const { data: existingProfile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  // Exchange the code for a session
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-  // if profile does not exist, create it
-  if (!existingProfile) {
-    await supabase.from("profiles").insert({
-      id: user.id,
-      email: user.email,
-      display_name: user.email?.split("@")[0] || "User",
-      role: "user"
-    });
+  if (error) {
+    return NextResponse.redirect(`/auth?error=${encodeURIComponent(error.message)}`);
   }
 
-  return NextResponse.redirect(new URL("/dashboard", request.url));
+  // Now user is authenticated in server-side session
+  const { user } = data;
+
+  if (!user) {
+    return NextResponse.redirect("/auth?error=no_user");
+  }
+
+  // OPTIONAL: Ensure user profile exists
+  await supabase.from("profiles").upsert({
+    id: user.id,
+    email: user.email,
+  });
+
+  // Redirect to dashboard or onboarding
+  return NextResponse.redirect("/dashboard");
 }
