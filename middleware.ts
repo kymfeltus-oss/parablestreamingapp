@@ -1,7 +1,10 @@
-// middleware.ts (Final Corrected Script with ALL Public Routes)
+// middleware.ts (Final, Compiling, Runtime-Fixed Script)
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import type { CookieOptions } from '@supabase/ssr';
+
+// FIX: Force Node.js runtime to resolve package/type conflicts
+export const runtime = 'nodejs'; 
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -15,8 +18,9 @@ export async function middleware(req: NextRequest) {
         set: (name: string, value: string, options: CookieOptions) => {
           res.cookies.set({ name, value, ...options });
         },
-        delete: (name: string, options: CookieOptions) => {
-          res.cookies.delete(name, options); 
+        // FIX: MUST use 'remove' as the method name to match the conflicting interface
+        remove: (name: string, options: CookieOptions) => { 
+          res.cookies.delete(name, options); // Correct implementation
         },
       },
     }
@@ -28,31 +32,17 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // ⚠️ FIX: ADDED all essential public paths here
+  // Including all essential public paths:
   const publicPaths = [
-    '/',               // Home/Root page
-    '/login',          // Login page
-    '/signup',         // Sign up page
-    '/auth/confirm',   // Email verification handler
-    '/auth/landing',   // Intermediate session stabilizer
-    '/welcome',        // Your Welcome page
-    '/flash',          // Your Flash page
-    '/discover',       // Discovery page (if public)
-    '/streamers',      // Streamers list (if public)
+    '/', '/login', '/signup', '/auth/confirm', '/auth/landing', 
+    '/welcome', '/flash', '/discover', '/streamers',
   ];
-  
-  // Use startsWith for better matching if paths include dynamic segments, but includes() works for exact matches
   const isPublicPath = publicPaths.includes(req.nextUrl.pathname);
 
-  // --- Redirection Logic ---
-
-  // A. Redirect unauthorized users away from protected paths
   if (!session && !isPublicPath) {
-    // If the root path ('/') is missing, this will catch unauthorized users trying to access it
     return NextResponse.redirect(new URL('/login', req.url));
   }
   
-  // B. Redirect authorized users away from login/signup/landing
   if (session && isPublicPath && req.nextUrl.pathname !== '/auth/landing') {
     return NextResponse.redirect(new URL('/profile-setup', req.url));
   }
@@ -61,6 +51,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // FIX: Complete the matcher array to resolve the Syntax Error
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
