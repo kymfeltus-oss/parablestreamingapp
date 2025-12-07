@@ -1,20 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+"use client";
 
-const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  process.env.SUPABASE_URL;
+import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_ANON_KEY;
-
-if (!supabaseUrl) {
-  throw new Error("Missing env: SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL");
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 }
-
-if (!supabaseAnonKey) {
-  throw new Error("Missing env: SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY");
-}
-
-// SINGLE CLIENT USED BY THE ENTIRE APP
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);

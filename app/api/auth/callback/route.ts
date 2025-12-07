@@ -1,17 +1,24 @@
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
+import { createServerSupabase } from "@/lib/supabaseServer";
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
+export async function GET(req: Request) {
+  const supabase = createServerSupabase();
+  const { searchParams } = new URL(req.url);
 
-  const supabase = createRouteHandlerClient({ cookies });
+  const token_hash = searchParams.get("token_hash");
+  const type = searchParams.get("type");
+  const next = searchParams.get("next") ?? "/dashboard";
 
-  if (code) {
-    await supabase.auth.exchangeCodeForSession(code);
+  if (token_hash && type) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash,
+      type,
+    });
+
+    if (!error) {
+      return NextResponse.redirect(new URL(next, req.url));
+    }
   }
 
-  // After verification is done, redirect user
-  return NextResponse.redirect(new URL("/welcome", request.url));
+  return NextResponse.redirect(new URL("/auth/error", req.url));
 }
