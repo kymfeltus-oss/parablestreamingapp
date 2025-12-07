@@ -1,5 +1,7 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+// Import the basic SerializeOptions type from the 'cookie' package
+import type { SerializeOptions } from 'cookie'
 
 export function createClient() {
   const cookieStore = cookies()
@@ -9,19 +11,20 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
+        // Use getAll() as required by v0.5.0+
         getAll() {
-          return cookieStore.getAll()
+          // Returns an array of { name, value } which satisfies the required type
+          return cookieStore.getAll() 
         },
-        // Explicitly type the parameter as CookieOptions[]
-        setAll(cookiesToSet: CookieOptions[]) {
+        // Use setAll() and explicitly cast the options to satisfy the type checker
+        setAll(cookiesToSet: Array<{ name: string; value: string; options: SerializeOptions }>) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options)
-            )
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            })
+          } catch (error) {
+            // These errors are expected if setting cookies in a Server Component context
+            console.error("Failed to set cookies:", error);
           }
         },
       },
