@@ -18,21 +18,21 @@ export async function middleware(req: NextRequest) {
         set: (name: string, value: string, options: CookieOptions) => {
           res.cookies.set({ name, value, ...options });
         },
-        // FIX: MUST use 'remove' as the method name to match the conflicting interface
+        // FIX: The implementation must pass only the cookie NAME to delete.
         remove: (name: string, options: CookieOptions) => { 
-          res.cookies.delete(name, options); // Correct implementation
+          res.cookies.delete(name); // <-- CHANGED from (name, options) to (name)
         },
       },
     }
   );
-
+  
+  // ... (rest of the logic is correct and remains the same)
   await supabase.auth.getSession(); 
   
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Including all essential public paths:
   const publicPaths = [
     '/', '/login', '/signup', '/auth/confirm', '/auth/landing', 
     '/welcome', '/flash', '/discover', '/streamers',
@@ -51,7 +51,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // FIX: Complete the matcher array to resolve the Syntax Error
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
