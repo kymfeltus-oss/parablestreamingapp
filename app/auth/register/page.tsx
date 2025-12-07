@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { Sparkles, UserPlus, Mic2, Music2, Gamepad2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const supabase = createClient(); // ✅ FIXED — no more "supabase not exported"
 
   // base fields
   const [email, setEmail] = useState("");
@@ -85,7 +86,7 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    // 🔥 SEND VERIFICATION EMAIL WITH METADATA
+    // 🔥 CREATE USER WITH METADATA
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -105,19 +106,19 @@ export default function RegisterPage() {
           creatorCategory,
           ministryName,
           bioShort,
-          analyticsConsent
-        }
-      }
+          analyticsConsent,
+        },
+      },
     });
+
+    setLoading(false);
 
     if (error) {
       alert(error.message);
-      setLoading(false);
       return;
     }
 
     alert("Account created! Please check your email to verify your account.");
-    setLoading(false);
     router.push("/auth");
   }
 
@@ -184,7 +185,7 @@ export default function RegisterPage() {
         {/* RIGHT PANEL — FORM */}
         <section className="lg:col-span-3 space-y-6">
           <div className="bg-[#111] border border-white/10 rounded-2xl p-6 space-y-6">
-
+            
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold flex items-center gap-2">
@@ -283,10 +284,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Demographics, interests, engagement, creator fields remain unchanged */}
-              {/* (Leaving exactly as in your previous UI) */}
-
-              {/* CONSENT */}
+              {/* Consent */}
               <label className="flex items-center gap-2 text-[11px] text-gray-400">
                 <input
                   type="checkbox"
@@ -296,7 +294,7 @@ export default function RegisterPage() {
                 I agree to anonymized analytics tracking to improve Parable.
               </label>
 
-              {/* SUBMIT */}
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
@@ -308,7 +306,6 @@ export default function RegisterPage() {
               >
                 {loading ? "Creating account..." : "Create account"}
               </button>
-
             </form>
 
             <p className="text-xs text-gray-400 text-center mt-4">
