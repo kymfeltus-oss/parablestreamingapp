@@ -4,17 +4,14 @@ import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
 // This handler will intercept the link clicked in the verification email.
-// CRITICAL: Must be exported as a Route Handler function
 export async function GET(request: Request) { 
-  // FIX: Corrected syntax error in destructuring the URL object
-  const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url); 
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || '/'; // Fallback path
+  // Removed unnecessary 'next' variable
 
   if (code) {
     const cookieStore = cookies();
     
-    // Create the server client using the modern cookie handling pattern (getAll/setAll)
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -34,7 +31,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Success! Redirect the user to the mandatory profile setup page
+      // Success! Redirect directly to the mandatory profile setup page
       return NextResponse.redirect(new URL('/profile-setup', request.url));
     }
   }
