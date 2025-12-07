@@ -10,17 +10,18 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) { // FIX: Explicitly type 'name' as string
+        get(name: string) {
           return cookieStore.get(name)?.value;
         },
-        set(name: string, value: string, options) { // FIX: Explicitly type 'name' and 'value' as string
+        // FIX: Explicitly type 'options' to resolve TypeScript error
+        set(name: string, value: string, options: { path: string; maxAge?: number; expires?: Date; httpOnly: boolean; secure?: boolean; sameSite: 'lax' | 'strict' | 'none'; }) { 
           try {
               cookieStore.set({ name, value, ...options });
           } catch (error) {
               // Handle cases where cookies might not be writable (e.g. static export)
           }
         },
-        remove(name: string, options) { // FIX: Explicitly type 'name' as string
+        remove(name: string, options: { path: string }) { // FIX: Explicitly type 'options' as string
            try {
               cookieStore.set({ name, value: "", ...options });
           } catch (error) {
