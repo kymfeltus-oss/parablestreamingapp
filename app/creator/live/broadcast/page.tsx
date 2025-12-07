@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient"; 
 import { Radio, Video } from "lucide-react";
 
 type LiveStream = {
@@ -17,6 +18,9 @@ type LiveStream = {
 };
 
 export default function BroadcastPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient(); 
+  
   const [stream, setStream] = useState<LiveStream | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingInput, setCreatingInput] = useState(false);
