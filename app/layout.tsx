@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import "./globals.css";
 import { Inter } from "next/font/google";
 import ClientBottomNav from "./mobile-bottom-nav";
