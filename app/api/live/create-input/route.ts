@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server"; // Imported for type clarity if using setAll options
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -13,20 +14,33 @@ export async function POST(req: Request) {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
+        // Added to satisfy the modern interface requirements
+        getAll() {
+          return cookieStore.getAll();
+        },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            // The cookieStore.set method handles all options correctly
             cookieStore.set({ name, value, ...options });
           } catch (error) {
-            // Handle cases where cookies might not be writable (e.g., after headers sent)
+            // Can be ignored if you have middleware refreshing user sessions
             console.error("Failed to set cookie:", error);
+          }
+        },
+        // Added to satisfy the modern interface requirements
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set({ name, value, ...options });
+            });
+          } catch (error) {
+            // Can be ignored if you have middleware refreshing user sessions
+            console.error("Failed to set all cookies:", error);
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            // Use the delete method or set maxAge to 0 for explicit removal/expiration
+            // Using maxAge: 0 to force expiration
             cookieStore.set({ name, value: "", ...options, maxAge: 0 });
-            // Alternatively: cookieStore.delete(name); (if all options are handled internally or not needed for delete)
           } catch (error) {
             console.error("Failed to remove cookie:", error);
           }
@@ -39,13 +53,13 @@ export async function POST(req: Request) {
   const {
     data: { user },
     error: userError,
-  } = await supabase.auth.getUser(); // getUser() revalidates the auth token
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // Parse body (consider Zod validation for robust input checks)
+  // Parse body
   const body = await req.json();
   const { title, description, visibility } = body;
 
@@ -62,8 +76,7 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    // Log the detailed error internally but return a generic message to the client
-    console.error("Database insertion error:", error); 
+    console.error("Database insertion error:", error);
     return NextResponse.json({ error: "Failed to insert data" }, { status: 400 });
   }
 
