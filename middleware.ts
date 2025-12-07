@@ -1,9 +1,8 @@
-// middleware.ts (Final, Compiling, Runtime-Fixed Script)
+// middleware.ts (Final, Complete, and Functional Script)
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import type { CookieOptions } from '@supabase/ssr';
 
-// FIX 1: Force Node.js runtime to resolve persistent package/type conflicts
 export const runtime = 'nodejs'; 
 
 export async function middleware(req: NextRequest) {
@@ -18,7 +17,6 @@ export async function middleware(req: NextRequest) {
         set: (name: string, value: string, options: CookieOptions) => {
           res.cookies.set({ name, value, ...options });
         },
-        // FIX 2: Use 'remove' as the method name and the single-argument 'delete' for implementation
         remove: (name: string, options: CookieOptions) => { 
           res.cookies.delete(name); 
         },
@@ -32,24 +30,19 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // FIX 3: Include all essential public paths
+  // FIX: INCLUDE all sign-up/register paths
   const publicPaths = [
     '/', '/login', '/signup', '/auth/confirm', '/auth/landing', 
+    '/auth/register', // <-- ADDED
     '/welcome', '/flash', '/discover', '/streamers',
   ];
   
-  // FIX 4: Use startsWith to check if the URL begins with any public path
-  // This ensures paths like /flash/123 or /welcome/ are allowed.
   const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
-  // --- Redirection Logic ---
-  
-  // A. Redirect unauthorized users away from protected paths
   if (!session && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
   
-  // B. Redirect authorized users away from login/signup/landing
   if (session && isPublicPath && req.nextUrl.pathname !== '/auth/landing') {
     return NextResponse.redirect(new URL('/profile-setup', req.url));
   }
@@ -58,7 +51,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // FIX 5: Complete the matcher array
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
