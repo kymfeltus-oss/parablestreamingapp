@@ -29,7 +29,7 @@ function createSupabaseServerClient() {
 export async function updateProfile(formData: FormData): Promise<{ success: boolean; error?: string }> {
   const supabase = createSupabaseServerClient();
   const username = formData.get("username") as string;
-  const avatarFile = formData.get("avatar") as File; // Retrieve the uploaded file
+  const avatarFile = formData.get("avatar") as File;
 
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -41,15 +41,11 @@ export async function updateProfile(formData: FormData): Promise<{ success: bool
 
   // --- NEW LOGIC: Handle Avatar Upload to Supabase Storage ---
   if (avatarFile && avatarFile.size > 0) {
-    // 1. Create a unique path (e.g., bucket/user_id/avatar.jpg)
     const filePath = `${user.id}/${Date.now()}_avatar.jpg`;
-    
-    // 2. Convert File to Buffer/ArrayBuffer for Supabase
     const fileBuffer = await avatarFile.arrayBuffer();
 
-    // 3. Upload the file to your Storage bucket (ASSUMING BUCKET NAME IS 'avatars')
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('avatars') // !!! CHANGE 'avatars' to your actual bucket name !!!
+      .from('avatars') // !!! MUST CHANGE 'avatars' to your actual bucket name !!!
       .upload(filePath, fileBuffer, {
         cacheControl: '3600',
         upsert: true,
@@ -61,7 +57,6 @@ export async function updateProfile(formData: FormData): Promise<{ success: bool
       return { success: false, error: "Failed to upload avatar image." };
     }
 
-    // 4. Get the public URL for the uploaded file
     const { data: publicUrlData } = supabase.storage
       .from('avatars')
       .getPublicUrl(filePath);
@@ -70,7 +65,6 @@ export async function updateProfile(formData: FormData): Promise<{ success: bool
   }
   // --- END NEW LOGIC ---
 
-  // Update the profile data object
   const profileData: any = {
     id: user.id,
     username: username,
@@ -79,7 +73,6 @@ export async function updateProfile(formData: FormData): Promise<{ success: bool
     profileData.avatar_url = avatarUrl;
   }
 
-  // Perform the Upsert: Insert or update the profile row
   const { error: profileError } = await supabase
     .from("profiles")
     .upsert(profileData, { onConflict: 'id' });
@@ -89,6 +82,5 @@ export async function updateProfile(formData: FormData): Promise<{ success: bool
     return { success: false, error: profileError.message };
   }
   
-  // Success: Redirect the user to the main application area
   redirect("/dashboard");
 }
