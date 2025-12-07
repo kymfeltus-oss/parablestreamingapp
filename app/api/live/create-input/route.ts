@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient, type CookieOptions, type SetAllCookiesOptions } from "@supabase/ssr"; // Import SetAllCookiesOptions
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -10,19 +10,17 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        // Use getAll() exclusively for retrieving cookies
+        // Aligns with modern interface
         getAll() {
           return cookieStore.getAll();
         },
-        // Use setAll() exclusively for setting cookies
-        setAll(cookiesToSet) {
+        // Aligns with modern interface and uses correct type for cookiesToSet parameter
+        setAll(cookiesToSet: SetAllCookiesOptions[]) { 
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              // Note: The options here include 'maxAge' for expiration/removal
               cookieStore.set({ name, value, ...options });
             });
           } catch (error) {
-            // Error handling if set is called in a place where it's not supported
             console.error("Failed to set cookies:", error);
           }
         },
