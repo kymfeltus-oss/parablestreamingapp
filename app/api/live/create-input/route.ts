@@ -1,8 +1,6 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-// Corrected import name based on the compiler's suggestion
-import type { SerializeOptions } from 'cookie'; 
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -12,16 +10,23 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-        setAll(cookiesToSet: { name: string; value: string; options: SerializeOptions }[]) {
+        set(name: string, value: string, options: CookieOptions) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options); 
-            });
+            // This is what Next.js cookies() natively supports
+            cookieStore.set(name, value, options);
           } catch (error) {
-            console.error("Failed to set cookies:", error);
+            console.error("Failed to set cookie:", error);
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            // Using maxAge: 0 to force expiration
+            cookieStore.set(name, "", { ...options, maxAge: 0 });
+          } catch (error) {
+            console.error("Failed to remove cookie:", error);
           }
         },
       },
