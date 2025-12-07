@@ -1,10 +1,13 @@
 'use client'
+
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+// 1. Import the new utility function you created
+import { createClient } from '@/utils/supabase/client' 
 import { useRouter } from 'next/navigation'
 
 export default function OnboardingWizard() {
-  const supabase = createClientComponentClient()
+  // 2. Use the new utility function instead of the old function
+  const supabase = createClient()
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -36,6 +39,7 @@ export default function OnboardingWizard() {
   // Final Submit to Supabase
   const completeOnboarding = async () => {
     setLoading(true)
+    // The methods getUser() and from('profiles') are the same, no changes needed here
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
