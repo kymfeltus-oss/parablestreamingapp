@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-// UPDATED: Changed from named import { supabase } to default import supabase
-import supabase from "@/lib/supabaseClient"; 
+// 1. Import the function using a named import
+import { createClient } from "@/lib/supabaseClient"; 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -11,6 +11,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // 2. Call the function inside the component to get the supabase instance
+  // This ensures the client is created in the browser context (due to "use client" and createBrowserClient)
+  const supabase = createClient(); 
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -22,6 +26,7 @@ export default function LoginPage() {
 
     setLoading(true);
 
+    // 3. Use the 'supabase' instance we just created
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -34,8 +39,7 @@ export default function LoginPage() {
       return;
     }
 
-    // Redirect to the dashboard after successful login
-    router.push("/dashboard"); 
+    router.push("/dashboard");
   }
 
   return (
@@ -56,7 +60,7 @@ export default function LoginPage() {
               className="mt-1 w-full bg-black border border-white/10 rounded-lg p-3 text-sm"
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail}
             />
           </div>
 
