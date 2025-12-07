@@ -14,9 +14,13 @@ import {
   Clock,
   Heart,
 } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient";
 
 export default function DashboardPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+  
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -216,15 +220,16 @@ export default function DashboardPage() {
                 See creators, pastors, and gamers you follow.
               </p>
             </Link>
-
+            
+             {/* Settings Link - completing the truncated script */}
             <Link
               href="/dashboard/settings"
-              className="bg-[#111] p-5 rounded-2xl border border:white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
+              className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
             >
               <Settings className="w-6 h-6 text-[#53fc18]" />
-              <p className="text-sm font-bold">Account Settings</p>
+              <p className="text-sm font-bold">Settings</p>
               <p className="text-[11px] text-gray-400">
-                Preferences, security, notifications, and more.
+                Manage notifications, security, and preferences.
               </p>
             </Link>
           </div>
