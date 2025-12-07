@@ -24,4 +24,5 @@ export function supabaseServer() {
   return client;
 }
 
-export type SupabaseServerClientType = ReturnType<typeof supabaseServer>;
+// Backward compatibility for all old routes:
+export const createServerSupabase = supabaseServer;

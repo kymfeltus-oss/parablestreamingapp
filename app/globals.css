@@ -132,4 +132,9 @@ body {
 .animate-slideUpFade {
   animation: slideUpFade 0.9s ease forwards;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* your custom CSS continues below */
 
