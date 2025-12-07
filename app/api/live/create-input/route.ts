@@ -1,39 +1,36 @@
-// Corrected Imports: Use createServerClient from @supabase/ssr
 import { createServerClient } from "@supabase/ssr"; 
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  // Use the standard Next.js method to get cookies and create the client
   const cookieStore = cookies();
-  // Call createServerClient from @supabase/ssr with the necessary cookie wrappers
-  const supabase = createServerClient({
-    // You must provide your Supabase URL and Anon Key here as arguments to createServerClient
-    // Example (replace with your actual env variables if they exist in this scope):
-    // process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    // process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    cookies: {
-      get(name) {
-        return cookieStore.get(name)?.value;
+  
+  // FIX: Pass the URL, Anon Key, and then the cookies options as separate arguments
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name, value, options) {
+          try {
+              cookieStore.set({ name, value, ...options });
+          } catch (error) {
+              // Handle cases where cookies might not be writable (e.g. static export)
+          }
+        },
+        remove(name, options) {
+           try {
+              cookieStore.set({ name, value: "", ...options });
+          } catch (error) {
+              // Handle cases where cookies might not be writable
+          }
+        },
       },
-      set(name, value, options) {
-        // Error handling for when cookies aren't available
-        try {
-            cookieStore.set({ name, value, ...options });
-        } catch (error) {
-            throw new Error("Cookies are not available");
-        }
-      },
-      remove(name, options) {
-        // Error handling for when cookies aren't available
-         try {
-            cookieStore.set({ name, value: "", ...options });
-        } catch (error) {
-            throw new Error("Cookies are not available");
-        }
-      },
-    },
-  });
+    }
+  );
 
   const {
     data: { user },
