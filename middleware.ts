@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import type { CookieOptions } from '@supabase/ssr';
 
-// FIX: Force Node.js runtime to resolve package/type conflicts
+// FIX 1: Force Node.js runtime to resolve persistent package/type conflicts
 export const runtime = 'nodejs'; 
 
 export async function middleware(req: NextRequest) {
@@ -18,31 +18,38 @@ export async function middleware(req: NextRequest) {
         set: (name: string, value: string, options: CookieOptions) => {
           res.cookies.set({ name, value, ...options });
         },
-        // FIX: The implementation must pass only the cookie NAME to delete.
+        // FIX 2: Use 'remove' as the method name and the single-argument 'delete' for implementation
         remove: (name: string, options: CookieOptions) => { 
-          res.cookies.delete(name); // <-- CHANGED from (name, options) to (name)
+          res.cookies.delete(name); 
         },
       },
     }
   );
-  
-  // ... (rest of the logic is correct and remains the same)
+
   await supabase.auth.getSession(); 
   
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // FIX 3: Include all essential public paths
   const publicPaths = [
     '/', '/login', '/signup', '/auth/confirm', '/auth/landing', 
     '/welcome', '/flash', '/discover', '/streamers',
   ];
-  const isPublicPath = publicPaths.includes(req.nextUrl.pathname);
+  
+  // FIX 4: Use startsWith to check if the URL begins with any public path
+  // This ensures paths like /flash/123 or /welcome/ are allowed.
+  const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
+  // --- Redirection Logic ---
+  
+  // A. Redirect unauthorized users away from protected paths
   if (!session && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
   
+  // B. Redirect authorized users away from login/signup/landing
   if (session && isPublicPath && req.nextUrl.pathname !== '/auth/landing') {
     return NextResponse.redirect(new URL('/profile-setup', req.url));
   }
@@ -51,6 +58,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // FIX 5: Complete the matcher array
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
