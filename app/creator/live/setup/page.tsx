@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } = from "react";
-// FIX: Change import from named export 'supabase' to named export 'createClient'
+// CORRECTED: Fixed the typo in the React import statement (removed '=')
+import { useState, useEffect } from "react"; 
+
+// FIX: Use a named import for the createClient function
 import { createClient } from "@/lib/supabaseClient"; 
 import Navbar from "@/components/Navbar";
 import { Upload, Radio } from "lucide-react";
