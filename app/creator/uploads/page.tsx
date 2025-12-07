@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient"; 
 
 type CreatorVideo = {
   id: number;
@@ -13,6 +14,9 @@ type CreatorVideo = {
 };
 
 export default function CreatorUploadsPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient(); 
+
   const [profileId, setProfileId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
