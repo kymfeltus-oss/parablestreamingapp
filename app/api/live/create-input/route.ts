@@ -1,7 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server"; // Imported for type clarity if using setAll options
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -11,45 +10,27 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        // Added to satisfy the modern interface requirements
+        // Use getAll() exclusively for retrieving cookies
         getAll() {
           return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value, ...options });
-          } catch (error) {
-            // Can be ignored if you have middleware refreshing user sessions
-            console.error("Failed to set cookie:", error);
-          }
-        },
-        // Added to satisfy the modern interface requirements
+        // Use setAll() exclusively for setting cookies
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
+              // Note: The options here include 'maxAge' for expiration/removal
               cookieStore.set({ name, value, ...options });
             });
           } catch (error) {
-            // Can be ignored if you have middleware refreshing user sessions
-            console.error("Failed to set all cookies:", error);
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            // Using maxAge: 0 to force expiration
-            cookieStore.set({ name, value: "", ...options, maxAge: 0 });
-          } catch (error) {
-            console.error("Failed to remove cookie:", error);
+            // Error handling if set is called in a place where it's not supported
+            console.error("Failed to set cookies:", error);
           }
         },
       },
     }
   );
 
-  // Authentication check
+  // Rest of your logic remains the same
   const {
     data: { user },
     error: userError,
@@ -59,11 +40,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // Parse body
   const body = await req.json();
   const { title, description, visibility } = body;
 
-  // Database insertion
   const { data, error } = await supabase
     .from("live_inputs")
     .insert({
