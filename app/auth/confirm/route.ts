@@ -1,13 +1,12 @@
 // app/auth/confirm/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
 // This handler will intercept the link clicked in the verification email.
-export async function GET(request: Request) { 
+export async function GET(request: NextRequest) { 
   const { searchParams } = new URL(request.url); 
   const code = searchParams.get('code');
-  // Removed unnecessary 'next' variable
 
   if (code) {
     const cookieStore = cookies();
