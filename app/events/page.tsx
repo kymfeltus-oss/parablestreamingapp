@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient";
 import { Calendar, MapPin, Ticket, Music, Mic2, Sparkles } from "lucide-react";
 
 type EventItem = {
@@ -17,6 +18,9 @@ type EventItem = {
 };
 
 export default function EventsPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+  
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
 
