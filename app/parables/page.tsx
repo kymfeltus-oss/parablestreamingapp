@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient";
 import { Film, BookOpen, Sparkles } from "lucide-react";
 
 type Parable = {
@@ -15,6 +16,9 @@ type Parable = {
 };
 
 export default function ParablesPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+
   const [parables, setParables] = useState<Parable[]>([]);
   const [loading, setLoading] = useState(true);
 

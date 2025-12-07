@@ -1,126 +1,120 @@
 "use client";
 
 import { useEffect, useState } from "react";
+// FIX: Use a named import for the createClient function
+import { createClient } from "@/lib/supabaseClient";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/lib/supabaseClient";
 import { useParams } from "next/navigation";
-import { Radio, Users } from "lucide-react";
+import { Users, MessageSquare } from "lucide-react";
 
+// Assuming a type for the stream data
 type LiveStream = {
   id: string;
   title: string;
-  category: string;
-  thumbnail_url: string | null;
-  rtmp_url: string | null;
-  stream_key: string | null;
-  cloudflare_input_id: string | null;
+  creator_name: string;
+  cloudflare_input_id: string;
+  viewers: number;
   is_live: boolean;
-  creator_id: string;
 };
 
-export default function ViewerWatchPage() {
+export default function WatchStreamPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient(); 
+
   const params = useParams();
-  const id = params.id as string;
+  const streamId = params.id as string;
 
   const [stream, setStream] = useState<LiveStream | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadStream();
-  }, []);
+    async function loadStream() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("live_streams")
+        .select("*")
+        .eq("id", streamId)
+        .single();
 
-  async function loadStream() {
-    setLoading(true);
-
-    const { data, error } = await supabase
-      .from("live_streams")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (!error && data) {
-      setStream(data as LiveStream);
+      if (!error && data) {
+        setStream(data as LiveStream);
+      }
+      setLoading(false);
     }
-
-    setLoading(false);
-  }
+    
+    if (streamId) {
+        loadStream();
+    }
+  }, [streamId]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white p-10">
+      <div className="min-h-screen bg-black text-white p-6">
         <Navbar />
-        <p className="text-gray-400 text-sm mt-10">Loading stream...</p>
+        <p className="mt-10">Loading stream details...</p>
       </div>
     );
   }
 
-  if (!stream) {
+  if (!stream || !stream.is_live) {
     return (
-      <div className="min-h-screen bg-black text-white p-10">
+      <div className="min-h-screen bg-black text-white p-6">
         <Navbar />
-        <p className="text-gray-500 text-sm mt-10">Stream not found.</p>
+        <p className="mt-10">Stream is offline or not found.</p>
       </div>
     );
   }
+  
+  // Assuming CF_SUBDOMAIN is available via a client-side ENV var or config
+  const CF_SUBDOMAIN = process.env.NEXT_PUBLIC_CF_STREAM_SUBDOMAIN || "customer-abrj4wfwhu1pcgln.cloudflarestream.com";
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-6 pt-24 space-y-12">
-
-        {/* HEADER */}
-        <header className="space-y-2">
-          <h1 className="text-3xl font-black">{stream.title}</h1>
-          <p className="text-sm text-gray-400">{stream.category}</p>
-
-          <div className="flex items-center gap-4 mt-2">
-            {stream.is_live ? (
-              <span className="bg-red-600 px-3 py-1 text-xs font-bold uppercase rounded-lg tracking-wide animate-pulse">
-                LIVE NOW
-              </span>
-            ) : (
-              <span className="bg-gray-700 px-3 py-1 text-xs font-bold uppercase rounded-lg tracking-wide">
-                OFFLINE
-              </span>
-            )}
-
-            {/* viewer badge placeholder */}
-            <span className="flex items-center gap-1 text-xs text-gray-300">
-              <Users className="w-3 h-3" /> 120 watching
-            </span>
+      <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Video Player & Info */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="aspect-video bg-black rounded-xl overflow-hidden border border-white/10">
+               {stream.cloudflare_input_id ? (
+              <iframe
+                src={`https://${CF_SUBDOMAIN}/${stream.cloudflare_input_id}/iframe`}
+                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                allowFullScreen
+                className="w-full h-full"
+              />
+               ) : (
+                <p className="text-gray-500 flex items-center justify-center h-full">Player loading...</p>
+               )}
+            </div>
+            
+            <div>
+              <h1 className="text-xl font-bold">{stream.title}</h1>
+              <p className="text-sm text-gray-400">by {stream.creator_name}</p>
+              <div className="flex items-center gap-2 text-xs text-[#53fc18] mt-1">
+                <Users className="w-3 h-3" /> {stream.viewers} viewers
+              </div>
+            </div>
           </div>
-        </header>
 
-        {/* LIVE PLAYER */}
-        <section className="aspect-video bg-black border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center">
-          {stream.cloudflare_input_id ? (
-            <iframe
-              src={`https://iframe.videodelivery.net/${stream.cloudflare_input_id}`}
-              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-              allowFullScreen
-              className="w-full h-full"
-            />
-          ) : (
-            <p className="text-gray-500 text-sm">
-              Stream is not configured for playback yet.
-            </p>
-          )}
-        </section>
-
-        {/* ABOUT STREAM */}
-        <section className="parable-card space-y-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <Radio className="w-5 h-5 text-[#53fc18]" />
-            About this stream
-          </h2>
-
-          <p className="text-gray-400 text-sm leading-relaxed">
-            {stream.is_live
-              ? "This livestream is currently active. Stay tuned for powerful gospel content, worship, and teaching."
-              : "This stream is not live yet. Check back soon!"}
-          </p>
-        </section>
+          {/* Chat Sidebar (Placeholder) */}
+          <div className="lg:col-span-1 bg-[#111] rounded-xl flex flex-col h-[60vh] lg:h-auto">
+            <div className="p-4 border-b border-white/10 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-[#53fc18]" />
+                <h2 className="text-sm font-semibold">Live Chat</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 text-xs text-gray-400 space-y-2">
+                {/* Mock Chat Messages */}
+                <p><span className="text-violet-400 font-bold">User1:</span> Amen! 🙏</p>
+                <p><span className="text-blue-400 font-bold">PastorMike:</span> Welcome everyone!</p>
+            </div>
+            <div className="p-4 border-t border-white/10">
+                <input placeholder="Say a prayer or an encouragement..." className="w-full bg-black px-3 py-2 rounded-lg text-sm" />
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

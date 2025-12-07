@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+  
   const [profile, setProfile] = useState<any>(null);
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");

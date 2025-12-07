@@ -5,10 +5,14 @@ import { Sparkles, Play, Music2, Mic2, Users, TrendingUp } from "lucide-react";
 import SignUpForm from "@/components/SignUpForm";
 import ParableParticles from "@/components/ParableParticles";
 import useReveal from "@/components/useReveal";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient";
 import { useEffect, useState } from "react";
 
 export default function WelcomePage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+  
   const reveal1 = useReveal();
   const reveal2 = useReveal();
   const reveal3 = useReveal();
