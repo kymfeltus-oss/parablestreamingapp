@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useState, useEffect } = from "react";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient"; 
 import Navbar from "@/components/Navbar";
 import { Upload, Radio } from "lucide-react";
 
 export default function GoLiveSetupPage() {
+  // FIX: Instantiate the client by calling the createClient function
+  const supabase = createClient();
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Sermons");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
