@@ -2,17 +2,18 @@
 'use client'; 
 
 import { useEffect, useState } from "react";
-// Assuming these paths/components are correct in your project
-import WelcomeComponent from "./welcome-content"; 
+// REVERTED: Using your original component import path
+import WelcomePage from "./welcome/page"; 
 import FlashLandingPage from "@/components/FlashLandingPage";
 
 export default function HomePage() {
-  const [stage, setStage] = useState<"flash" | "done">("flash");
+  // REVERTED: Using your original state names "flash" | "welcome"
+  const [stage, setStage] = useState<"flash" | "welcome">("flash"); 
 
   useEffect(() => {
     // Start the 5-second timer
     const timer = setTimeout(() => {
-      setStage("done");
+      setStage("welcome");
     }, 5000); 
 
     return () => clearTimeout(timer);
@@ -21,14 +22,14 @@ export default function HomePage() {
   if (stage === "flash") {
     return (
       <FlashLandingPage
-        // FIX: Prop name must be 'onEnter' to match the component's required props 
+        // FIX: The prop name is 'onEnter' (to resolve the TypeScript error)
         onEnter={() => { 
-          setStage("done");
+          setStage("welcome"); // Set to your original state name
         }}
       />
     );
   }
 
-  // After the flash stage is complete, render the permanent welcome component.
-  return <WelcomeComponent />;
+  // After the flash stage is complete, render the original WelcomePage component.
+  return <WelcomePage />;
 }
