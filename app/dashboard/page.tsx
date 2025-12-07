@@ -2,26 +2,18 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
+// Assuming Navbar is defined in your components folder
+import Navbar from "@/components/Navbar"; 
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // <-- NEW: Import useRouter for redirects
+import { useRouter } from "next/navigation"; 
 import {
-  User,
-  Coins,
-  Gauge,
-  Settings,
-  BookOpen,
-  Radio,
-  Gamepad2,
-  Clock,
-  Heart,
-  LogOut, // <-- NEW: Import LogOut icon
+  User, Coins, Gauge, Settings, BookOpen, Radio, Gamepad2, Clock, Heart, LogOut, 
 } from "lucide-react";
 // FIX: Ensure correct path for the client utility
 import { createClient } from "@/utils/supabase/client"; 
 
 export default function DashboardPage() {
-  const router = useRouter(); // <-- Initialize router
+  const router = useRouter(); 
   const supabase = createClient();
   
   const [profile, setProfile] = useState<any>(null);
@@ -34,10 +26,9 @@ export default function DashboardPage() {
   async function loadProfile() {
     const { data: userData } = await supabase.auth.getUser();
     
-    // Check 1: User is NOT authenticated (middleware should catch this, but this is a fail-safe)
     if (!userData.user) {
-      setLoading(false);
-      return;
+      setLoading(false); 
+      return; 
     }
 
     const { data, error } = await supabase
@@ -46,11 +37,9 @@ export default function DashboardPage() {
       .eq("id", userData.user.id)
       .single();
 
-    // Check 2: Profile row is MISSING (The user has logged in but hasn't run the /profile-setup Server Action)
-    // PGRST116 is the standard PostgREST error code for 'no rows found for a single query'.
+    // CRITICAL: Check if the profile row is missing (PGRST116 = no rows found)
     if (error && error.code === 'PGRST116') {
-      // Redirect to the mandatory profile setup page
-      router.push('/profile-setup');
+      router.push('/profile-setup'); // Redirect to the mandatory setup page
       return; 
     }
     
@@ -58,7 +47,6 @@ export default function DashboardPage() {
     setLoading(false);
   }
 
-  // NEW: Logout handler
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push('/login'); // Redirect to login page after signing out
@@ -72,12 +60,12 @@ export default function DashboardPage() {
     );
   }
 
+  // --- JSX for Dashboard Layout ---
   return (
     <div className="min-h-screen bg-black text-white pb-24">
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-6 pt-24 space-y-10">
-        {/* HEADER */}
         <section className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-extrabold">Dashboard</h1>
@@ -93,7 +81,6 @@ export default function DashboardPage() {
                 {profile?.seeds ?? 0}
                 </p>
             </div>
-            {/* NEW: LOGOUT BUTTON */}
             <button 
                 onClick={handleLogout} 
                 className="p-2 border border-red-500/50 rounded-lg text-red-500 hover:bg-red-500/10 transition"
@@ -106,160 +93,48 @@ export default function DashboardPage() {
 
         {/* TOP ROW: PROFILE • ANALYTICS • EARNINGS */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* PROFILE CARD */}
-          <Link
-            href="/profile"
-            className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex items-center gap-4"
-          >
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-              <User className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold">Profile & Identity</p>
-              <p className="text-[11px] text-gray-400">
-                Edit name, avatar, bio, and public links.
-              </p>
-            </div>
+          <Link href="/profile" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><User className="w-5 h-5" /></div>
+            <div><p className="text-sm font-bold">Profile & Identity</p><p className="text-[11px] text-gray-400">Edit name, avatar, bio, and public links.</p></div>
           </Link>
 
-          {/* CREATOR ANALYTICS - Only for creators */}
           {profile?.role === "creator" && (
-            <Link
-              href="/dashboard/analytics"
-              className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex items-center gap-4"
-            >
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                <Gauge className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-sm font-bold">Creator Analytics</p>
-                <p className="text-[11px] text-gray-400">
-                  Track views, engagement, and follower growth.
-                </p>
-              </div>
+            <Link href="/dashboard/analytics" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><Gauge className="w-5 h-5" /></div>
+              <div><p className="text-sm font-bold">Creator Analytics</p><p className="text-[11px] text-gray-400">Track views, engagement, and follower growth.</p></div>
             </Link>
           )}
 
-          {/* If not a creator, show Become a Creator */}
           {profile?.role !== "creator" && (
-            <Link
-              href="/creator/become"
-              className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-            >
-              <User className="w-6 h-6 text-[#53fc18]" />
-              <p className="text-sm font-bold">Become a Creator</p>
-              <p className="text-[11px] text-gray-400">
-                Start uploading videos, streaming, and building your audience.
-              </p>
-            </Link>
+            <Link href="/creator/become" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2">
+              <User className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Become a Creator</p><p className="text-[11px] text-gray-400">Start uploading videos, streaming, and building your audience.</p></Link>
           )}
 
-          {/* EARNINGS */}
-          <Link
-            href="/monetization"
-            className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex items-center gap-4"
-          >
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-              <Coins className="w-5 h-5 text-[#53fc18]" />
-            </div>
-            <div>
-              <p className="text-sm font-bold">Earnings & Seeds</p>
-              <p className="text-[11px] text-gray-400">
-                Buy Seeds, see payouts, and transaction history.
-              </p>
-            </div>
+          <Link href="/monetization" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><Coins className="w-5 h-5 text-[#53fc18]" /></div>
+            <div><p className="text-sm font-bold">Earnings & Seeds</p><p className="text-[11px] text-gray-400">Buy Seeds, see payouts, and transaction history.</p></div>
           </Link>
         </section>
 
         {/* CREATOR TOOLS SECTION – Creators Only */}
         {profile?.role === "creator" && (
           <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold">Creator Tools</h2>
-              <p className="text-[11px] text-gray-500">
-                Streaming • Parables • Gaming
-              </p>
-            </div>
-
+            <h2 className="text-lg font-bold">Creator Tools</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {/* STREAMING TOOL */}
-              <Link
-                href="/creator/tools"
-                className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-              >
-                <Radio className="w-6 h-6 text-[#53fc18]" />
-                <p className="text-sm font-bold">Streaming Studio</p>
-                <p className="text-[11px] text-gray-400">
-                  Go live, manage overlays, and streaming settings.
-                </p>
-              </Link>
-
-              {/* PARABLES TOOL */}
-              <Link
-                href="/creator/parables/dashboard"
-                className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-              >
-                <BookOpen className="w-6 h-6 text-[#53fc18]" />
-                <p className="text-sm font-bold">Parables Studio</p>
-                <p className="text-[11px] text-gray-400">
-                  Create, manage, and monetize microdrama series.
-                </p>
-              </Link>
-
-              {/* GAMING TOOL */}
-              <Link
-                href="/gaming"
-                className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-              >
-                <Gamepad2 className="w-6 h-6 text-[#53fc18]" />
-                <p className="text-sm font-bold">Gaming Hub</p>
-                <p className="text-[11px] text-gray-400">
-                  Explore Christian gamers and streaming categories.
-                </p>
-              </Link>
+              <Link href="/creator/tools" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"><Radio className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Streaming Studio</p><p className="text-[11px] text-gray-400">Go live, manage overlays, and streaming settings.</p></Link>
+              <Link href="/creator/parables/dashboard" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"><BookOpen className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Parables Studio</p><p className="text-[11px] text-gray-400">Create, manage, and monetize microdrama series.</p></Link>
+              <Link href="/gaming" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"><Gamepad2 className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Gaming Hub</p><p className="text-[11px] text-gray-400">Explore Christian gamers and streaming categories.</p></Link>
             </div>
           </section>
         )}
 
         {/* USER ACTIVITY SECTION */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Your Activity</h2>
-          </div>
-
+          <h2 className="text-lg font-bold">Your Activity</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Link
-              href="/dashboard/history"
-              className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-            >
-              <Clock className="w-6 h-6 text-[#53fc18]" />
-              <p className="text-sm font-bold">Watch History</p>
-              <p className="text-[11px] text-gray-400">
-                Continue watching Parables, streams, and clips.
-              </p>
-            </Link>
-
-            <Link
-              href="/follow"
-              className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-            >
-              <Heart className="w-6 h-6 text-[#53fc18]" />
-              <p className="text-sm font-bold">Following</p>
-              <p className="text-[11px] text-gray-400">
-                See creators, pastors, and gamers you follow.
-              </p>
-            </Link>
-            
-            <Link
-              href="/dashboard/settings"
-              className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"
-            >
-              <Settings className="w-6 h-6 text-[#53fc18]" />
-              <p className="text-sm font-bold">Settings</p>
-              <p className="text-[11px] text-gray-400">
-                Manage notifications, security, and preferences.
-              </p>
-            </Link>
+            <Link href="/dashboard/history" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"><Clock className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Watch History</p><p className="text-[11px] text-gray-400">Continue watching Parables, streams, and clips.</p></Link>
+            <Link href="/follow" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"><Heart className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Following</p><p className="text-[11px] text-gray-400">See creators, pastors, and gamers you follow.</p></Link>
+            <Link href="/dashboard/settings" className="bg-[#111] p-5 rounded-2xl border border-white/10 hover:border-[#53fc18]/60 transition flex flex-col gap-2"><Settings className="w-6 h-6 text-[#53fc18]" /><p className="text-sm font-bold">Settings</p><p className="text-[11px] text-gray-400">Manage notifications, security, and preferences.</p></Link>
           </div>
         </section>
       </main>

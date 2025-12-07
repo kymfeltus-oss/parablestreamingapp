@@ -4,21 +4,8 @@
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-
-// Define the Server Action for submission (you'll need to create this action later)
-async function updateProfile(formData: FormData) {
-  // NOTE: We will assume this Server Action is defined in a separate file (e.g., /actions/profile.ts)
-  // For now, let's keep the client-side logic focused on the form.
-  console.log('Sending profile data to server...');
-  
-  // *** Placeholder for the actual Server Action ***
-  // You would call your server action here: 
-  // const result = await YOUR_SERVER_ACTION(formData); 
-  // 
-  // Since I can't write that file yet, we'll simulate the redirect
-  return { success: true };
-}
-
+// 1. FIX: Import the actual Server Action (updateProfile)
+import { updateProfile } from '@/app/actions/profile'; 
 
 export default function ProfileSetupPage() {
   const router = useRouter();
@@ -26,6 +13,8 @@ export default function ProfileSetupPage() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  // NEW: State for displaying errors from the server action
+  const [error, setError] = useState<string | null>(null);
 
   // 1. Check current session/user status
   useEffect(() => {
@@ -33,6 +22,7 @@ export default function ProfileSetupPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        
         // Optional: Check if profile already exists and redirect if necessary
         const { data: profile } = await supabase
           .from('profiles')
@@ -55,27 +45,38 @@ export default function ProfileSetupPage() {
     return <div className="p-8">Loading profile check...</div>;
   }
   
-  // 2. Client-side form handler
+  // 2. Client-side form handler (Updated to call imported Server Action)
+  // We use the 'action' attribute on the form for the cleanest Server Action call.
+  // Note: We keep the separate handler here to capture errors before submission.
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      setError(null);
       
       const formData = new FormData(event.currentTarget);
       
       // Call the server action
       const result = await updateProfile(formData);
       
-      if (result.success) {
-          router.push('/dashboard'); // Redirect on success
-      } else {
-          // Handle error display
-          alert('Failed to update profile. Try a different username.');
+      if (result.error) {
+          // Display error received from the server action
+          setError(`Failed to update profile: ${result.error}`);
       }
+      // CRITICAL FIX: If successful, the server action handles the redirect.
+      // We do NOT use router.push('/dashboard') here.
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Welcome! Finish Your Profile</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Welcome! Finish Your Profile</h1>
+        
+        {/* NEW: Error Display */}
+        {error && (
+            <div className="p-3 mb-4 bg-red-100 text-red-700 rounded-md text-sm">
+                {error}
+            </div>
+        )}
+        
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
@@ -84,11 +85,11 @@ export default function ProfileSetupPage() {
             <input
               type="text"
               id="username"
-              name="username"
+              name="username" // Name is CRITICAL for formData
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-800"
               placeholder="Choose a unique name"
               minLength={3}
             />
