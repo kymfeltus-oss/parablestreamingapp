@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function POST(req: Request) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
 
   const formData = await req.formData();
   const file = formData.get("file") as File;
@@ -22,26 +22,28 @@ export async function POST(req: Request) {
 
   const fileName = `${user.id}-${Date.now()}`;
 
-  // Upload
   const { data: uploadData, error: uploadError } = await supabase.storage
     .from("avatars")
-    .upload(fileName, file);
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
 
-  if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 400 });
+  if (uploadError || !uploadData) {
+    return NextResponse.json(
+      { error: uploadError?.message ?? "Upload failed" },
+      { status: 400 }
+    );
   }
 
-  const { data: publicUrlData } = supabase.storage
-    .from("avatars")
-    .getPublicUrl(uploadData.path);
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("avatars").getPublicUrl(uploadData.path);
 
-  const avatarUrl = publicUrlData.publicUrl;
-
-  // Update profile
   await supabase
     .from("profiles")
-    .update({ avatar_url: avatarUrl })
+    .update({ avatar_url: publicUrl })
     .eq("id", user.id);
 
-  return NextResponse.json({ avatarUrl });
+  return NextResponse.json({ avatarUrl: publicUrl });
 }

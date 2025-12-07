@@ -1,28 +1,30 @@
+"use server";
+
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-export function supabaseServer() {
-  const cookieStore = cookies();
+/**
+ * Server side Supabase client.
+ * Use this inside route handlers and server actions.
+ */
+export async function supabaseServer() {
+  const cookieStore = await cookies();
 
-  const client = createServerClient(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-        setAll(cookiesToSet) {
-          for (const { name, value, options } of cookiesToSet) {
-            cookieStore.set(name, value, options as any);
-          }
+        set(name: string, value: string, options: any) {
+          cookieStore.set(name, value, options);
+        },
+        remove(name: string, options: any) {
+          cookieStore.set(name, "", { ...options, maxAge: 0 });
         },
       },
     }
   );
-
-  return client;
 }
-
-// Backward compatibility for all old routes:
-export const createServerSupabase = supabaseServer;

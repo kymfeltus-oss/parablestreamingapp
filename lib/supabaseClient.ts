@@ -2,17 +2,13 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 
-export const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-// Optional helper if you ever want a fresh client instance
+/**
+ * Client side Supabase browser client.
+ * Use this inside React components and hooks.
+ */
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
-
-export type SupabaseClientType = ReturnType<typeof createClient>;
