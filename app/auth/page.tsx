@@ -1,22 +1,23 @@
 "use client";
 
 import { useState } from "react";
-// 1. Import the function using a named import
-import { createClient } from "@/lib/supabaseClient"; 
+// UPDATED: Use a named import for the createClient function
+import { createClient } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+// Assuming you still need this component, otherwise remove the import:
+// import Navbar from "@/components/Navbar"; 
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   
-  // 2. Call the function inside the component to get the supabase instance
-  // This ensures the client is created in the browser context (due to "use client" and createBrowserClient)
-  const supabase = createClient(); 
+  // Call the function inside the component to get the supabase client instance
+  const supabase = createClient();
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
 
     if (!email || !password) {
@@ -26,33 +27,37 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    // 3. Use the 'supabase' instance we just created
-    const { error } = await supabase.auth.signInWithPassword({
+    // Use the correctly instantiated 'supabase' client
+    const { error } = await supabase.auth.signUp({
       email,
       password,
+      // You can add options like email redirects here if needed:
+      // options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
     });
 
     if (error) {
       console.error(error);
-      alert(error.message || "Login failed");
+      alert(error.message || "Registration failed");
       setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
+    // After successful signup (usually requires email verification)
+    alert("Check your email to confirm your account!");
+    router.push("/auth/login"); // Redirect to login page after successful registration prompt
   }
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-8 space-y-6">
         <div>
-          <h1 className="text-2xl font-extrabold">Sign in to Parable</h1>
+          <h1 className="text-2xl font-extrabold">Create an Account</h1>
           <p className="text-xs text-gray-400 mt-1">
-            Secure login with email and password
+            Sign up with email and password
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleLogin}>
+        <form className="space-y-4" onSubmit={handleSignup}>
           <div>
             <label className="text-xs text-gray-400">Email</label>
             <input
@@ -60,7 +65,7 @@ export default function LoginPage() {
               className="mt-1 w-full bg-black border border-white/10 rounded-lg p-3 text-sm"
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -83,14 +88,14 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-violet-600 hover:bg-violet-700 text-sm font-bold rounded-lg py-3 disabled:opacity-50"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "Registering..." : "Sign Up"}
           </button>
         </form>
 
         <p className="text-xs text-gray-400 text-center">
-          Do not have an account yet{" "}
-          <Link href="/auth/register" className="text-[#53fc18] font-semibold">
-            Create account
+          Already have an account?{" "}
+          <Link href="/auth/page.tsx" className="text-[#53fc18] font-semibold">
+            Sign In
           </Link>
         </p>
       </div>
