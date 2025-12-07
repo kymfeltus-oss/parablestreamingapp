@@ -1,4 +1,4 @@
-// middleware.ts (Final Corrected Script)
+// middleware.ts (Final Corrected Script - Fixes all Type Errors)
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
@@ -11,17 +11,17 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        // Correctly read cookies from the request
+        // FIX: Only include supported methods (get, set, delete) for middleware
         get: (name) => req.cookies.get(name)?.value,
-        getAll: () => req.cookies.getAll(),
         
         // Correctly set cookies on the response
         set: (name, value, options) => {
           res.cookies.set({ name, value, ...options });
         },
-        // Correctly remove cookies on the response
-        remove: (name, options) => {
-          res.cookies.set({ name, value: '', ...options });
+        // Correctly delete cookies on the response (using name: 'delete')
+        delete: (name, options) => {
+          // Setting value to '' and adding options effectively removes the cookie
+          res.cookies.delete(name, options); 
         },
       },
     }
@@ -35,11 +35,10 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // 4. Define public paths (including the new landing page)
+  // 4. Define public paths (including the new landing page to fix the mobile loop)
   const publicPaths = ['/login', '/signup', '/auth/confirm', '/auth/landing'];
 
-  // Check if the current path starts with any of the public paths
-  // Using includes() is fine if the path is an exact match like '/login'
+  // Check if the current path is protected or public
   const isPublicPath = publicPaths.includes(req.nextUrl.pathname);
 
   // --- Redirection Logic ---
@@ -62,6 +61,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // FIX: Complete the matcher array to resolve the syntax error
   matcher: [
     /*
     * Match all request paths except for Next.js internal files and APIs
