@@ -1,21 +1,12 @@
-// ./app/onboarding/page.tsx
+// utils/supabase/client.ts
 
-'use client'
+import { createBrowserClient } from '@supabase/ssr'
 
-import { useState } from 'react'
-// Import the new utility function from your utils folder
-import { createClient } from '@/utils/supabase/client' 
-import { useRouter } from 'next/navigation'
-
-export default function OnboardingWizard() {
-  // Use the utility function to instantiate the client
-  const supabase = createClient()
-  const router = useRouter()
-  
-  // ... rest of your component logic ...
-
-  return (
-    // Your component JSX
-    <></>
+export function createClient() {
+  // This function returns an instance of the Supabase client
+  // and does *not* contain any React/JSX syntax like <></> or <div>.
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 }
