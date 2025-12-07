@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient"; // <--- 1. FIXED IMPORT
 import { useRouter } from "next/navigation";
 
 export default function AuthCallback() {
   const router = useRouter();
+  const supabase = createClient(); // <--- 2. INITIALIZE CLIENT HERE
 
   useEffect(() => {
     async function finalizeAccount() {
@@ -54,11 +55,14 @@ export default function AuthCallback() {
         });
       }
 
+      // STRATEGY NOTE:
+      // If you want to use the new Onboarding Wizard we built,
+      // change "/dashboard" below to "/onboarding"
       router.push("/dashboard");
     }
 
     finalizeAccount();
-  }, []);
+  }, [router, supabase]); // Added dependencies for safety
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
