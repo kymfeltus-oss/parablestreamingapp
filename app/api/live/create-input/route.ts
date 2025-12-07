@@ -1,11 +1,25 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"; // Use this
-import { cookies } from "next/headers"; // Use this
+// Corrected Imports: Use createClient from @supabase/ssr
+import { createClient } from "@supabase/ssr"; 
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   // Use the standard Next.js method to get cookies and create the client
   const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  // Call createClient from @supabase/ssr with the necessary cookie wrappers
+  const supabase = createClient({
+    cookies: {
+      get(name) {
+        return cookieStore.get(name)?.value;
+      },
+      set(name, value, options) {
+        cookieStore.set({ name, value, ...options });
+      },
+      remove(name, options) {
+        cookieStore.set({ name, value: "", ...options });
+      },
+    },
+  });
 
   const {
     data: { user },
