@@ -5,6 +5,9 @@ import WelcomePage from "./welcome/page";
 import FlashLandingPage from "@/components/FlashLandingPage";
 
 export default function HomePage() {
+  // CHECK: Testing if the .env.local file is reading correctly
+  console.log("MY TEST VARIABLE:", process.env.NEXT_PUBLIC_TEST_VAR);
+
   const [stage, setStage] = useState<"flash" | "welcome">("flash");
 
   useEffect(() => {
