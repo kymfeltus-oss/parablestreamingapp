@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { updateProfile } from '@/app/actions/profile'; 
-import { Camera, User as UserIcon } from 'lucide-react'; // Added icons
+import { Camera, User as UserIcon } from 'lucide-react'; 
 
 export default function ProfileSetupPage() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function ProfileSetupPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // NEW STATES FOR IMAGE HANDLING
+  // States for Image Handling
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
 
@@ -25,6 +25,8 @@ export default function ProfileSetupPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        
+        // Check if profile already exists—this is CRITICAL
         const { data: profile } = await supabase
           .from('profiles')
           .select('username')
@@ -35,24 +37,23 @@ export default function ProfileSetupPage() {
           router.replace('/dashboard'); 
         }
       } else {
-        router.replace('/login'); 
+        router.replace('/login'); // If somehow logged out, redirect
       }
       setLoading(false);
     }
     getUser();
   }, [router, supabase]);
 
-  // NEW FUNCTION: Handles file selection and creates a local preview
+  // Handles file selection and creates a local preview (fixes your image issue)
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     
     if (avatarPreviewUrl) {
-      URL.revokeObjectURL(avatarPreviewUrl); // Clean up old preview URL
+      URL.revokeObjectURL(avatarPreviewUrl);
     }
 
     if (file) {
       setAvatarFile(file);
-      // Create a local URL for immediate display
       const newPreviewUrl = URL.createObjectURL(file);
       setAvatarPreviewUrl(newPreviewUrl);
     } else {
@@ -61,26 +62,25 @@ export default function ProfileSetupPage() {
     }
   };
 
-
-  // Client-side form handler (Updated to include file data if necessary)
+  // Client-side form handler
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setError(null);
       
       const formData = new FormData(event.currentTarget);
       
-      // OPTIONAL: Append the file to the FormData if you want the Server Action 
-      // to handle the upload logic.
+      // Append the avatar file if one was selected
       if (avatarFile) {
         formData.append('avatar', avatarFile); 
       }
       
+      // Call the Server Action
       const result = await updateProfile(formData);
       
       if (result.error) {
-          setError(`Failed to update profile: ${result.error}`);
+          setError(`Failed to create profile: ${result.error}`);
       }
-      // Server Action handles the redirect on success
+      // Success redirect is handled by the Server Action itself
   };
 
   if (loading || !userId) {
@@ -116,9 +116,9 @@ export default function ProfileSetupPage() {
                 type="file"
                 id="avatar-upload"
                 name="avatar-file"
-                accept="image/*" // Restrict to image files
+                accept="image/*"
                 onChange={handleFileChange}
-                className="hidden" // Hide the default file input
+                className="hidden"
               />
             </label>
           </div>
