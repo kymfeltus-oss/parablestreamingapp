@@ -1,16 +1,13 @@
 "use client";
 
 import { useState } from "react";
-// FIX: Import the function, not a default object
-import { createClient } from "@/lib/supabaseClient"; 
+// UPDATED: Changed from named import { supabase } to default import supabase
+import supabase from "@/lib/supabaseClient"; 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  // FIX: Initialize the client here
-  const supabase = createClient(); 
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,8 +34,8 @@ export default function LoginPage() {
       return;
     }
 
-    // STRATEGY: Send to Onboarding to capture data, not Dashboard
-    router.push("/onboarding"); 
+    // Redirect to the dashboard after successful login
+    router.push("/dashboard"); 
   }
 
   return (
