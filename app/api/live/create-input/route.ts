@@ -1,6 +1,8 @@
-import { createServerClient, type CookieOptions, type SetAllCookiesOptions } from "@supabase/ssr"; // Import SetAllCookiesOptions
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+// Import SerializeOptions from the 'cookie' package (a dev dependency that should be available)
+import type { CookieSerializeOptions as SerializeOptions } from 'cookie'; 
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -10,17 +12,18 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        // Aligns with modern interface
         getAll() {
           return cookieStore.getAll();
         },
-        // Aligns with modern interface and uses correct type for cookiesToSet parameter
-        setAll(cookiesToSet: SetAllCookiesOptions[]) { 
+        // Use the exact inline type definition required by the library's interface
+        setAll(cookiesToSet: { name: string; value: string; options: SerializeOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set({ name, value, ...options });
+              // The Next.js cookieStore.set method accepts the combined options
+              cookieStore.set(name, value, options); 
             });
           } catch (error) {
+            // This can be ignored if you have middleware refreshing user sessions
             console.error("Failed to set cookies:", error);
           }
         },
