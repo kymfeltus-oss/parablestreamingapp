@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// FIX: Change import from named export 'supabase' to named export 'createClient'
+import { createClient } from "@/lib/supabaseClient"; 
 import Navbar from "@/components/Navbar";
 import { Radio, Video } from "lucide-react";
 
 export default function LivePreviewPage() {
+  // FIX: Instantiate the client by calling the createClient function inside the component
+  const supabase = createClient(); 
+
   const [stream, setStream] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [creatorId, setCreatorId] = useState<string | null>(null);
