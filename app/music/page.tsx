@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient";
 import Navbar from "@/components/Navbar";
 import { Flame, Mic2, Headphones, Calendar, MapPin, Ticket } from "lucide-react";
 
 /* ============================================================
-   TYPES — FIXED camelCase to match real Supabase fields
+   TYPES — camelCase aligned with your Supabase return fields
 =============================================================== */
 type Artist = {
   id: string;
@@ -43,6 +43,8 @@ type Event = {
    PAGE COMPONENT
 =============================================================== */
 export default function MusicPage() {
+  const supabase = createClient();
+
   const [artists, setArtists] = useState<Artist[]>([]);
   const [shedRooms, setShedRooms] = useState<ShedRoom[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -61,9 +63,7 @@ export default function MusicPage() {
       supabase.from("events").select("*"),
     ]);
 
-    /* ============================
-       FIX: Normalize camelCase
-    ============================== */
+    /* Artists */
     if (artistsRes.data) {
       setArtists(
         artistsRes.data.map((a: any) => ({
@@ -79,6 +79,7 @@ export default function MusicPage() {
       );
     }
 
+    /* Shed Rooms */
     if (shedsRes.data) {
       setShedRooms(
         shedsRes.data.map((s: any) => ({
@@ -92,6 +93,7 @@ export default function MusicPage() {
       );
     }
 
+    /* Events */
     if (eventsRes.data) {
       setEvents(
         eventsRes.data.map((e: any) => ({
@@ -109,7 +111,7 @@ export default function MusicPage() {
     setLoading(false);
   }
 
-  /* CATEGORY FILTERS */
+  /* Filter groups */
   const gospelArtists = artists.filter((a) =>
     a.genre?.toLowerCase().includes("gospel") ||
     a.genre?.toLowerCase().includes("urban") ||
@@ -345,7 +347,7 @@ export default function MusicPage() {
         </section>
 
         {/* ======================================================
-           WORSHIP
+           WORSHIP ARTISTS
         ======================================================= */}
         <section className="pb-10">
           <div className="flex justify-between items-center mb-6">
