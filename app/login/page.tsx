@@ -1,4 +1,4 @@
-// app/login/page.tsx (Previous Version)
+// app/login/page.tsx (Reverted to version linking to /signup)
 'use client';
 
 import { useState } from 'react';
