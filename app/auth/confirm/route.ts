@@ -1,40 +1,28 @@
-// app/auth/confirm/route.ts
+// app/auth/confirm/route.ts (Final, Cleaned Script)
 import { NextResponse, type NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+// FIX: Use the dedicated route handler helper for reliability
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'; 
 
-// This handler will intercept the link clicked in the verification email.
-export async function GET(request: NextRequest) { 
-  const { searchParams } = new URL(request.url); 
-  const code = searchParams.get('code');
+export async function GET(request: NextRequest) {
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
 
-  if (code) {
-    const cookieStore = cookies();
-    
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => cookieStore.getAll(),
-          setAll: (cookiesToSet) => {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
+  if (code) {
+    const cookieStore = cookies();
+    
+    // FIX: Use createRouteHandlerClient for automatic cookie management
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      // SUCCESS: Redirect to an intermediate client page to stabilize the session
-      return NextResponse.redirect(new URL('/auth/landing', request.url));
-    }
-  }
+    if (!error) {
+      // SUCCESS: Redirect to the intermediate client page to stabilize the session
+      return NextResponse.redirect(new URL('/auth/landing', requestUrl));
+    }
+  }
 
-  // FAILURE: Use the hardcoded host fix
-  const liveHost = 'https://main.dqugj22h6x51v.amplifyapp.com';
-  return NextResponse.redirect(new URL(`${liveHost}/login?error=verification_failed`));
+  // FAILURE: Redirect to login with error
+  // FIX: Use the request URL's origin for a clean, reliable redirect
+  return NextResponse.redirect(new URL('/login?error=verification_failed', requestUrl.origin));
 }

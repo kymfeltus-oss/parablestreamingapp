@@ -1,3 +1,4 @@
+// app/auth/register/page.tsx (Final Corrected Script)
 "use client";
 
 import type React from "react";
@@ -10,7 +11,7 @@ import { Sparkles, UserPlus, Mic2, Music2, Gamepad2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const supabase = createClient(); // ✅ FIXED — no more "supabase not exported"
+  const supabase = createClient(); 
 
   // base fields
   const [email, setEmail] = useState("");
@@ -91,7 +92,8 @@ export default function RegisterPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
+        // Use the dynamic origin for the redirect link in the email
+        emailRedirectTo: `${location.origin}/auth/confirm`, 
         data: {
           displayName,
           username,
@@ -119,7 +121,9 @@ export default function RegisterPage() {
     }
 
     alert("Account created! Please check your email to verify your account.");
-    router.push("/auth");
+    
+    // FIX: Redirect to the canonical login route after successful registration prompt
+    router.push("/login"); 
   }
 
   // input styling
@@ -310,7 +314,7 @@ export default function RegisterPage() {
 
             <p className="text-xs text-gray-400 text-center mt-4">
               Already have an account?{" "}
-              <Link href="/auth" className="text-[#53fc18] font-semibold">
+              <Link href="/login" className="text-[#53fc18] font-semibold">
                 Sign in
               </Link>
             </p>
