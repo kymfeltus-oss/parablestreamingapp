@@ -11,9 +11,10 @@ export async function GET(request: NextRequest) {
   if (code) {
     const cookieStore = cookies();
     
-    // FIX: Use createRouteHandlerClient for automatic cookie management
+    // FIX: Use createRouteHandlerClient for automatic and reliable cookie management
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
+    // Exchange the verification code for a user session
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
@@ -23,6 +24,6 @@ export async function GET(request: NextRequest) {
   }
 
   // FAILURE: Redirect to login with error
-  // FIX: Use the request URL's origin for a clean, reliable redirect
+  // Use the request URL's origin for a clean, reliable redirect
   return NextResponse.redirect(new URL('/login?error=verification_failed', requestUrl.origin));
 }
