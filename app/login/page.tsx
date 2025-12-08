@@ -1,16 +1,17 @@
-// app/login/page.tsx (Reverted to version linking to /signup)
+// app/login/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link'; // <--- ADDED: Import Link component for Next.js routing
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams(); 
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -26,7 +27,7 @@ export default function LoginPage() {
       setError(`Login failed: ${signInError.message}`);
     } else {
       // Check for redirect_to parameter set by middleware
-      const redirectTo = searchParams.get('redirect_to') || '/dashboard'; 
+      const redirectTo = searchParams.get('redirect_to') || '/dashboard';
       router.push(redirectTo);
     }
   };
@@ -42,7 +43,8 @@ export default function LoginPage() {
         </button>
         {error && <p className="mt-4 text-sm text-center text-red-500">{error}</p>}
         <p className="mt-4 text-center">
-          Don't have an account? <a href="/signup" className="text-indigo-600 hover:underline">Sign Up</a> 
+          {/* FIX: Corrected path to /auth/register and used Link component */}
+          Don't have an account? <Link href="/auth/register" className="text-indigo-600 hover:underline">Sign Up</Link>
         </p>
       </form>
     </div>
