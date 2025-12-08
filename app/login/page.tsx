@@ -1,17 +1,16 @@
-// app/login/page.tsx
+// app/login/page.tsx (Previous Version)
 'use client';
 
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link'; // <--- NEW: Import Link component
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); 
   const supabase = createClient();
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -27,7 +26,7 @@ export default function LoginPage() {
       setError(`Login failed: ${signInError.message}`);
     } else {
       // Check for redirect_to parameter set by middleware
-      const redirectTo = searchParams.get('redirect_to') || '/dashboard';
+      const redirectTo = searchParams.get('redirect_to') || '/dashboard'; 
       router.push(redirectTo);
     }
   };
@@ -43,8 +42,7 @@ export default function LoginPage() {
         </button>
         {error && <p className="mt-4 text-sm text-center text-red-500">{error}</p>}
         <p className="mt-4 text-center">
-          {/* FIX: Use the Link component and the correct path */}
-          Don't have an account? <Link href="/auth/register" className="text-indigo-600 hover:underline">Sign Up</Link>
+          Don't have an account? <a href="/signup" className="text-indigo-600 hover:underline">Sign Up</a> 
         </p>
       </form>
     </div>
