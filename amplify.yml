@@ -12,6 +12,8 @@ frontend:
     baseDirectory: .next
     files:
       - '**/*'
-  cache:
-    paths:
-      - node_modules/**/*
+# The cache section is intentionally REMOVED to force a clean build
+# The old cache section was:
+# cache:
+#   paths:
+#     - node_modules/**/*
