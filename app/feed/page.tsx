@@ -1,99 +1,97 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabaseClient";
 import { Users, Coins, Sparkles, Music2, Mic2 } from "lucide-react";
 
 export default function FeedPage() {
-  /* ================== LIVE STREAMS ================== */
-  const liveStreams = [
-    {
-      id: 1,
-      slug: "td-jakes",
-      title: "Faith + Obedience = Miracles!",
-      streamer: "Bishop T.D. Jakes",
-      viewers: 18205,
-      thumbnail: "/td-jakes.jpg",
-      tags: ["Sermon", "Faith", "Live"],
-    },
-    {
-      id: 2,
-      slug: "kirk-franklin",
-      title: "Praise Break • Live Worship",
-      streamer: "Kirk Franklin",
-      viewers: 12440,
-      thumbnail: "/kirk_avatar.png",
-      tags: ["Worship", "Music", "Praise"],
-    },
-    {
-      id: 3,
-      slug: "lauren-daigle",
-      title: "Gospel Flow Night",
-      streamer: "Lauren Daigle",
-      viewers: 9200,
-      thumbnail: "/lauren-daigle.jpg",
-      tags: ["Gospel", "Music", "Live"],
-    },
-    {
-      id: 4,
-      slug: "pastor-stevenson",
-      title: "Prayer & Prophetic Flow",
-      streamer: "Pastor Stevenson",
-      viewers: 7855,
-      thumbnail: "/steven-furtick.jpg",
-      tags: ["Prayer", "Teaching"],
-    },
-  ];
+  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
+  const [liveStreams, setLiveStreams] = useState<any[]>([]);
 
-  /* ================== SHED ROOMS ================== */
+  /* ================== AUTH GUARD ================== */
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      loadStreams();
+    }
+
+    checkUser();
+  }, []);
+
+  /* ================== LOAD REAL STREAMS ================== */
+  async function loadStreams() {
+    const { data, error } = await supabase
+      .from("live_streams")
+      .select("*");
+
+    if (error) console.error("Error fetching live streams:", error);
+
+    const normalized = (data || []).map((stream: any) => ({
+      id: stream.id,
+      slug: stream.slug || stream.id, // Fallback
+      title: stream.title || "Untitled Stream",
+      streamer: stream.streamer_name || "Creator",
+      viewers: stream.viewer_count || 0,
+      thumbnail: stream.thumbnail_url || "/placeholder.jpg",
+      tags: stream.tags || (stream.category ? [stream.category] : []),
+      isLive: stream.is_live ?? true, // Default true for now
+    }));
+
+    setLiveStreams(normalized);
+    setLoading(false);
+  }
+
+  /* ====================== LOADING SKELETON ====================== */
+  const SkeletonCard = () => (
+    <div className="neon-card rounded-xl bg-[#111] animate-pulse h-40" />
+  );
+
+  /* ================== SHED ROOMS (NO CHANGE) ================== */
   const shedRooms = [
-    {
-      id: 1,
-      title: "Organ + Drum Pocket Session",
-      streamer: "Jamal Keys",
-      thumbnail: "/images.jfif",
-      viewers: 1320,
-    },
-    {
-      id: 2,
-      title: "Bass Lines 101 • Gospel Grooves",
-      streamer: "Marcus Bass",
-      thumbnail: "/bass-room.jpg",
-      viewers: 880,
-    },
-    {
-      id: 3,
-      title: "Aux Keys Worship Pads",
-      streamer: "SynthLord",
-      thumbnail: "/keys-room.jpg",
-      viewers: 1670,
-    },
+    { id: 1, title: "Organ + Drum Pocket Session", streamer: "Jamal Keys", thumbnail: "/images.jfif", viewers: 1320 },
+    { id: 2, title: "Bass Lines 101 • Gospel Grooves", streamer: "Marcus Bass", thumbnail: "/bass-room.jpg", viewers: 880 },
+    { id: 3, title: "Aux Keys Worship Pads", streamer: "SynthLord", thumbnail: "/keys-room.jpg", viewers: 1670 },
   ];
 
-  /* ================== VOCAL ROOMS ================== */
+  /* ================== VOCAL ROOMS (NO CHANGE) ================== */
   const vocalRooms = [
-    {
-      id: 1,
-      title: "🔥 Gospel Riffs + Runs Session",
-      streamer: "Sarah Sings",
-      thumbnail: "/vocal-room1.jpg",
-      viewers: 2020,
-    },
-    {
-      id: 2,
-      title: "Choir Blending Workshop",
-      streamer: "Voices United",
-      thumbnail: "/vocal-room2.jpg",
-      viewers: 920,
-    },
-    {
-      id: 3,
-      title: "Vocal Warmups Live",
-      streamer: "Coach Harmony",
-      thumbnail: "/vocal-room3.jpg",
-      viewers: 1420,
-    },
+    { id: 1, title: "🔥 Gospel Riffs + Runs Session", streamer: "Sarah Sings", thumbnail: "/vocal-room1.jpg", viewers: 2020 },
+    { id: 2, title: "Choir Blending Workshop", streamer: "Voices United", thumbnail: "/vocal-room2.jpg", viewers: 920 },
+    { id: 3, title: "Vocal Warmups Live", streamer: "Coach Harmony", thumbnail: "/vocal-room3.jpg", viewers: 1420 },
   ];
 
+  /* ================== SKELETON DURING LOAD ================== */
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white pb-24">
+        <header className="flex items-center justify-between px-5 py-4 bg-[#0f0f0f] border-b border-white/10">
+          <span className="text-5xl font-black tracking-tight text-[#53fc18]">PARABLE</span>
+        </header>
+
+        <section className="mt-8 px-5">
+          <h2 className="text-3xl font-extrabold mb-4 text-[#53fc18]">Live Now</h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  /* ================== PAGE UI (UNCHANGED) ================== */
   return (
     <div className="min-h-screen bg-black text-white pb-24">
 
@@ -135,14 +133,13 @@ export default function FeedPage() {
               className="neon-card overflow-hidden rounded-xl"
             >
               <div className="relative">
-                <img
-                  src={s.thumbnail}
-                  className="w-full h-32 object-cover"
-                />
+                <img src={s.thumbnail} className="w-full h-32 object-cover" />
 
-                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">
-                  LIVE
-                </span>
+                {s.isLive && (
+                  <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">
+                    LIVE
+                  </span>
+                )}
 
                 <span className="absolute bottom-1 left-2 bg-black/70 px-2 py-0.5 text-[11px] rounded flex items-center gap-1">
                   <Users className="w-3 h-3" />
@@ -155,7 +152,7 @@ export default function FeedPage() {
                 <p className="text-[11px] text-gray-400">{s.streamer}</p>
 
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {s.tags.map((tag, idx) => (
+                  {s.tags.map((tag: string, idx: number) => (
                     <span key={idx} className="neon-tag">
                       {tag}
                     </span>
@@ -176,10 +173,7 @@ export default function FeedPage() {
 
         <div className="flex gap-4 overflow-x-auto pb-3">
           {shedRooms.map((room) => (
-            <div
-              key={room.id}
-              className="min-w-[200px] neon-card rounded-xl overflow-hidden"
-            >
+            <div key={room.id} className="min-w-[200px] neon-card rounded-xl overflow-hidden">
               <img src={room.thumbnail} className="w-full h-32 object-cover" />
 
               <div className="p-2">
@@ -204,10 +198,7 @@ export default function FeedPage() {
 
         <div className="flex gap-4 overflow-x-auto pb-3">
           {vocalRooms.map((room) => (
-            <div
-              key={room.id}
-              className="min-w-[200px] neon-card rounded-xl overflow-hidden"
-            >
+            <div key={room.id} className="min-w-[200px] neon-card rounded-xl overflow-hidden">
               <img src={room.thumbnail} className="w-full h-32 object-cover" />
 
               <div className="p-2">
