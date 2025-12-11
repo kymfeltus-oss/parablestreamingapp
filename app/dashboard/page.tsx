@@ -13,26 +13,26 @@ export default function DashboardRouter() {
   }, []);
 
   async function init() {
-    // Get logged in user
+    // Get authenticated user
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
+    // Not logged in → go to login
     if (!user) {
       router.replace("/auth/login");
       return;
     }
 
-    // Read account type from metadata
     const type = user.user_metadata?.accountType;
 
-    // IF CREATOR → send to Creator Dashboard
+    // Creator → go to creator dashboard
     if (type === "creator") {
       router.replace("/creator/dashboard");
       return;
     }
 
-    // IF VIEWER → send to viewer feed
+    // Viewer → go to feed
     router.replace("/feed");
   }
 
