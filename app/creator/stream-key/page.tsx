@@ -4,11 +4,17 @@ import { useState } from "react";
 
 export default function StreamKeyPage() {
   const [key, setKey] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function generate() {
-    const res = await fetch("/api/stream-key", { method: "POST" });
+    setLoading(true);
+    const res = await fetch(
+      "https://api.parablestreaming.com/api/stream-key",
+      { method: "POST" }
+    );
     const json = await res.json();
     if (json.ok) setKey(json.streamKey);
+    setLoading(false);
   }
 
   return (
@@ -17,13 +23,14 @@ export default function StreamKeyPage() {
 
       <button
         onClick={generate}
-        className="bg-[#53fc18] text-black px-4 py-2 rounded font-bold mb-4"
+        disabled={loading}
+        className="px-4 py-3 bg-[#53fc18] text-black font-bold rounded"
       >
-        Generate New Stream Key
+        {loading ? "Generating..." : "Generate New Stream Key"}
       </button>
 
       {key && (
-        <div className="bg-[#111] border border-white/10 p-4 rounded text-sm">
+        <div className="mt-4 p-4 bg-[#111] border border-white/10 rounded">
           {key}
         </div>
       )}
