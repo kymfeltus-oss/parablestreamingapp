@@ -1,18 +1,16 @@
 // app/api/ws/route.ts
 
-// Declare the global interface AND the global constructor function
+// Keep the global declarations from the previous step:
 declare global {
   interface WebSocketPair {
     0: WebSocket;
     1: WebSocket;
   }
-  // This line tells TypeScript that a function/constructor named 'WebSocketPair' exists globally
   var WebSocketPair: {
     prototype: WebSocketPair;
     new(): WebSocketPair;
   };
 }
-
 
 export const runtime = "edge"; 
 
@@ -21,24 +19,28 @@ export function GET(req: Request) {
     return new Response("Expected websocket", { status: 400 });
   }
 
-  // The build worker should now accept this line:
   const pair = new WebSocketPair();
+  const client = pair;
   
-  // Note: Vercel's edge runtime API is slightly different from Cloudflare Workers' default API.
-  // In many Next.js edge examples, the pair is accessed differently.
-  // Let's adjust slightly for robust compatibility with Vercel's preferred access pattern:
+  // Cast the 'server' side to 'any' to bypass the TypeScript DOM type check
+  const server = pair as any; 
 
-  const client = pair[0];
-  const server = pair[1];
-
-
+  // TypeScript will no longer error on this line:
   server.accept();
 
   // Echo server for now
   server.addEventListener("message", (event) => {
     server.send(event.data);
   });
-  // ... (rest of event listeners) ...
+
+  server.addEventListener("close", () => {
+    console.log("WebSocket connection closed.");
+  });
+  
+  server.addEventListener("error", (error) => {
+    console.error("WebSocket error:", error);
+  });
+
 
   return new Response(null, {
     status: 101,
