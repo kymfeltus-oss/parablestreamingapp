@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic"; // <-- REQUIRED FIX
+
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabaseClient";
 
@@ -8,8 +11,9 @@ export async function GET(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user)
+  if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -17,8 +21,9 @@ export async function GET(req: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile?.stream_key)
+  if (!profile?.stream_key) {
     return NextResponse.json({ error: "No stream key set" }, { status: 400 });
+  }
 
   const rtmpUrl = `rtmp://live.cloudflare.com:1935/live/${profile.stream_key}`;
 
