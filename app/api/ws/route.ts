@@ -1,6 +1,6 @@
 export const runtime = "edge";
 
-export default async function handler(req: Request) {
+export function GET(req: Request) {
   if (req.headers.get("upgrade") !== "websocket") {
     return new Response("Expected websocket", { status: 400 });
   }
@@ -11,9 +11,13 @@ export default async function handler(req: Request) {
 
   server.accept();
 
+  // Echo server for now
   server.addEventListener("message", (event) => {
-    server.send(event.data); // echo for now
+    server.send(event.data);
   });
 
-  return new Response(null, { status: 101, webSocket: client });
+  return new Response(null, {
+    status: 101,
+    webSocket: client,
+  });
 }
