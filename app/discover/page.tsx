@@ -2,13 +2,16 @@
 
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { creators } from "@/lib/preachers";
-import { artists } from "@/lib/artists";
-import { Flame, Gamepad2, Star, Crown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabaseClient";
+import { Flame, Star, Crown, Gamepad2 } from "lucide-react";
 
 export default function DiscoverPage() {
-  const topPreachers = creators.slice(0, 4);
-  const topArtists = artists.slice(0, 4);
+  const supabase = createClient();
+
+  const [creators, setCreators] = useState<any[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const tiers = [
     {
@@ -45,16 +48,48 @@ export default function DiscoverPage() {
     },
   ];
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    // Load creators
+    const { data: creatorProfiles } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url, creator_category, ministry_name")
+      .not("creator_category", "is", null)
+      .order("display_name");
+
+    // Load artists (tagged separately by category)
+    const { data: artistProfiles } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url, creator_category, ministry_name")
+      .eq("creator_category", "Worship artist");
+
+    setCreators(creatorProfiles || []);
+    setArtists(artistProfiles || []);
+    setLoading(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Loading content...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white pb-20">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8 space-y-10">
+
         {/* HEADER */}
         <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">Discover</h1>
             <p className="text-gray-400 text-sm">
-              Find new ministries, worship artists, and games to support with Seeds and subscriptions.
+              Find new ministries, artists, and creators to support.
             </p>
           </div>
           <div className="flex gap-3">
@@ -73,34 +108,36 @@ export default function DiscoverPage() {
           </div>
         </section>
 
-        {/* FEATURED STREAMERS / GAMERS */}
+        {/* FEATURED CREATORS */}
         <section className="space-y-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Flame className="w-5 h-5 text-orange-400" /> Trending Ministries & Streamers
           </h2>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {topPreachers.map((p: any, i: number) => (
+            {creators.slice(0, 8).map((p: any) => (
               <Link
-                href={`/creator/${p.slug}`}
-                key={i}
-                className="bg-[#101010] border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/50 transition group"
+                href={`/creator/${p.username}`}
+                key={p.id}
+                className="bg-[#101010] border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/50 transition"
               >
                 <div className="relative h-32 overflow-hidden">
                   <img
-                    src={p.bannerUrl}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    src={p.avatar_url || "/placeholder.jpg"}
+                    className="w-full h-full object-cover opacity-60"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 </div>
+
                 <div className="p-4 flex items-center gap-3">
                   <img
-                    src={p.avatarUrl}
+                    src={p.avatar_url || "/placeholder.jpg"}
                     className="w-10 h-10 rounded-full border border-white/20"
                   />
                   <div>
-                    <p className="font-semibold text-sm">{p.name}</p>
+                    <p className="font-semibold text-sm">{p.display_name}</p>
                     <p className="text-[11px] text-gray-400">
-                      {p.ministry ? "Ministry • Live & On-Demand" : "Creator"}
+                      {p.ministry_name || p.creator_category}
                     </p>
                   </div>
                 </div>
@@ -112,30 +149,34 @@ export default function DiscoverPage() {
         {/* FEATURED ARTISTS */}
         <section className="space-y-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-300" /> Featured Worship & Artists
+            <Star className="w-5 h-5 text-yellow-300" /> Featured Worship Artists
           </h2>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {topArtists.map((a: any, i: number) => (
+            {artists.slice(0, 8).map((a: any) => (
               <Link
-                href={`/artist/${a.slug}`}
-                key={i}
-                className="bg-[#101010] border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/50 transition group"
+                href={`/creator/${a.username}`}
+                key={a.id}
+                className="bg-[#101010] border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/50 transition"
               >
                 <div className="relative h-32 overflow-hidden">
                   <img
-                    src={a.bannerUrl}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    src={a.avatar_url || "/placeholder.jpg"}
+                    className="w-full h-full object-cover opacity-60"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 </div>
+
                 <div className="p-4 flex items-center gap-3">
                   <img
-                    src={a.avatarUrl}
+                    src={a.avatar_url || "/placeholder.jpg"}
                     className="w-10 h-10 rounded-full border border-white/20"
                   />
                   <div>
-                    <p className="font-semibold text-sm">{a.name}</p>
-                    <p className="text-[11px] text-gray-400">Artist • Worship & Live Sets</p>
+                    <p className="font-semibold text-sm">{a.display_name}</p>
+                    <p className="text-[11px] text-gray-400">
+                      Worship • Artist
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -143,11 +184,12 @@ export default function DiscoverPage() {
           </div>
         </section>
 
-        {/* SUBSCRIPTION TIERS PREVIEW */}
+        {/* SUBSCRIPTIONS */}
         <section className="space-y-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Crown className="w-5 h-5 text-violet-300" /> Subscription Tiers
           </h2>
+
           <div className="grid md:grid-cols-3 gap-4">
             {tiers.map((tier, i) => (
               <div
@@ -179,35 +221,6 @@ export default function DiscoverPage() {
           </div>
         </section>
 
-        {/* GAMER DISCOVERY */}
-        <section className="space-y-4 pb-10">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Gamepad2 className="w-5 h-5 text-emerald-300" /> Faith + Gaming Channels
-          </h2>
-          <p className="text-xs text-gray-400 mb-2">
-            Discover pastors and creators who mix Bible study, community nights, and gaming.
-          </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-[#101010] border border-white/10 rounded-2xl p-4 flex flex-col justify-between"
-              >
-                <div>
-                  <p className="text-sm font-semibold mb-1">
-                    Youth Co-Op Night #{i}
-                  </p>
-                  <p className="text-xs text-gray-400 mb-2">
-                    Co-op gameplay, prayer, & discipleship moments.
-                  </p>
-                </div>
-                <button className="mt-2 w-full bg-white/10 hover:bg-white/20 text-[11px] font-semibold py-2 rounded-full">
-                  View Channel
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );

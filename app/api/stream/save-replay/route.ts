@@ -13,10 +13,13 @@ export async function POST(req: Request) {
       );
     }
 
+    // Update stream with replay URL and mark as ended
     const { error } = await supabase
       .from("live_streams")
       .update({
         replay_url: replayUrl,
+        is_live: false,
+        ended_at: new Date().toISOString(),
       })
       .eq("id", streamId);
 
@@ -30,7 +33,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Replay save failed" },
+      { error: err.message || "Failed to save replay" },
       { status: 500 }
     );
   }

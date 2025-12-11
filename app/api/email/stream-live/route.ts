@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       streamId,
     } = body as {
       to: string;
-      creatorName: string;
+      creatorName?: string;
       streamTitle: string;
       streamUrl: string;
       streamId?: string;
@@ -35,16 +35,19 @@ export async function POST(req: Request) {
           <h1 style="font-size:24px;font-weight:900;color:#53fc18;margin-bottom:10px;">
             You're live on Parable 🔴
           </h1>
+
           <p style="font-size:14px;color:#ccc;line-height:1.6;margin-bottom:22px;">
             ${creatorName || "Your stream"} is now broadcasting:<br/>
             <strong>${streamTitle}</strong>
           </p>
+
           <a href="${streamUrl}"
             style="display:inline-block;background:#53fc18;color:#000;font-weight:700;
                    padding:12px 20px;border-radius:10px;text-decoration:none;font-size:14px;
                    box-shadow:0 0 12px #53fc18;">
             Open live dashboard
           </a>
+
           ${
             streamId
               ? `<p style="color:#777;font-size:12px;margin-top:24px;">Stream ID: ${streamId}</p>`
@@ -64,7 +67,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, result });
   } catch (err: any) {
-    console.error(err);
+    console.error("STREAM-LIVE ERROR:", err);
     return NextResponse.json(
       { error: err?.message || "Failed to send live email" },
       { status: 500 }

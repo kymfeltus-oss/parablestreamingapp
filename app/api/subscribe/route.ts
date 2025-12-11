@@ -1,16 +1,24 @@
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
-  const body = await request.json();
-  const { email } = body;
+export async function POST(req: Request) {
+  const { creatorId, priceId } = await req.json();
 
-  if (!email || typeof email !== "string") {
-    return NextResponse.json({ ok: false, error: "Invalid email" }, { status: 400 });
-  }
+  const checkout = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      mode: "subscription",
+      "line_items[0][price]": priceId,
+      "line_items[0][quantity]": "1",
+      success_url: "https://parablestreaming.com/sub-success",
+      cancel_url: "https://parablestreaming.com/sub-cancel",
+      "metadata[creator_id]": creatorId,
+    }),
+  });
 
-  console.log("NEW PARABLE EARLY ACCESS EMAIL:", email);
-
-  // TODO: connect to Mailchimp, Brevo, SES, etc.
-
-  return NextResponse.json({ ok: true });
+  const json = await checkout.json();
+  return NextResponse.json(json);
 }

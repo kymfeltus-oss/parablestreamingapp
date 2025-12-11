@@ -4,25 +4,34 @@ import { createClient } from "@/lib/supabaseClient";
 export async function POST(req: Request) {
   try {
     const supabase = createClient();
-    const { streamId } = await req.json();
+    const { creatorId } = await req.json();
 
-    if (!streamId) {
+    if (!creatorId) {
       return NextResponse.json(
-        { error: "streamId is required" },
+        { error: "creatorId is required" },
         { status: 400 }
       );
     }
 
+    // Get logged-in viewer
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
     const { error } = await supabase
-      .from("live_streams")
-      .update({
-        is_live: false,
-        ended_at: new Date().toISOString(),
-      })
-      .eq("id", streamId);
+      .from("follows")
+      .delete()
+      .eq("follower_id", user.id)
+      .eq("creator_id", creatorId);
 
     if (error) {
-      console.error("STREAM STOP DB ERROR:", error.message);
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
@@ -31,9 +40,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    console.error("STREAM STOP API ERROR:", err.message);
     return NextResponse.json(
-      { error: err.message || "Stream stop failed" },
+      { error: err.message || "Failed to unfollow" },
       { status: 500 }
     );
   }

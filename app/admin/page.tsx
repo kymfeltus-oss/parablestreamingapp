@@ -1,57 +1,79 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import { Shield, Users, DollarSign, Activity, Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabaseClient";
 
-export default function AdminDashboard() {
+export default function AdminPage() {
+  const supabase = createClient();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    check();
+  }, []);
+
+  async function check() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role === "admin") {
+      setIsAdmin(true);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email, display_name, role")
+        .order("created_at", { ascending: false });
+      setUsers(data || []);
+    } else {
+      setIsAdmin(false);
+    }
+  }
+
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Checking admin access...
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Access denied.
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
-      <Navbar />
-
-      <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
-
-        <h1 className="text-4xl font-black mb-3 flex items-center gap-3">
-          <Shield className="w-8 h-8 text-red-500" />
-          Admin Control Panel
-        </h1>
-        <p className="text-gray-400 text-sm">
-          Manage creators, Seeds economy, moderation queues, and global activity.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-6">
-
-          <a href="/admin/seeds" className="bg-[#111] p-6 rounded-2xl border border-white/10 hover:border-violet-500/40 transition">
-            <DollarSign className="text-green-400 w-8 h-8 mb-4" />
-            <h3 className="font-bold text-xl mb-1">Seed Economy</h3>
-            <p className="text-xs text-gray-400">Manage pricing, transactions & gifts</p>
-          </a>
-
-          <a href="/admin/moderation" className="bg-[#111] p-6 rounded-2xl border border-white/10 hover:border-violet-500/40 transition">
-            <Activity className="text-orange-400 w-8 h-8 mb-4" />
-            <h3 className="font-bold text-xl mb-1">Moderation Queue</h3>
-            <p className="text-xs text-gray-400">Flagged sermons & chat messages</p>
-          </a>
-
-          <a href="/admin/verification" className="bg-[#111] p-6 rounded-2xl border border-white/10 hover:border-violet-500/40 transition">
-            <Users className="text-blue-400 w-8 h-8 mb-4" />
-            <h3 className="font-bold text-xl mb-1">Creator Verification</h3>
-            <p className="text-xs text-gray-400">Approve pastor & artist badges</p>
-          </a>
-
-          <a href="/admin/flags" className="bg-[#111] p-6 rounded-2xl border border-white/10 hover:border-violet-500/40 transition">
-            <Shield className="text-red-500 w-8 h-8 mb-4" />
-            <h3 className="font-bold text-xl mb-1">Content Flags</h3>
-            <p className="text-xs text-gray-400">User reports & policy reviews</p>
-          </a>
-
-          <a href="/admin/announcements" className="bg-[#111] p-6 rounded-2xl border border-white/10 hover:border-violet-500/40 transition">
-            <Bell className="text-yellow-400 w-8 h-8 mb-4" />
-            <h3 className="font-bold text-xl mb-1">Global Announcements</h3>
-            <p className="text-xs text-gray-400">Send platform-wide messages</p>
-          </a>
-
-        </div>
-      </main>
+    <div className="min-h-screen bg-black text-white p-6">
+      <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
+      <h2 className="text-xl font-semibold mb-2">Users</h2>
+      <div className="space-y-2">
+        {users.map((u) => (
+          <div
+            key={u.id}
+            className="bg-[#111] border border-white/10 rounded-lg p-3 text-sm flex justify-between"
+          >
+            <div>
+              <p className="font-bold">{u.display_name || u.email}</p>
+              <p className="text-xs text-gray-400">{u.email}</p>
+            </div>
+            <span className="text-xs text-gray-300">{u.role || "user"}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
