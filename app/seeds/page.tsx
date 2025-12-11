@@ -1,139 +1,125 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import { useState } from "react";
-import { Coins, HeartHandshake, Sparkles, Flame } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabaseClient";
 
-const seedPackages = [
-  { name: "Starter Seed Pack", seeds: 500, price: "$4.99" },
-  { name: "Overflow Pack", seeds: 1500, price: "$9.99" },
-  { name: "Open Heaven Pack", seeds: 5000, price: "$24.99" },
-];
-
-const sampleTargets = [
-  { name: "Sunday Service", slug: "mike-todd" },
-  { name: "Youth Night Co-Op", slug: "steven-furtick" },
-  { name: "Worship Live", slug: "lauren-daigle" },
+const PACKAGES = [
+  { amount: 100, label: "100 Seeds", description: "Starter pack" },
+  { amount: 250, label: "250 Seeds", description: "Supporter pack" },
+  { amount: 500, label: "500 Seeds", description: "Partner pack" },
 ];
 
 export default function SeedsPage() {
-  const [selectedPack, setSelectedPack] = useState(seedPackages[0]);
-  const [selectedTarget, setSelectedTarget] = useState(sampleTargets[0]);
-  const [giftLog, setGiftLog] = useState<string[]>([]);
+  const supabase = createClient();
+  const [balance, setBalance] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [buying, setBuying] = useState(false);
 
-  const handleGift = () => {
-    const msg = `You sowed ${selectedPack.seeds} Seeds into ${selectedTarget.name}.`;
-    setGiftLog((prev) => [msg, ...prev].slice(0, 5));
-  };
+  useEffect(() => {
+    loadBalance();
+  }, []);
 
-  const handleTithe = () => {
-    const msg = `You tapped "Tithe Now" during ${selectedTarget.name}.`;
-    setGiftLog((prev) => [msg, ...prev].slice(0, 5));
-  };
+  async function loadBalance() {
+    setLoading(true);
+    setError("");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("You must be logged in to use Seeds.");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("seeds")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      setError(error?.message || "Could not load profile.");
+      setLoading(false);
+      return;
+    }
+
+    setBalance(data.seeds || 0);
+    setLoading(false);
+  }
+
+  async function buySeeds(amount: number, description: string) {
+    setBuying(true);
+    setError("");
+
+    try {
+      const res = await fetch(
+        "https://api.parablestreaming.com/api/seeds/add",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount, description }),
+        }
+      );
+
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Failed to add seeds.");
+
+      setBalance(json.balance);
+    } catch (err: any) {
+      setError(err.message);
+    }
+
+    setBuying(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Loading Seeds…
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
-      <Navbar />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
-        {/* HEADER */}
-        <section className="flex flex-col md:flex-row justify-between gap-4 items-start">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Coins className="w-7 h-7 text-amber-300" />
-              Prophetic Seeds & Gifting
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Purchase Seeds and sow into live streams with “Seeds” or give directly with “Tithe Now.”
-            </p>
-          </div>
-        </section>
+    <div className="min-h-screen bg-black text-white p-6 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Seeds</h1>
 
-        {/* BUY SEEDS + TARGET */}
-        <section className="grid md:grid-cols-2 gap-6">
-          {/* Seed Packs */}
-          <div className="bg-[#101010] border border-white/10 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-300" /> Choose a Seed Pack
-            </h2>
-            <div className="space-y-2">
-              {seedPackages.map((pack) => (
-                <button
-                  key={pack.name}
-                  onClick={() => setSelectedPack(pack)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs border ${
-                    selectedPack.name === pack.name
-                      ? "bg-amber-500/20 border-amber-400 text-amber-100"
-                      : "bg-white/5 border-white/15 text-gray-200 hover:bg-white/10"
-                  }`}
-                >
-                  <div className="flex justify-between">
-                    <span className="font-semibold">{pack.name}</span>
-                    <span className="font-semibold">{pack.price}</span>
-                  </div>
-                  <p className="text-[11px] text-gray-300">
-                    {pack.seeds.toLocaleString()} Seeds
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
+      {error && (
+        <div className="bg-red-900 text-red-300 p-3 rounded mb-4">
+          {error}
+        </div>
+      )}
 
-          {/* Target & Actions */}
-          <div className="bg-[#101010] border border-white/10 rounded-2xl p-5 space-y-4">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <Flame className="w-4 h-4 text-red-400" /> Choose Live Stream Target
-            </h2>
-            <div className="flex gap-2 text-xs">
-              {sampleTargets.map((t) => (
-                <button
-                  key={t.slug}
-                  onClick={() => setSelectedTarget(t)}
-                  className={`flex-1 px-3 py-2 rounded-full border ${
-                    selectedTarget.slug === t.slug
-                      ? "bg-violet-600 border-violet-400"
-                      : "bg-white/5 border-white/20 hover:bg-white/10"
-                  }`}
-                >
-                  {t.name}
-                </button>
-              ))}
-            </div>
+      <div className="mb-6">
+        <p className="text-sm text-gray-400">Your current balance:</p>
+        <p className="text-3xl font-bold text-[#53fc18]">
+          {balance ?? 0} Seeds
+        </p>
+      </div>
 
-            <div className="space-y-2">
-              <button
-                onClick={handleGift}
-                className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2 rounded-xl text-sm flex items-center justify-center gap-2"
-              >
-                <Coins className="w-4 h-4" />
-                Sow {selectedPack.seeds.toLocaleString()} Seeds
-              </button>
-              <button
-                onClick={handleTithe}
-                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2 rounded-xl text-sm flex items-center justify-center gap-2"
-              >
-                <HeartHandshake className="w-4 h-4" />
-                Tithe Now
-              </button>
-            </div>
-          </div>
-        </section>
+      <h2 className="text-xl font-bold mb-4">Add Seeds (Demo)</h2>
 
-        {/* RECENT ACTIVITY */}
-        <section className="bg-[#101010] border border-white/10 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold mb-3">Recent Seed Activity (Demo)</h2>
-          {giftLog.length === 0 ? (
-            <p className="text-xs text-gray-500">
-              No activity yet. Choose a pack, a stream, and try “Sow Seeds” or “Tithe Now”.
-            </p>
-          ) : (
-            <ul className="space-y-1 text-xs text-gray-200">
-              {giftLog.map((line, idx) => (
-                <li key={idx}>• {line}</li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </main>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {PACKAGES.map((p) => (
+          <button
+            key={p.amount}
+            disabled={buying}
+            onClick={() => buySeeds(p.amount, p.description)}
+            className="bg-[#111] border border-white/10 rounded p-4 text-left hover:border-[#53fc18]/60 transition"
+          >
+            <p className="font-bold text-lg">{p.label}</p>
+            <p className="text-xs text-gray-400 mt-1">{p.description}</p>
+          </button>
+        ))}
+      </div>
+
+      <p className="text-xs text-gray-500 mt-6">
+        This is a demo implementation of Seeds. In production, this would be
+        connected to Stripe or another payment provider.
+      </p>
     </div>
   );
 }

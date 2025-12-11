@@ -1,40 +1,36 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 
-export default function ConfirmPage() {
+export default function ConfirmEmailPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [status, setStatus] = useState("Verifying...");
 
   useEffect(() => {
-    verify();
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      const type = user.user_metadata?.accountType;
+
+      if (type === "creator") {
+        router.replace("/creator/setup");
+      } else {
+        router.replace("/dashboard");
+      }
+    })();
   }, []);
 
-  async function verify() {
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error || !data.user) {
-      setStatus("Verification failed");
-      return;
-    }
-
-    const { user } = data;
-
-    const type = user.user_metadata?.accountType || "viewer";
-
-    if (type === "creator") {
-      router.replace("/creator/setup");
-    } else {
-      router.replace("/dashboard");
-    }
-  }
-
   return (
-    <div className="text-white bg-black min-h-screen flex items-center justify-center">
-      <p>{status}</p>
+    <div className="text-white bg-black p-10 min-h-screen flex items-center justify-center">
+      Finishing verification…
     </div>
   );
 }

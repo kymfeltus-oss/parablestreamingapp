@@ -1,93 +1,92 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 
 export default function CreatorProfileSetup() {
   const supabase = createClient();
-
+  const [profile, setProfile] = useState<any>(null);
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatar, setAvatar] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [avatar, setAvatar] = useState<any>(null);
 
-  async function handleSave() {
-    setSaving(true);
-    setError("");
+  useEffect(() => {
+    load();
+  }, []);
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  async function load() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-      if (!user) throw new Error("Not authenticated");
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
 
-      let avatarUrl = "";
+    setProfile(data);
 
-      // Upload avatar if selected
-      if (avatar) {
-        const form = new FormData();
-        form.append("file", avatar);
+    // Pre-fill from profile (no duplicate work)
+    if (data?.display_name) setDisplayName(data.display_name);
+    if (data?.bio) setBio(data.bio);
+  }
 
-        const uploadRes = await fetch(
-          "https://api.parablestreaming.com/api/upload-thumbnail",
-          { method: "POST", body: form }
-        );
+  async function save() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-        const uploadJson = await uploadRes.json();
-        if (!uploadJson.ok) throw new Error("Avatar upload failed");
+    let avatarUrl = profile?.avatar_url;
 
-        avatarUrl = uploadJson.url;
-      }
+    if (avatar) {
+      const form = new FormData();
+      form.append("file", avatar);
 
-      // Update profile fields
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          display_name: displayName,
-          bio: bio,
-          avatar_url: avatarUrl,
-        })
-        .eq("id", user.id);
+      const res = await fetch(
+        "https://api.parablestreaming.com/api/upload-thumbnail",
+        {
+          method: "POST",
+          body: form,
+        }
+      );
 
-      if (updateError) throw new Error(updateError.message);
-
-      // Redirect to dashboard
-      window.location.href = "/dashboard";
-    } catch (err: any) {
-      setError(err.message);
+      const json = await res.json();
+      avatarUrl = json.url;
     }
 
-    setSaving(false);
+    await supabase
+      .from("profiles")
+      .update({
+        display_name: displayName,
+        bio,
+        avatar_url: avatarUrl,
+      })
+      .eq("id", user!.id);
+
+    window.location.href = "/dashboard";
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 max-w-xl mx-auto">
+    <div className="bg-black text-white p-8 max-w-lg mx-auto min-h-screen">
+      <h1 className="text-3xl font-bold mb-6">Finish Your Creator Profile</h1>
 
-      <h1 className="text-3xl font-bold mb-6">Finish Setting Up Your Creator Profile</h1>
-
-      {error && (
-        <div className="bg-red-900 text-red-300 px-4 py-2 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <label className="block mb-2">Display Name</label>
+      <label>Display Name</label>
       <input
-        className="w-full p-2 mb-4 bg-[#111] border border-white/20 rounded"
+        className="w-full p-3 bg-[#111] rounded mb-4"
         value={displayName}
         onChange={(e) => setDisplayName(e.target.value)}
       />
 
-      <label className="block mb-2">Bio</label>
+      <label>Bio</label>
       <textarea
-        className="w-full p-2 mb-4 bg-[#111] border border-white/20 rounded"
+        className="w-full p-3 bg-[#111] rounded mb-4"
         value={bio}
         onChange={(e) => setBio(e.target.value)}
       />
 
-      <label className="block mb-2">Profile Picture</label>
+      <label>Avatar</label>
       <input
         type="file"
         className="mb-4"
@@ -95,11 +94,10 @@ export default function CreatorProfileSetup() {
       />
 
       <button
-        onClick={handleSave}
-        disabled={saving}
+        onClick={save}
         className="px-6 py-3 bg-[#53fc18] text-black font-bold rounded"
       >
-        {saving ? "Saving..." : "Save Profile"}
+        Save Profile
       </button>
     </div>
   );

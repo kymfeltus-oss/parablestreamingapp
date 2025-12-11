@@ -11,6 +11,7 @@ type Profile = {
   ministry_name: string | null;
   creator_category: string | null;
   social_links: string | null;
+  slug: string | null;
 };
 
 type Stream = {
@@ -21,6 +22,8 @@ type Stream = {
   slug: string | null;
   is_live: boolean;
   started_at: string | null;
+  creator_id: string;
+  category: string | null;
 };
 
 export default function CreatorChannelPage({ params }: any) {
@@ -31,91 +34,106 @@ export default function CreatorChannelPage({ params }: any) {
   const [streams, setStreams] = useState<Stream[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [viewerId, setViewerId] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
-    // Get logged-in user (follower)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      // Logged-in viewer
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    setViewerId(user?.id || null);
+      setViewerId(user?.id || null);
 
-    // Load creator profile
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("username", username)
-      .maybeSingle();
-
-    setProfile(profileData);
-
-    if (!profileData) return;
-
-    // Load creator streams
-    const { data: streamData } = await supabase
-      .from("live_streams")
-      .select("*")
-      .eq("creator_id", profileData.id)
-      .order("started_at", { ascending: false });
-
-    setStreams(streamData || []);
-
-    // Check if current user follows this creator
-    if (user) {
-      const { data: followData } = await supabase
-        .from("follows")
+      // Load creator profile
+      const { data: profileRow } = await supabase
+        .from("profiles")
         .select("*")
-        .eq("follower_id", user.id)
-        .eq("creator_id", profileData.id)
+        .eq("username", username)
         .maybeSingle();
 
-      setIsFollowing(!!followData);
+      if (!profileRow) {
+        setError("Creator not found");
+        return;
+      }
+
+      setProfile(profileRow);
+
+      // Load all creator streams
+      const { data: streamRows } = await supabase
+        .from("live_streams")
+        .select("*")
+        .eq("creator_id", profileRow.id)
+        .order("started_at", { ascending: false });
+
+      setStreams(streamRows || []);
+
+      // Check if current viewer follows creator
+      if (user) {
+        const { data: followRow } = await supabase
+          .from("follows")
+          .select("*")
+          .eq("follower_id", user.id)
+          .eq("creator_id", profileRow.id)
+          .maybeSingle();
+
+        setIsFollowing(!!followRow);
+      }
+    } catch (err: any) {
+      setError(err.message);
     }
   }
 
-  async function handleFollow() {
+  async function followCreator() {
     if (!viewerId || !profile) return;
 
-    const res = await fetch("/api/follow", {
+    await fetch("https://api.parablestreaming.com/api/follow", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ creatorId: profile.id }),
     });
 
-    if (res.ok) setIsFollowing(true);
+    setIsFollowing(true);
   }
 
-  async function handleUnfollow() {
+  async function unfollowCreator() {
     if (!viewerId || !profile) return;
 
-    const res = await fetch("/api/unfollow", {
+    await fetch("https://api.parablestreaming.com/api/unfollow", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ creatorId: profile.id }),
     });
 
-    if (res.ok) setIsFollowing(false);
+    setIsFollowing(false);
   }
 
-  if (!profile) {
+  if (error)
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Creator not found.
+      <div className="min-h-screen bg-black text-white p-6 text-center">
+        {error}
       </div>
     );
-  }
+
+  if (!profile)
+    return (
+      <div className="min-h-screen bg-black text-white p-6 text-center">
+        Loading…
+      </div>
+    );
 
   const liveStream = streams.find((s) => s.is_live);
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-10">
-      {/* Header */}
-      <div className="flex items-center gap-6 mb-8">
-        <div className="w-24 h-24 rounded-full overflow-hidden border border-white/10 bg-[#111]">
+    <div className="min-h-screen bg-black text-white px-6 py-10 max-w-5xl mx-auto">
+
+      {/* HEADER */}
+      <div className="flex items-center gap-6 mb-10">
+        <div className="w-24 h-24 rounded-full overflow-hidden border border-white/20 bg-[#111]">
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
@@ -140,10 +158,9 @@ export default function CreatorChannelPage({ params }: any) {
           )}
         </div>
 
-        {/* Follow / Unfollow */}
         {viewerId && viewerId !== profile.id && (
           <button
-            onClick={isFollowing ? handleUnfollow : handleFollow}
+            onClick={isFollowing ? unfollowCreator : followCreator}
             className={`ml-auto px-4 py-2 rounded-lg font-bold ${
               isFollowing
                 ? "bg-red-600 hover:bg-red-700"
@@ -155,17 +172,15 @@ export default function CreatorChannelPage({ params }: any) {
         )}
       </div>
 
-      {/* Bio */}
+      {/* BIO */}
       {profile.bio && (
-        <p className="text-gray-300 mb-8 max-w-2xl">{profile.bio}</p>
+        <p className="text-gray-300 mb-10 max-w-2xl">{profile.bio}</p>
       )}
 
       {/* LIVE NOW */}
       {liveStream && (
         <>
-          <h2 className="text-2xl font-bold text-[#53fc18] mb-4">
-            Live Now 🔴
-          </h2>
+          <h2 className="text-2xl font-bold text-[#53fc18] mb-4">Live Now 🔴</h2>
           <a
             href={`https://live.parablestreaming.com/live/${liveStream.slug}`}
             className="block max-w-xl mb-12"
@@ -181,15 +196,12 @@ export default function CreatorChannelPage({ params }: any) {
 
       {/* REPLAYS */}
       <h2 className="text-xl font-bold mb-4">Replays</h2>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl">
         {streams
           .filter((s) => s.replay_url)
           .map((s) => (
-            <a
-              key={s.id}
-              href={`/replay/${s.id}`}
-              className="block"
-            >
+            <a key={s.id} href={`/replay/${s.id}`} className="block">
               <img
                 src={s.thumbnail_url || "/placeholder.jpg"}
                 className="w-full h-40 object-cover rounded-lg border border-white/10"

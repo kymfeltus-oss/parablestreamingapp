@@ -2,88 +2,105 @@
 
 import { useState } from "react";
 
+const CATEGORIES = [
+  "Sermon",
+  "Worship",
+  "Prayer",
+  "Teaching",
+  "Prophetic",
+  "Music",
+  "Podcast",
+  "Talk Show",
+  "Gaming",
+  "Bible Study",
+  "Testimony",
+  "Youth Ministry",
+  "Women's Ministry",
+  "Men's Ministry",
+  "Live Event",
+  "Conference",
+  "Q&A Session",
+];
+
 export default function GoLivePage() {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Sermon");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleGoLive() {
-    setError("");
-    setLoading(true);
-
     try {
-      // Upload thumbnail if provided
+      setError("");
+      setLoading(true);
+
       let thumbnailUrl = "";
+
       if (thumbnail) {
         const form = new FormData();
         form.append("file", thumbnail);
 
-        const uploadRes = await fetch(
+        const upload = await fetch(
           "https://api.parablestreaming.com/api/upload-thumbnail",
           { method: "POST", body: form }
         );
 
-        const uploadJson = await uploadRes.json();
-        if (!uploadJson.ok) throw new Error("Thumbnail upload failed");
+        const uploadJson = await upload.json();
+        if (!uploadJson.ok) throw new Error(uploadJson.error);
         thumbnailUrl = uploadJson.url;
       }
 
-      // Create stream entry
       const res = await fetch(
         "https://api.parablestreaming.com/api/stream-live",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title,
-            category,
-            thumbnailUrl,
-          }),
+          body: JSON.stringify({ title, category, thumbnailUrl }),
         }
       );
 
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error || "Stream creation failed");
+      if (!json.ok) throw new Error(json.error);
 
-      // Redirect to Stream Manager
       window.location.href = `/creator/stream/${json.streamId}`;
     } catch (err: any) {
       setError(err.message);
     }
-
     setLoading(false);
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <h1 className="text-3xl font-bold mb-4">Go Live</h1>
+    <div className="min-h-screen bg-black text-white p-6 max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Go Live</h1>
 
       {error && (
-        <div className="bg-red-900 text-red-200 px-4 py-2 rounded mb-4">
+        <div className="bg-red-900 text-red-300 p-3 rounded mb-4">
           {error}
         </div>
       )}
 
-      <label className="block mb-2">Stream Title</label>
+      <label>Stream Title</label>
       <input
-        className="w-full p-2 bg-[#111] border border-white/20 rounded mb-4"
+        className="w-full p-3 bg-[#111] rounded mb-4"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
 
-      <label className="block mb-2">Category</label>
-      <input
-        className="w-full p-2 bg-[#111] border border-white/20 rounded mb-4"
+      <label>Category</label>
+      <select
+        className="w-full p-3 bg-[#111] rounded mb-4"
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-      />
+      >
+        {CATEGORIES.map((c) => (
+          <option key={c}>{c}</option>
+        ))}
+      </select>
 
-      <label className="block mb-2">Thumbnail</label>
+      <label>Thumbnail</label>
       <input
         type="file"
-        className="mb-4"
+        className="w-full mb-6"
         onChange={(e) => setThumbnail(e.target.files?.[0] || null)}
       />
 
