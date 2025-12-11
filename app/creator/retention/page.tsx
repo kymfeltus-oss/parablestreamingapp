@@ -16,6 +16,13 @@ export default function RetentionPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
+    // FIX: Protect against null user
+    if (!user) {
+      setSessions([]);
+      return;
+    }
+
+    // FIX: user.id now guaranteed safe
     const { data: streams } = await supabase
       .from("live_streams")
       .select("id")
@@ -24,7 +31,6 @@ export default function RetentionPage() {
       .limit(1);
 
     const latest = streams?.[0]?.id;
-
     if (!latest) return;
 
     const { data } = await supabase
