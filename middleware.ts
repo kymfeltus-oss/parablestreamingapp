@@ -12,16 +12,18 @@ export async function middleware(req: NextRequest) {
     "/login",
     "/auth/register",
     "/profile-setup",
+    "/welcome",
     "/success",
-    "/cancel",
-    "/welcome"
+    "/cancel"
   ];
 
-  const isPublicRoute = publicRoutes.some(route =>
-    pathname === route || pathname.startsWith(route + "/")
+  const isPublicRoute = publicRoutes.some(
+    route => pathname === route || pathname.startsWith(route + "/")
   );
 
-  const accessToken = req.cookies.get("sb-access-token")?.value;
+  const accessToken =
+    req.cookies.get("sb-access-token")?.value ||
+    req.cookies.get("sb-access-token.0")?.value;
 
   if (!accessToken) {
     if (!isPublicRoute) {
@@ -38,15 +40,11 @@ export async function middleware(req: NextRequest) {
     }
   });
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
 
   if (!user) {
-    if (!isPublicRoute) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   const { data: profile } = await supabase
@@ -55,15 +53,21 @@ export async function middleware(req: NextRequest) {
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.onboarding_complete !== true) {
+  if (!profile?.onboarding_complete) {
     if (!pathname.startsWith("/profile-setup")) {
       return NextResponse.redirect(new URL("/profile-setup", req.url));
     }
     return NextResponse.next();
   }
 
+  // ✅ ALLOW CREATOR ROUTES AFTER ONBOARDING
+  if (pathname.startsWith("/creator")) {
+    return NextResponse.next();
+  }
+
+  // ❌ BLOCK RETURNING TO PROFILE SETUP
   if (pathname.startsWith("/profile-setup")) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/creator/ministry", req.url));
   }
 
   return NextResponse.next();
