@@ -1,51 +1,81 @@
-// app/login/page.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link'; // <--- ADDED: Import Link component for Next.js routing
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const supabase = createClient();
 
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setLoading(true);
+    setError(null);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      password,
+      password
     });
 
-    if (signInError) {
-      setError(`Login failed: ${signInError.message}`);
-    } else {
-      // Check for redirect_to parameter set by middleware
-      const redirectTo = searchParams.get('redirect_to') || '/dashboard';
-      router.push(redirectTo);
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+      return;
     }
+
+    router.replace("/profile-setup");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSignIn} className="p-6 border rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-4">Log In</h2>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2 mb-3 border rounded" />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full p-2 mb-4 border rounded" />
-        <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-          Log In
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <form
+        onSubmit={handleLogin}
+        className="w-full max-w-md p-6 border border-gray-700 rounded text-white"
+      >
+        <h1 className="text-xl font-semibold mb-4">Log In</h1>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full mb-3 p-2 rounded text-black"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full mb-3 p-2 rounded text-black"
+        />
+
+        {error && (
+          <p className="text-red-500 mb-3">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 py-2 rounded"
+        >
+          {loading ? "Logging in…" : "Log In"}
         </button>
-        {error && <p className="mt-4 text-sm text-center text-red-500">{error}</p>}
-        <p className="mt-4 text-center">
-          {/* FIX: Corrected path to /auth/register and used Link component */}
-          Don't have an account? <Link href="/auth/register" className="text-indigo-600 hover:underline">Sign Up</Link>
-        </p>
       </form>
     </div>
   );
