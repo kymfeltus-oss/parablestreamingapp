@@ -1,3 +1,4 @@
+// flash-click-fix
 "use client";
 
 import { useRouter } from "next/navigation";
