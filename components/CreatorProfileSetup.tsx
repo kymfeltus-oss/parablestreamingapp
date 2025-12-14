@@ -19,6 +19,7 @@ export default function CreatorProfileSetup() {
   const [displayName, setDisplayName] = useState("");
   const [ministryName, setMinistryName] = useState("");
   const [creatorType, setCreatorType] = useState("");
+  const [socialLinksInput, setSocialLinksInput] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -62,11 +63,21 @@ export default function CreatorProfileSetup() {
     try {
       const avatarUrl = await uploadAvatar();
 
+      // ✅ Convert social links to a REAL array
+      const socialLinks =
+        socialLinksInput.trim() === ""
+          ? []
+          : socialLinksInput
+              .split(",")
+              .map(link => link.trim())
+              .filter(Boolean);
+
       const { error } = await supabase.from("profiles").upsert({
         id: userId,
         display_name: displayName,
         ministry_name: ministryName,
         creator_type: creatorType,
+        social_links: socialLinks, // ✅ ARRAY NOT STRING
         avatar_url: avatarUrl,
         onboarding_complete: true,
         updated_at: new Date().toISOString()
@@ -105,7 +116,7 @@ export default function CreatorProfileSetup() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={e => setDisplayName(e.target.value)}
           placeholder="Display name"
           required
           className="w-full p-2 rounded bg-black border border-gray-700"
@@ -113,7 +124,7 @@ export default function CreatorProfileSetup() {
 
         <input
           value={ministryName}
-          onChange={(e) => setMinistryName(e.target.value)}
+          onChange={e => setMinistryName(e.target.value)}
           placeholder="Ministry or brand name"
           required
           className="w-full p-2 rounded bg-black border border-gray-700"
@@ -121,7 +132,7 @@ export default function CreatorProfileSetup() {
 
         <select
           value={creatorType}
-          onChange={(e) => setCreatorType(e.target.value)}
+          onChange={e => setCreatorType(e.target.value)}
           required
           className="w-full p-2 rounded bg-black border border-gray-700"
         >
@@ -131,11 +142,17 @@ export default function CreatorProfileSetup() {
           <option value="ministry">Ministry</option>
         </select>
 
+        <textarea
+          value={socialLinksInput}
+          onChange={e => setSocialLinksInput(e.target.value)}
+          placeholder="Social links (comma separated)"
+          className="w-full p-2 rounded bg-black border border-gray-700"
+        />
+
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-          className="w-full"
+          onChange={e => setAvatarFile(e.target.files?.[0] || null)}
         />
 
         <button
