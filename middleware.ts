@@ -1,21 +1,59 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 
 export async function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
 
-  if (url.pathname.startsWith("/admin")) {
-    // Example: look for a cookie flag; real check should be JWT / Supabase
-    const isAdmin = req.cookies.get("is_admin")?.value === "true";
-    if (!isAdmin) {
-      url.pathname = "/"; // redirect home
-      return NextResponse.redirect(url);
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const pathname = req.nextUrl.pathname;
+
+  const publicRoutes = [
+    "/login",
+    "/auth/register",
+    "/profile-setup",
+    "/success",
+    "/cancel",
+    "/welcome"
+  ];
+
+  const isPublicRoute = publicRoutes.some(route =>
+    pathname === route || pathname.startsWith(route + "/")
+  );
+
+  if (!session) {
+    if (!isPublicRoute) {
+      return NextResponse.redirect(new URL("/login", req.url));
     }
+    return res;
   }
 
-  return NextResponse.next();
+  const userId = session.user.id;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_complete")
+    .eq("id", userId)
+    .single();
+
+  if (!profile || profile.onboarding_complete !== true) {
+    if (!pathname.startsWith("/profile-setup")) {
+      return NextResponse.redirect(new URL("/profile-setup", req.url));
+    }
+    return res;
+  }
+
+  if (pathname.startsWith("/profile-setup")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  return res;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)"
+  ]
 };
