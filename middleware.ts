@@ -8,7 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Always send root to flash
+  // Root always goes to flash
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/flash", req.url));
   }
@@ -68,8 +68,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Logged in and onboarded
-  if (pathname === "/flash") {
+  // ✅ ALLOW CREATOR ROUTES AFTER LOGIN
+  if (pathname.startsWith("/creator")) {
+    return NextResponse.next();
+  }
+
+  // Prevent going back to profile setup
+  if (pathname.startsWith("/profile-setup")) {
     return NextResponse.redirect(new URL("/creator/ministry", req.url));
   }
 
