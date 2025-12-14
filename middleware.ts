@@ -8,10 +8,16 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
+  // Always send root to flash
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/flash", req.url));
+  }
+
+  // Public routes
   const publicRoutes = [
+    "/flash",
     "/login",
     "/auth/register",
-    "/profile-setup",
     "/welcome",
     "/success",
     "/cancel"
@@ -25,9 +31,10 @@ export async function middleware(req: NextRequest) {
     req.cookies.get("sb-access-token")?.value ||
     req.cookies.get("sb-access-token.0")?.value;
 
+  // Not logged in
   if (!accessToken) {
     if (!isPublicRoute) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/flash", req.url));
     }
     return NextResponse.next();
   }
@@ -40,11 +47,11 @@ export async function middleware(req: NextRequest) {
     }
   });
 
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user;
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/flash", req.url));
   }
 
   const { data: profile } = await supabase
@@ -53,6 +60,7 @@ export async function middleware(req: NextRequest) {
     .eq("id", user.id)
     .single();
 
+  // Logged in but not onboarded
   if (!profile?.onboarding_complete) {
     if (!pathname.startsWith("/profile-setup")) {
       return NextResponse.redirect(new URL("/profile-setup", req.url));
@@ -60,13 +68,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ✅ ALLOW CREATOR ROUTES AFTER ONBOARDING
-  if (pathname.startsWith("/creator")) {
-    return NextResponse.next();
-  }
-
-  // ❌ BLOCK RETURNING TO PROFILE SETUP
-  if (pathname.startsWith("/profile-setup")) {
+  // Logged in and onboarded
+  if (pathname === "/flash") {
     return NextResponse.redirect(new URL("/creator/ministry", req.url));
   }
 
