@@ -8,7 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Root always goes to flash
+  // Root always shows flash
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/flash", req.url));
   }
@@ -60,20 +60,26 @@ export async function middleware(req: NextRequest) {
     .eq("id", user.id)
     .single();
 
-  // Logged in but not onboarded
-  if (!profile?.onboarding_complete) {
-    if (!pathname.startsWith("/profile-setup")) {
-      return NextResponse.redirect(new URL("/profile-setup", req.url));
-    }
+  // ✅ ALLOW BOTH ONBOARDING PATHS
+  if (
+    !profile?.onboarding_complete &&
+    (pathname.startsWith("/profile-setup") ||
+     pathname.startsWith("/profile-setup/creator"))
+  ) {
     return NextResponse.next();
   }
 
-  // ✅ ALLOW CREATOR ROUTES AFTER LOGIN
+  // Logged in but not onboarded
+  if (!profile?.onboarding_complete) {
+    return NextResponse.redirect(new URL("/profile-setup", req.url));
+  }
+
+  // Allow creator routes after onboarding
   if (pathname.startsWith("/creator")) {
     return NextResponse.next();
   }
 
-  // Prevent going back to profile setup
+  // Prevent returning to setup after onboarding
   if (pathname.startsWith("/profile-setup")) {
     return NextResponse.redirect(new URL("/creator/ministry", req.url));
   }
