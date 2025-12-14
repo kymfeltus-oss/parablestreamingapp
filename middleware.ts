@@ -8,14 +8,18 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // 1️⃣ Root always goes to flash
+  // Root always goes to flash
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/flash", req.url));
   }
 
-  // 2️⃣ Always allow static public pages
+  // Flash is ALWAYS allowed
+  if (pathname === "/flash") {
+    return NextResponse.next();
+  }
+
+  // Public auth routes
   const publicRoutes = [
-    "/flash",
     "/login",
     "/auth/register",
     "/welcome",
@@ -23,21 +27,21 @@ export async function middleware(req: NextRequest) {
     "/cancel"
   ];
 
-  if (publicRoutes.some(route => pathname === route)) {
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
-  // 3️⃣ Read auth cookie
+  // Read auth cookie
   const accessToken =
     req.cookies.get("sb-access-token")?.value ||
     req.cookies.get("sb-access-token.0")?.value;
 
-  // 4️⃣ Not logged in → flash
+  // Not logged in → flash
   if (!accessToken) {
     return NextResponse.redirect(new URL("/flash", req.url));
   }
 
-  // 5️⃣ Authenticated client
+  // Authenticated client
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: {
@@ -53,39 +57,31 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/flash", req.url));
   }
 
-  // 6️⃣ Get onboarding status
+  // Fetch onboarding status
   const { data: profile } = await supabase
     .from("profiles")
     .select("onboarding_complete")
     .eq("id", user.id)
     .single();
 
-  // 🔴 CRITICAL FIX
-  // Allow creator setup BEFORE onboarding
+  // Allow creator setup before onboarding
   if (
     !profile?.onboarding_complete &&
-    pathname === "/profile-setup/creator"
+    pathname.startsWith("/profile-setup")
   ) {
     return NextResponse.next();
   }
 
-  // 7️⃣ Not onboarded → force creator setup
+  // Force onboarding
   if (!profile?.onboarding_complete) {
     return NextResponse.redirect(
       new URL("/profile-setup/creator", req.url)
     );
   }
 
-  // 8️⃣ Onboarded users
+  // Allow creator area after onboarding
   if (pathname.startsWith("/creator")) {
     return NextResponse.next();
-  }
-
-  // 9️⃣ Block returning to setup
-  if (pathname.startsWith("/profile-setup")) {
-    return NextResponse.redirect(
-      new URL("/creator/ministry", req.url)
-    );
   }
 
   return NextResponse.next();
