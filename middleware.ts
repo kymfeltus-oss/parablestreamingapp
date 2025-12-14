@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
-
-  const { data: { session } } = await supabase.auth.getSession();
-
   const pathname = req.nextUrl.pathname;
 
   const publicRoutes = [
@@ -23,33 +21,52 @@ export async function middleware(req: NextRequest) {
     pathname === route || pathname.startsWith(route + "/")
   );
 
-  if (!session) {
+  const accessToken = req.cookies.get("sb-access-token")?.value;
+
+  if (!accessToken) {
     if (!isPublicRoute) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
-    return res;
+    return NextResponse.next();
   }
 
-  const userId = session.user.id;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  });
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    if (!isPublicRoute) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    return NextResponse.next();
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("onboarding_complete")
-    .eq("id", userId)
+    .eq("id", user.id)
     .single();
 
   if (!profile || profile.onboarding_complete !== true) {
     if (!pathname.startsWith("/profile-setup")) {
       return NextResponse.redirect(new URL("/profile-setup", req.url));
     }
-    return res;
+    return NextResponse.next();
   }
 
   if (pathname.startsWith("/profile-setup")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {
