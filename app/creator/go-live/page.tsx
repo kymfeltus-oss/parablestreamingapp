@@ -3,69 +3,60 @@
 import { useState } from "react";
 
 const CATEGORIES = [
-  "Sermon",
-  "Worship",
-  "Prayer",
-  "Teaching",
-  "Prophetic",
-  "Music",
-  "Podcast",
-  "Talk Show",
-  "Gaming",
-  "Bible Study",
-  "Testimony",
-  "Youth Ministry",
-  "Women's Ministry",
-  "Men's Ministry",
-  "Live Event",
-  "Conference",
-  "Q&A Session",
+  "Sermon","Worship","Prayer","Teaching","Prophetic","Music","Podcast",
+  "Talk Show","Gaming","Bible Study","Testimony","Youth Ministry",
+  "Women's Ministry","Men's Ministry","Live Event","Conference","Q&A Session"
 ];
 
 export default function GoLivePage() {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Sermon");
+  const [category, setCategory] = useState(CATEGORIES[0]);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleGoLive() {
     try {
-      setError("");
       setLoading(true);
+      setError("");
 
       let thumbnailUrl = "";
 
+      // Upload thumbnail first
       if (thumbnail) {
         const form = new FormData();
         form.append("file", thumbnail);
 
-        const upload = await fetch(
+        const uploadRes = await fetch(
           "https://api.parablestreaming.com/api/upload-thumbnail",
           { method: "POST", body: form }
         );
+        const uploadJson = await uploadRes.json();
 
-        const uploadJson = await upload.json();
         if (!uploadJson.ok) throw new Error(uploadJson.error);
         thumbnailUrl = uploadJson.url;
       }
 
+      // Create stream
       const res = await fetch(
         "https://api.parablestreaming.com/api/stream-live",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, category, thumbnailUrl }),
+          body: JSON.stringify({ title, category, thumbnailUrl })
         }
       );
 
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
 
+      // Redirect to Stream Manager
       window.location.href = `/creator/stream/${json.streamId}`;
+
     } catch (err: any) {
       setError(err.message);
     }
+
     setLoading(false);
   }
 
@@ -109,7 +100,7 @@ export default function GoLivePage() {
         disabled={loading}
         className="px-6 py-3 bg-[#53fc18] text-black font-bold rounded"
       >
-        {loading ? "Starting..." : "Go Live"}
+        {loading ? "Starting…" : "Go Live"}
       </button>
     </div>
   );

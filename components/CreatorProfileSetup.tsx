@@ -1,104 +1,140 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function CreatorProfileSetup() {
-  const supabase = createClient();
-  const [profile, setProfile] = useState<any>(null);
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
   const [displayName, setDisplayName] = useState("");
-  const [bio, setBio] = useState("");
-  const [avatar, setAvatar] = useState<any>(null);
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("creator");
+
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    load();
-  }, []);
+    const init = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
 
-  async function load() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+      if (!sessionData.session) {
+        router.replace("/login");
+        return;
+      }
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
+      const uid = sessionData.session.user.id;
+      setUserId(uid);
 
-    setProfile(data);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("id", uid)
+        .single();
 
-    // Pre-fill from profile (no duplicate work)
-    if (data?.display_name) setDisplayName(data.display_name);
-    if (data?.bio) setBio(data.bio);
-  }
+      if (profile?.onboarding_complete) {
+        router.replace("/dashboard");
+        return;
+      }
 
-  async function save() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      setLoading(false);
+    };
 
-    let avatarUrl = profile?.avatar_url;
+    init();
+  }, [router]);
 
-    if (avatar) {
-      const form = new FormData();
-      form.append("file", avatar);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      const res = await fetch(
-        "https://api.parablestreaming.com/api/upload-thumbnail",
-        {
-          method: "POST",
-          body: form,
-        }
-      );
+    if (!userId) return;
 
-      const json = await res.json();
-      avatarUrl = json.url;
+    setSaving(true);
+
+    const { error } = await supabase.from("profiles").upsert({
+      id: userId,
+      display_name: displayName,
+      username: username,
+      role: role,
+      onboarding_complete: true,
+      updated_at: new Date().toISOString()
+    });
+
+    setSaving(false);
+
+    if (error) {
+      alert(error.message);
+      return;
     }
 
-    await supabase
-      .from("profiles")
-      .update({
-        display_name: displayName,
-        bio,
-        avatar_url: avatarUrl,
-      })
-      .eq("id", user!.id);
+    if (role === "creator") {
+      router.replace("/creator/dashboard");
+    } else {
+      router.replace("/feed");
+    }
+  };
 
-    window.location.href = "/dashboard";
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading profile setup…
+      </div>
+    );
   }
 
   return (
-    <div className="bg-black text-white p-8 max-w-lg mx-auto min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Finish Your Creator Profile</h1>
+    <div className="max-w-md mx-auto mt-20 p-6 border rounded">
+      <h1 className="text-xl font-semibold mb-4">
+        Create Your Profile
+      </h1>
 
-      <label>Display Name</label>
-      <input
-        className="w-full p-3 bg-[#111] rounded mb-4"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-      />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-1">Display Name</label>
+          <input
+            required
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="w-full border p-2 rounded"
+          />
+        </div>
 
-      <label>Bio</label>
-      <textarea
-        className="w-full p-3 bg-[#111] rounded mb-4"
-        value={bio}
-        onChange={(e) => setBio(e.target.value)}
-      />
+        <div>
+          <label className="block mb-1">Username</label>
+          <input
+            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full border p-2 rounded"
+          />
+        </div>
 
-      <label>Avatar</label>
-      <input
-        type="file"
-        className="mb-4"
-        onChange={(e) => setAvatar(e.target.files?.[0] || null)}
-      />
+        <div>
+          <label className="block mb-1">Account Type</label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full border p-2 rounded"
+          >
+            <option value="creator">Creator</option>
+            <option value="viewer">Viewer</option>
+          </select>
+        </div>
 
-      <button
-        onClick={save}
-        className="px-6 py-3 bg-[#53fc18] text-black font-bold rounded"
-      >
-        Save Profile
-      </button>
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full bg-black text-white py-2 rounded"
+        >
+          {saving ? "Saving…" : "Complete Setup"}
+        </button>
+      </form>
     </div>
   );
 }

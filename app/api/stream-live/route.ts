@@ -10,45 +10,35 @@ export async function POST(req: Request) {
     const supabase = createClient();
     const { title, category, thumbnailUrl } = await req.json();
 
-    if (!title) {
-      return NextResponse.json(
-        { ok: false, error: "Title is required" },
-        { status: 400 }
-      );
-    }
+    if (!title)
+      return NextResponse.json({ ok: false, error: "Title required" });
 
-    // Get user
+    // AUTH USER
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json(
-        { ok: false, error: "Not authenticated" },
-        { status: 401 }
-      );
-    }
+    if (!user)
+      return NextResponse.json({ ok: false, error: "Not authenticated" });
 
-    // Create stream ID
+    // CREATE STREAM ID
     const streamId = randomUUID();
 
-    // Create slug
-    const slug =
-      title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") +
-      "-" +
-      streamId.substring(0, 6);
+    // GENERATE SLUG
+    const slugBase = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const slug = `${slugBase}-${streamId.substring(0, 6)}`;
 
-    // Insert row
+    // INSERT STREAM
     const { error } = await supabase.from("live_streams").insert({
       id: streamId,
       creator_id: user.id,
       title,
       category,
       thumbnail_url: thumbnailUrl || "",
-      is_live: true,
       slug,
+      is_live: true,
       viewer_count: 0,
-      started_at: new Date().toISOString(),
+      started_at: new Date().toISOString()
     });
 
     if (error)
@@ -57,12 +47,10 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       streamId,
-      slug,
+      slug
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, error: err.message || "Server error" },
-      { status: 500 }
-    );
+
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message });
   }
 }
