@@ -17,45 +17,39 @@ export default function CreatorProfileSetup() {
   const [error, setError] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [ministryName, setMinistryName] = useState("");
+  const [creatorType, setCreatorType] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-
-      if (!sessionData.session) {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
         router.replace("/login");
         return;
       }
-
-      setUserId(sessionData.session.user.id);
+      setUserId(data.session.user.id);
       setLoading(false);
     };
-
     init();
   }, [router]);
 
-  const handleImageUpload = async () => {
-    if (!profileImage || !userId) return null;
+  const uploadAvatar = async (): Promise<string | null> => {
+    if (!avatarFile || !userId) return null;
 
-    const fileExt = profileImage.name.split(".").pop();
-    const filePath = `avatars/${userId}.${fileExt}`;
+    const ext = avatarFile.name.split(".").pop();
+    const path = `avatars/${userId}.${ext}`;
 
     const { error } = await supabase.storage
       .from("avatars")
-      .upload(filePath, profileImage, {
-        upsert: true
-      });
+      .upload(path, avatarFile, { upsert: true });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     const { data } = supabase.storage
       .from("avatars")
-      .getPublicUrl(filePath);
+      .getPublicUrl(path);
 
     return data.publicUrl;
   };
@@ -66,16 +60,13 @@ export default function CreatorProfileSetup() {
     setError(null);
 
     try {
-      let avatarUrl = null;
-
-      if (profileImage) {
-        avatarUrl = await handleImageUpload();
-      }
+      const avatarUrl = await uploadAvatar();
 
       const { error } = await supabase.from("profiles").upsert({
         id: userId,
         display_name: displayName,
-        username,
+        ministry_name: ministryName,
+        creator_type: creatorType,
         avatar_url: avatarUrl,
         onboarding_complete: true,
         updated_at: new Date().toISOString()
@@ -83,7 +74,7 @@ export default function CreatorProfileSetup() {
 
       if (error) throw error;
 
-      router.replace("/dashboard");
+      router.replace("/creator/ministry");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -113,34 +104,44 @@ export default function CreatorProfileSetup() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          type="text"
-          placeholder="Display name"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Display name"
           required
           className="w-full p-2 rounded bg-black border border-gray-700"
         />
 
         <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={ministryName}
+          onChange={(e) => setMinistryName(e.target.value)}
+          placeholder="Ministry or brand name"
           required
           className="w-full p-2 rounded bg-black border border-gray-700"
         />
+
+        <select
+          value={creatorType}
+          onChange={(e) => setCreatorType(e.target.value)}
+          required
+          className="w-full p-2 rounded bg-black border border-gray-700"
+        >
+          <option value="">Select a category</option>
+          <option value="pastor">Pastor</option>
+          <option value="teacher">Teacher</option>
+          <option value="ministry">Ministry</option>
+        </select>
 
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setProfileImage(e.target.files?.[0] || null)}
+          onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
           className="w-full"
         />
 
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-green-600 py-2 rounded"
+          className="w-full bg-emerald-600 py-2 rounded"
         >
           {saving ? "Saving…" : "Complete Profile"}
         </button>
