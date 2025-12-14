@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabaseClient"; // ✅ USE AUTHED CLIENT
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient();
 
 export default function CreatorProfileSetup() {
   const router = useRouter();
@@ -63,7 +60,6 @@ export default function CreatorProfileSetup() {
     try {
       const avatarUrl = await uploadAvatar();
 
-      // ✅ Convert social links to a REAL array
       const socialLinks =
         socialLinksInput.trim() === ""
           ? []
@@ -77,7 +73,7 @@ export default function CreatorProfileSetup() {
         display_name: displayName,
         ministry_name: ministryName,
         creator_type: creatorType,
-        social_links: socialLinks, // ✅ ARRAY NOT STRING
+        social_links: socialLinks,
         avatar_url: avatarUrl,
         onboarding_complete: true,
         updated_at: new Date().toISOString()
