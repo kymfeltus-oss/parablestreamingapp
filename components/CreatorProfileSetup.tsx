@@ -14,11 +14,11 @@ export default function CreatorProfileSetup() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("creator");
-
+  const [profileImage, setProfileImage] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,109 +30,119 @@ export default function CreatorProfileSetup() {
         return;
       }
 
-      const uid = sessionData.session.user.id;
-      setUserId(uid);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("onboarding_complete")
-        .eq("id", uid)
-        .single();
-
-      if (profile?.onboarding_complete) {
-        router.replace("/dashboard");
-        return;
-      }
-
+      setUserId(sessionData.session.user.id);
       setLoading(false);
     };
 
     init();
   }, [router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleImageUpload = async () => {
+    if (!profileImage || !userId) return null;
 
-    if (!userId) return;
+    const fileExt = profileImage.name.split(".").pop();
+    const filePath = `avatars/${userId}.${fileExt}`;
 
-    setSaving(true);
-
-    const { error } = await supabase.from("profiles").upsert({
-      id: userId,
-      display_name: displayName,
-      username: username,
-      role: role,
-      onboarding_complete: true,
-      updated_at: new Date().toISOString()
-    });
-
-    setSaving(false);
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, profileImage, {
+        upsert: true
+      });
 
     if (error) {
-      alert(error.message);
-      return;
+      throw error;
     }
 
-    if (role === "creator") {
-      router.replace("/creator/dashboard");
-    } else {
-      router.replace("/feed");
+    const { data } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+
+    try {
+      let avatarUrl = null;
+
+      if (profileImage) {
+        avatarUrl = await handleImageUpload();
+      }
+
+      const { error } = await supabase.from("profiles").upsert({
+        id: userId,
+        display_name: displayName,
+        username,
+        avatar_url: avatarUrl,
+        onboarding_complete: true,
+        updated_at: new Date().toISOString()
+      });
+
+      if (error) throw error;
+
+      router.replace("/dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading profile setup…
-      </div>
-    );
+    return <div className="text-white p-6">Loading…</div>;
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 border rounded">
-      <h1 className="text-xl font-semibold mb-4">
-        Create Your Profile
+    <div className="max-w-xl mx-auto p-6 text-white">
+      <h1 className="text-2xl font-semibold mb-2">
+        Set up your creator profile
       </h1>
 
+      <p className="text-gray-400 mb-4">
+        This is what viewers will see across Parable.
+      </p>
+
+      {error && (
+        <div className="bg-red-900 text-red-200 p-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1">Display Name</label>
-          <input
-            required
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Display name"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          required
+          className="w-full p-2 rounded bg-black border border-gray-700"
+        />
 
-        <div>
-          <label className="block mb-1">Username</label>
-          <input
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          className="w-full p-2 rounded bg-black border border-gray-700"
+        />
 
-        <div>
-          <label className="block mb-1">Account Type</label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
-            <option value="creator">Creator</option>
-            <option value="viewer">Viewer</option>
-          </select>
-        </div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setProfileImage(e.target.files?.[0] || null)}
+          className="w-full"
+        />
 
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-black text-white py-2 rounded"
+          className="w-full bg-green-600 py-2 rounded"
         >
-          {saving ? "Saving…" : "Complete Setup"}
+          {saving ? "Saving…" : "Complete Profile"}
         </button>
       </form>
     </div>
