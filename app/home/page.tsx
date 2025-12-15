@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
-import PostComposer from "../../components/PostComposer";
 import {
   Radio,
-  PlayCircle,
   Users,
   Image as ImageIcon,
   Video,
+  X,
 } from "lucide-react";
 
 type Profile = {
@@ -49,12 +48,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-black text-white pb-16">
       <div className="max-w-7xl mx-auto px-6 pt-8 space-y-12">
 
-        {/* LIVE NOW STRIP */}
+        {/* LIVE NOW */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-extrabold neon-text">
-              🔴 Live Now
-            </h2>
+            <h2 className="text-lg font-extrabold neon-text">🔴 Live Now</h2>
 
             {isCreator && (
               <Link
@@ -70,7 +67,7 @@ export default function HomePage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="min-w-[260px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition cursor-pointer"
+                className="min-w-[260px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition"
               >
                 <div className="text-xs text-gray-400 mb-2">
                   Ministry Live
@@ -85,20 +82,20 @@ export default function HomePage() {
             ))}
 
             {isCreator && (
-              <Link
-                href="/creator/go-live"
+              <button
+                onClick={() => setComposerOpen(true)}
                 className="min-w-[260px] bg-black border border-dashed border-white/20 rounded-xl p-4 flex flex-col items-center justify-center hover:border-white/40 transition"
               >
                 <Radio className="w-6 h-6 neon-text mb-2" />
                 <span className="text-sm font-bold neon-text">
                   Go Live
                 </span>
-              </Link>
+              </button>
             )}
           </div>
         </section>
 
-        {/* COMMUNITY POST COMPOSER */}
+        {/* CREATE POST */}
         <section>
           <div
             onClick={() => setComposerOpen(true)}
@@ -107,15 +104,11 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-black border border-white/20 overflow-hidden flex items-center justify-center">
                 {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={profile.avatar_url} className="w-full h-full object-cover" />
                 ) : (
                   <Users className="w-5 h-5 text-gray-500" />
                 )}
               </div>
-
               <p className="text-sm text-gray-400">
                 What’s on your heart?
               </p>
@@ -123,31 +116,21 @@ export default function HomePage() {
 
             <div className="flex gap-4 mt-4 text-xs text-gray-400">
               <span className="flex items-center gap-1">
-                <ImageIcon className="w-4 h-4 neon-text" />
-                Photo
+                <ImageIcon className="w-4 h-4 neon-text" /> Photo
               </span>
               <span className="flex items-center gap-1">
-                <Video className="w-4 h-4 neon-text" />
-                Video
+                <Video className="w-4 h-4 neon-text" /> Video
               </span>
               <span className="flex items-center gap-1">
-                <Radio className="w-4 h-4 neon-text" />
-                Go Live
+                <Radio className="w-4 h-4 neon-text" /> Go Live
               </span>
             </div>
           </div>
-
-          <PostComposer
-            open={composerOpen}
-            onClose={() => setComposerOpen(false)}
-          />
         </section>
 
-        {/* COMMUNITY FEED */}
+        {/* FEED */}
         <section>
-          <h2 className="text-lg font-extrabold mb-4">
-            Community
-          </h2>
+          <h2 className="text-lg font-extrabold mb-4">Community</h2>
 
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
@@ -155,36 +138,49 @@ export default function HomePage() {
                 key={i}
                 className="bg-[#111] border border-white/10 rounded-xl p-5"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-black border border-white/20 flex items-center justify-center">
-                    <Users className="w-4 h-4 text-gray-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">
-                      Faith Builder Ministry
-                    </p>
-                    <p className="text-[11px] text-gray-500">
-                      2 hours ago
-                    </p>
-                  </div>
-                </div>
-
                 <p className="text-sm text-gray-300">
-                  Encouragement for today: Stay rooted, stay faithful,
-                  and trust the process God is building in you.
+                  Encouragement for today: Stay rooted, stay faithful, and trust the process.
                 </p>
-
-                <div className="flex gap-6 mt-4 text-xs text-gray-400">
-                  <span>❤️ 12</span>
-                  <span>💬 3</span>
-                  <span>↗ Share</span>
-                </div>
               </div>
             ))}
           </div>
         </section>
-
       </div>
+
+      {/* POST COMPOSER MODAL */}
+      {composerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-2xl p-6 relative shadow-[0_0_40px_rgba(83,252,24,0.25)]">
+            <button
+              onClick={() => setComposerOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-lg font-extrabold neon-text mb-4">
+              Create Post
+            </h2>
+
+            <textarea
+              placeholder="What’s on your heart?"
+              className="w-full bg-black border border-white/15 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 min-h-[120px]"
+            />
+
+            <div className="flex justify-between items-center mt-4">
+              <div className="flex gap-3 text-xs text-gray-400">
+                <span><ImageIcon className="inline w-4 h-4 neon-text" /> Photo</span>
+                <span><Video className="inline w-4 h-4 neon-text" /> Video</span>
+                <span><Radio className="inline w-4 h-4 neon-text" /> Go Live</span>
+              </div>
+
+              <button className="neon-button text-sm">
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
