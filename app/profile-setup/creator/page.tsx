@@ -12,8 +12,9 @@ type SupabaseProfile = {
   avatar_url?: string | null;
   ministry_name?: string | null;
   creator_category?: string | null;
-  social_links?: string | null;
+  social_links?: string[] | null;
   username?: string | null;
+  onboarding_complete?: boolean | null;
 };
 
 const CREATOR_CATEGORIES = [
@@ -42,17 +43,16 @@ export default function CreatorProfileSetupPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  /* ================= LOADING USER + PROFILE ================= */
   useEffect(() => {
     async function load() {
       setLoading(true);
 
-      const { data: session } = await supabase.auth.getUser();
-      const user = session?.user;
+      const { data } = await supabase.auth.getUser();
+      const user = data?.user;
 
       if (!user) return router.replace("/login");
 
-      if (user.user_metadata?.accountType !== "creator") {
+      if ((user.user_metadata as any)?.accountType !== "creator") {
         return router.replace("/profile-setup/viewer");
       }
 
@@ -62,16 +62,19 @@ export default function CreatorProfileSetupPage() {
         .eq("id", user.id)
         .maybeSingle();
 
-      setProfile(existing || null);
+      setProfile((existing as SupabaseProfile) || null);
 
       setDisplayName(
-        existing?.display_name || user.user_metadata?.displayName || ""
+        (existing as any)?.display_name || (user.user_metadata as any)?.displayName || ""
       );
-      setMinistryName(existing?.ministry_name || "");
-      setCreatorCategory(existing?.creator_category || "");
-      setBio(existing?.bio || "");
-      setSocialLinks(existing?.social_links || "");
-      setAvatarUrl(existing?.avatar_url || null);
+      setMinistryName((existing as any)?.ministry_name || "");
+      setCreatorCategory((existing as any)?.creator_category || "");
+      setBio((existing as any)?.bio || "");
+
+      const existingLinks = (existing as any)?.social_links as string[] | null | undefined;
+      setSocialLinks(existingLinks && Array.isArray(existingLinks) ? existingLinks.join("\n") : "");
+
+      setAvatarUrl((existing as any)?.avatar_url || null);
 
       setLoading(false);
     }
@@ -79,26 +82,40 @@ export default function CreatorProfileSetupPage() {
     load();
   }, [router, supabase]);
 
-  /* ================= AVATAR UPLOAD ================= */
   async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
     try {
       const file = event.target.files?.[0];
       if (!file) return;
 
+      setError(null);
       setUploading(true);
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const { data } = await supabase.auth.getUser();
+      const user = data?.user;
 
-      const res = await fetch("/api/profile/avatar", {
-        method: "POST",
-        body: formData,
-      });
+      if (!user) {
+        setUploading(false);
+        router.replace("/login");
+        return;
+      }
 
-      const json = await res.json();
-      if (!json.avatarUrl) throw new Error("Upload failed");
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}.${ext}`;
 
-      setAvatarUrl(json.avatarUrl);
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(publicData.publicUrl);
     } catch (err: any) {
       setError(err.message || "Avatar upload failed");
     } finally {
@@ -106,7 +123,6 @@ export default function CreatorProfileSetupPage() {
     }
   }
 
-  /* ================= SAVE CREATOR PROFILE ================= */
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -124,13 +140,21 @@ export default function CreatorProfileSetupPage() {
       return;
     }
 
-    const { data: session } = await supabase.auth.getUser();
-    const user = session?.user;
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
 
     if (!user) {
       setSaving(false);
       return router.replace("/login");
     }
+
+    const socialLinksArray =
+      socialLinks.trim() === ""
+        ? []
+        : socialLinks
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
 
     const payload = {
       id: user.id,
@@ -138,25 +162,27 @@ export default function CreatorProfileSetupPage() {
       bio,
       ministry_name: ministryName,
       creator_category: creatorCategory,
-      social_links: socialLinks,
+      social_links: socialLinksArray,
       avatar_url: avatarUrl,
-      username: profile?.username ?? user.user_metadata?.username ?? null,
+      onboarding_complete: true,
+      username: (profile as any)?.username ?? (user.user_metadata as any)?.username ?? null,
+      updated_at: new Date().toISOString()
     };
 
     const { error: saveError } = await supabase
       .from("profiles")
       .upsert(payload, { onConflict: "id" });
 
+    setSaving(false);
+
     if (saveError) {
       setError(saveError.message);
-      setSaving(false);
       return;
     }
 
     router.replace("/creator/dashboard");
   }
 
-  /* ================= LOADING STATE ================= */
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-gray-300">
@@ -165,7 +191,6 @@ export default function CreatorProfileSetupPage() {
     );
   }
 
-  /* ================= PAGE UI (UNCHANGED) ================= */
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center pb-16">
       <div className="w-full max-w-3xl bg-[#111] border border-white/10 rounded-2xl p-8 shadow-[0_0_30px_rgba(83,252,24,0.25)]">
@@ -183,8 +208,6 @@ export default function CreatorProfileSetupPage() {
         )}
 
         <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* AVATAR BLOCK */}
           <div className="lg:col-span-1 flex flex-col items-center gap-4">
             <div className="relative">
               <div className="w-32 h-32 rounded-full border border-white/20 overflow-hidden flex items-center justify-center bg-black">
@@ -209,9 +232,7 @@ export default function CreatorProfileSetupPage() {
             </p>
           </div>
 
-          {/* RIGHT SIDE FORM */}
           <div className="lg:col-span-2 space-y-4">
-
             <div>
               <label className="text-xs font-semibold mb-1 block">Display name</label>
               <input
@@ -277,7 +298,6 @@ export default function CreatorProfileSetupPage() {
             >
               {saving ? "Saving creator profile..." : "Finish creator setup"}
             </button>
-
           </div>
         </form>
       </div>
