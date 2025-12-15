@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { createClient } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const router = useRouter();
+  const supabase = createClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,29 +18,40 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { data, error: authError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
+    if (authError || !data.user) {
+      setError(authError?.message || "Login failed");
+      setLoading(false);
       return;
     }
 
-    router.replace("/profile-setup");
+    // 🔑 ROUTING LOGIC (ONLY FIX)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_complete")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    setLoading(false);
+
+    if (!profile || profile.onboarding_complete !== true) {
+      router.replace("/profile-setup/creator");
+    } else {
+      router.replace("/feed");
+    }
   };
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Glow background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,255,0,0.15),transparent_60%)]" />
 
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-950 to-black p-8 shadow-[0_0_60px_rgba(34,255,0,0.15)]">
-          {/* Brand */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-black border border-green-500 shadow-[0_0_25px_rgba(34,255,0,0.8)] mb-4">
               <span className="text-green-400 text-xl font-bold">P</span>
