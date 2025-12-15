@@ -4,209 +4,144 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import {
-  Radio,
-  PlayCircle,
-  Compass,
-  Users,
-  Gamepad2,
-  Mic2,
-  Music2,
-  BookOpen,
+  ChevronDown,
+  LogOut,
+  Settings,
+  User,
+  LayoutDashboard,
 } from "lucide-react";
 
 type Profile = {
-  id: string;
   display_name?: string | null;
-  ministry_name?: string | null;
-  creator_category?: string | null;
+  avatar_url?: string | null;
 };
 
 export default function HomePage() {
   const supabase = createClient();
-  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
       const { data } = await supabase.auth.getUser();
       const user = data?.user;
-
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+      if (!user) return;
 
       const { data: p } = await supabase
         .from("profiles")
-        .select("id,display_name,ministry_name,creator_category")
+        .select("display_name,avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
       setProfile((p as Profile) || null);
-      setLoading(false);
     }
 
     load();
   }, [supabase]);
 
-  const isCreator = !!profile?.creator_category;
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }
 
   return (
     <div className="min-h-screen bg-black text-white pb-16">
+
+      {/* HEADER */}
+      <header className="sticky top-0 z-30 bg-black/80 backdrop-blur border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
+          {/* LEFT: LOGO */}
+          <Link href="/home" className="text-2xl font-extrabold neon-text">
+            PARABLE
+          </Link>
+
+          {/* RIGHT: PROFILE MENU */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center gap-3 bg-black border border-white/15 rounded-full px-3 py-1 hover:border-white/30 transition"
+            >
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-black border border-white/20 flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-4 h-4 text-gray-400" />
+                )}
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            </button>
+
+            {menuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-52 bg-[#111] border border-white/15 rounded-xl shadow-lg overflow-hidden"
+                onMouseLeave={() => setMenuOpen(false)}
+              >
+                <MenuItem href="/profile">View profile</MenuItem>
+                <MenuItem href="/creator/dashboard">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Creator dashboard
+                </MenuItem>
+                <MenuItem href="/settings">
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </MenuItem>
+
+                <div className="border-t border-white/10 my-1" />
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-400 hover:bg-black/60 transition"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* HOME CONTENT */}
       <div className="max-w-7xl mx-auto px-6 pt-8 space-y-12">
+        <h1 className="text-3xl font-extrabold">
+          Streaming. Creating. Believing.
+        </h1>
 
-        {/* HERO: LIVE NOW */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-extrabold neon-text">
-              🔴 Live Now
-            </h2>
+        <p className="text-gray-400 max-w-2xl">
+          A living stage for faith-driven creators, ministries, and communities.
+        </p>
 
-            {isCreator && (
-              <Link
-                href="/creator/dashboard"
-                className="text-xs neon-text hover:underline"
-              >
-                Go to Creator Dashboard
-              </Link>
-            )}
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="min-w-[260px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition cursor-pointer"
-              >
-                <div className="text-xs text-gray-400 mb-2">
-                  Ministry Live
-                </div>
-                <div className="text-sm font-bold mb-1">
-                  Faith & Encouragement Night
-                </div>
-                <div className="text-[11px] text-gray-500">
-                  124 watching
-                </div>
-              </div>
-            ))}
-
-            {isCreator && (
-              <Link
-                href="/creator/go-live"
-                className="min-w-[260px] bg-black border border-dashed border-white/20 rounded-xl p-4 flex flex-col items-center justify-center hover:border-white/40 transition"
-              >
-                <Radio className="w-6 h-6 neon-text mb-2" />
-                <span className="text-sm font-bold neon-text">
-                  Go Live
-                </span>
-              </Link>
-            )}
-          </div>
-        </section>
-
-        {/* CONTINUE WATCHING */}
-        <section>
-          <h2 className="text-lg font-extrabold mb-4">
-            Continue Watching
+        {/* Placeholder sections (already approved earlier) */}
+        <div className="bg-[#111] border border-white/10 rounded-2xl p-6">
+          <h2 className="text-lg font-extrabold neon-text mb-2">
+            🔴 Live Now
           </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="bg-[#111] border border-white/10 rounded-xl p-4 hover:border-white/20 transition"
-              >
-                <PlayCircle className="w-6 h-6 neon-text mb-3" />
-                <div className="text-sm font-semibold">
-                  Sunday Teaching
-                </div>
-                <div className="text-[11px] text-gray-500">
-                  Resume where you left off
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* FEATURED MOMENT */}
-        <section>
-          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 shadow-[0_0_30px_rgba(83,252,24,0.15)]">
-            <h2 className="text-lg font-extrabold neon-text mb-2">
-              Featured Ministry
-            </h2>
-            <p className="text-sm text-gray-400 max-w-2xl">
-              Experience powerful worship and teaching from ministries
-              impacting lives this week.
-            </p>
-          </div>
-        </section>
-
-        {/* FAITH SHORTS */}
-        <section>
-          <h2 className="text-lg font-extrabold mb-4">
-            Faith Clips
-          </h2>
-
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="min-w-[180px] bg-[#111] border border-white/10 rounded-xl p-4 hover:border-white/20 transition"
-              >
-                <div className="text-sm font-bold mb-1">
-                  60-second encouragement
-                </div>
-                <div className="text-[11px] text-gray-500">
-                  Watch now
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* EXPLORE BY CATEGORY */}
-        <section>
-          <h2 className="text-lg font-extrabold mb-4">
-            Explore
-          </h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Category icon={BookOpen} label="Teaching" />
-            <Category icon={Music2} label="Worship" />
-            <Category icon={Gamepad2} label="Christian Gaming" />
-            <Category icon={Mic2} label="Podcasts" />
-            <Category icon={Users} label="Testimonies" />
-            <Category icon={Compass} label="Discover" />
-          </div>
-        </section>
-
-        {/* COMMUNITY PULSE */}
-        <section>
-          <div className="bg-black border border-white/10 rounded-xl p-4 flex flex-wrap gap-6 text-xs text-gray-400">
-            <span>18 creators live now</span>
-            <span>2,340 people watching</span>
-            <span>New ministries joined today</span>
-          </div>
-        </section>
-
+          <p className="text-sm text-gray-400">
+            Live content will appear here.
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-function Category({
-  icon: Icon,
-  label,
+function MenuItem({
+  href,
+  children,
 }: {
-  icon: any;
-  label: string;
+  href: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#111] border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:border-white/20 transition cursor-pointer">
-      <Icon className="w-6 h-6 neon-text" />
-      <span className="text-xs font-semibold text-center">
-        {label}
-      </span>
-    </div>
+    <Link
+      href={href}
+      className="flex items-center gap-2 px-4 py-3 text-sm text-gray-300 hover:bg-black/60 transition"
+    >
+      {children}
+    </Link>
   );
 }
