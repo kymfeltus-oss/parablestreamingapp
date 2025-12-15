@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabaseClient"; // ✅ USE AUTHED CLIENT
-
-const supabase = createClient();
+import { createClient } from "@/lib/supabaseClient";
 
 export default function CreatorProfileSetup() {
   const router = useRouter();
+  const supabase = createClient();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -16,12 +15,13 @@ export default function CreatorProfileSetup() {
   const [displayName, setDisplayName] = useState("");
   const [ministryName, setMinistryName] = useState("");
   const [creatorType, setCreatorType] = useState("");
-  const [socialLinksInput, setSocialLinksInput] = useState("");
+  const [bio, setBio] = useState("");
+  const [socialLinks, setSocialLinks] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const init = async () => {
+    const load = async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         router.replace("/login");
@@ -30,29 +30,34 @@ export default function CreatorProfileSetup() {
       setUserId(data.session.user.id);
       setLoading(false);
     };
-    init();
-  }, [router]);
+    load();
+  }, [router, supabase]);
 
-  const uploadAvatar = async (): Promise<string | null> => {
+  async function uploadAvatar(): Promise<string | null> {
     if (!avatarFile || !userId) return null;
 
     const ext = avatarFile.name.split(".").pop();
-    const path = `avatars/${userId}.${ext}`;
+    const filePath = `${userId}.${ext}`;
 
-    const { error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, avatarFile, { upsert: true });
+      .upload(filePath, avatarFile, {
+        upsert: true,
+        contentType: avatarFile.type
+      });
 
-    if (error) throw error;
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
 
     const { data } = supabase.storage
       .from("avatars")
-      .getPublicUrl(path);
+      .getPublicUrl(filePath);
 
     return data.publicUrl;
-  };
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
@@ -60,105 +65,99 @@ export default function CreatorProfileSetup() {
     try {
       const avatarUrl = await uploadAvatar();
 
-      const socialLinks =
-        socialLinksInput.trim() === ""
+      const linksArray =
+        socialLinks.trim() === ""
           ? []
-          : socialLinksInput
-              .split(",")
-              .map(link => link.trim())
+          : socialLinks
+              .split("\n")
+              .map(l => l.trim())
               .filter(Boolean);
 
-      const { error } = await supabase.from("profiles").upsert({
+      const { error: dbError } = await supabase.from("profiles").upsert({
         id: userId,
         display_name: displayName,
         ministry_name: ministryName,
         creator_type: creatorType,
-        social_links: socialLinks,
+        bio,
+        social_links: linksArray,
         avatar_url: avatarUrl,
         onboarding_complete: true,
         updated_at: new Date().toISOString()
       });
 
-      if (error) throw error;
+      if (dbError) throw dbError;
 
       router.replace("/creator/ministry");
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Upload failed");
     } finally {
       setSaving(false);
     }
-  };
+  }
 
   if (loading) {
     return <div className="text-white p-6">Loading…</div>;
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6 text-white">
-      <h1 className="text-2xl font-semibold mb-2">
-        Set up your creator profile
-      </h1>
+    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 text-white space-y-4">
+      {error && <div className="bg-red-900 text-red-200 p-3 rounded">{error}</div>}
 
-      <p className="text-gray-400 mb-4">
-        This is what viewers will see across Parable.
-      </p>
+      <input
+        className="w-full p-2 rounded bg-black border border-gray-700"
+        placeholder="Display name"
+        value={displayName}
+        onChange={e => setDisplayName(e.target.value)}
+        required
+      />
 
-      {error && (
-        <div className="bg-red-900 text-red-200 p-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+      <input
+        className="w-full p-2 rounded bg-black border border-gray-700"
+        placeholder="Ministry or brand name"
+        value={ministryName}
+        onChange={e => setMinistryName(e.target.value)}
+        required
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          value={displayName}
-          onChange={e => setDisplayName(e.target.value)}
-          placeholder="Display name"
-          required
-          className="w-full p-2 rounded bg-black border border-gray-700"
-        />
+      <select
+        className="w-full p-2 rounded bg-black border border-gray-700"
+        value={creatorType}
+        onChange={e => setCreatorType(e.target.value)}
+        required
+      >
+        <option value="">Select category</option>
+        <option value="pastor">Pastor</option>
+        <option value="teacher">Teacher</option>
+        <option value="ministry">Ministry</option>
+      </select>
 
-        <input
-          value={ministryName}
-          onChange={e => setMinistryName(e.target.value)}
-          placeholder="Ministry or brand name"
-          required
-          className="w-full p-2 rounded bg-black border border-gray-700"
-        />
+      <textarea
+        className="w-full p-2 rounded bg-black border border-gray-700"
+        placeholder="Short bio"
+        value={bio}
+        onChange={e => setBio(e.target.value)}
+      />
 
-        <select
-          value={creatorType}
-          onChange={e => setCreatorType(e.target.value)}
-          required
-          className="w-full p-2 rounded bg-black border border-gray-700"
-        >
-          <option value="">Select a category</option>
-          <option value="pastor">Pastor</option>
-          <option value="teacher">Teacher</option>
-          <option value="ministry">Ministry</option>
-        </select>
+      <textarea
+        className="w-full p-2 rounded bg-black border border-gray-700"
+        placeholder="Social links (one per line)"
+        value={socialLinks}
+        onChange={e => setSocialLinks(e.target.value)}
+      />
 
-        <textarea
-          value={socialLinksInput}
-          onChange={e => setSocialLinksInput(e.target.value)}
-          placeholder="Social links (comma separated)"
-          className="w-full p-2 rounded bg-black border border-gray-700"
-        />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={e => setAvatarFile(e.target.files?.[0] || null)}
+      />
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={e => setAvatarFile(e.target.files?.[0] || null)}
-        />
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full bg-emerald-600 py-2 rounded"
-        >
-          {saving ? "Saving…" : "Complete Profile"}
-        </button>
-      </form>
-    </div>
+      <button
+        type="submit"
+        disabled={saving}
+        className="w-full bg-emerald-600 py-2 rounded"
+      >
+        {saving ? "Saving…" : "Finish creator setup"}
+      </button>
+    </form>
   );
 }
