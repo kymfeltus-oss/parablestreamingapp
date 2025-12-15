@@ -22,7 +22,7 @@ export default function LoginPage() {
     const { data, error: authError } =
       await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
     if (authError || !data.user) {
@@ -48,16 +48,18 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,255,0,0.15),transparent_60%)]" />
+      {/* 🔧 FIX: background overlay must ignore pointer events */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,rgba(34,255,0,0.15),transparent_60%)]" />
 
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
-        <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-950 to-black p-8 shadow-[0_0_60px_rgba(34,255,0,0.15)]">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#111] p-8 shadow-[0_0_30px_rgba(83,252,24,0.25)]">
+          {/* Brand */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-black border border-green-500 shadow-[0_0_25px_rgba(34,255,0,0.8)] mb-4">
-              <span className="text-green-400 text-xl font-bold">P</span>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-black border border-white/20 shadow-[0_0_25px_rgba(83,252,24,0.8)] mb-4">
+              <span className="neon-text text-xl font-bold">P</span>
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-3xl font-bold tracking-tight neon-text">
               Welcome to Parable
             </h1>
 
@@ -67,7 +69,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-900/40 border border-red-800 px-4 py-3 text-sm text-red-300 mb-4">
+            <div className="mb-4 rounded-lg bg-red-900/40 border border-red-500 px-4 py-3 text-sm text-red-200">
               {error}
             </div>
           )}
@@ -82,7 +84,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@parable.com"
-                className="mt-1 w-full rounded-lg bg-black border border-zinc-700 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,255,0,0.5)]"
+                className="mt-1 w-full rounded-lg bg-black border border-white/15 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#53fc18]"
               />
             </div>
 
@@ -95,7 +97,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="mt-1 w-full rounded-lg bg-black border border-zinc-700 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,255,0,0.5)]"
+                className="mt-1 w-full rounded-lg bg-black border border-white/15 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#53fc18]"
               />
             </div>
 
@@ -103,7 +105,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="w-full rounded-xl bg-green-500 py-3 font-semibold text-black hover:bg-green-400 transition shadow-[0_0_25px_rgba(34,255,0,0.9)]"
+              className="w-full neon-button disabled:opacity-60"
             >
               {loading ? "Entering…" : "Enter Parable"}
             </button>
@@ -113,7 +115,7 @@ export default function LoginPage() {
             New to Parable?{" "}
             <a
               href="/auth/register"
-              className="text-green-400 hover:underline"
+              className="neon-text hover:underline"
             >
               Create your account
             </a>
