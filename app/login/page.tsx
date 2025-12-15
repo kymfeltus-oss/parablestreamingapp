@@ -42,18 +42,17 @@ export default function LoginPage() {
     if (!profile || profile.onboarding_complete !== true) {
       router.replace("/profile-setup/creator");
     } else {
-      router.replace("/feed");
+      // ✅ FINAL DESTINATION FOR CREATORS
+      router.replace("/creator/dashboard");
     }
   }
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* 🔧 FIX: background overlay must ignore pointer events */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,rgba(34,255,0,0.15),transparent_60%)]" />
 
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#111] p-8 shadow-[0_0_30px_rgba(83,252,24,0.25)]">
-          {/* Brand */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-black border border-white/20 shadow-[0_0_25px_rgba(83,252,24,0.8)] mb-4">
               <span className="neon-text text-xl font-bold">P</span>
@@ -113,10 +112,7 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center text-sm text-zinc-400">
             New to Parable?{" "}
-            <a
-              href="/auth/register"
-              className="neon-text hover:underline"
-            >
+            <a href="/auth/register" className="neon-text hover:underline">
               Create your account
             </a>
           </div>
