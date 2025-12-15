@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Always allow public and onboarding routes
+  // Always allow public + onboarding routes
   const allowedRoutes = [
     "/",
     "/flash",
@@ -24,14 +24,19 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // For everything else, require session cookie
+  // Check for Supabase session cookie
   const hasSession =
     req.cookies.get("sb-access-token") ||
     req.cookies.get("sb-access-token.0") ||
     req.cookies.get("supabase-auth-token");
 
+  // Allow creator pages if session exists
+  if (pathname.startsWith("/creator") && hasSession) {
+    return NextResponse.next();
+  }
+
+  // Otherwise redirect to login
   if (!hasSession) {
-    // Send unauthenticated users to login (NOT flash)
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
