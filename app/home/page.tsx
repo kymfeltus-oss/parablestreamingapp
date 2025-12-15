@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
-import PostComposer from "@/components/PostComposer";
+import PostComposer from "../../components/PostComposer";
 import {
   Radio,
   PlayCircle,
@@ -150,8 +150,6 @@ export default function HomePage() {
           </h2>
 
           <div className="space-y-6">
-
-            {/* FEED ITEM */}
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
