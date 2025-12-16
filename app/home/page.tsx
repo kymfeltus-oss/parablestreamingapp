@@ -1,5 +1,4 @@
-// FORCE_HOME_UPDATE_123
-// HOME_WITH_SIDEBAR_EXPLORE_V1
+// HOME_WITH_CLICKABLE_PROFILE_AND_SIDEBAR
 
 "use client";
 
@@ -26,6 +25,7 @@ type Profile = {
   display_name?: string | null;
   avatar_url?: string | null;
   creator_category?: string | null;
+  username?: string | null;
 };
 
 type Post = {
@@ -54,7 +54,7 @@ export default function HomePage() {
 
       const { data: p } = await supabase
         .from("profiles")
-        .select("display_name,avatar_url,creator_category")
+        .select("display_name,avatar_url,creator_category,username")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -64,7 +64,7 @@ export default function HomePage() {
     load();
   }, [supabase]);
 
-  /* ---------- LOAD POSTS (PERSISTED) ---------- */
+  /* ---------- LOAD POSTS (PERSIST) ---------- */
   useEffect(() => {
     const stored = localStorage.getItem("parable_home_posts");
     if (stored) setPosts(JSON.parse(stored));
@@ -97,10 +97,12 @@ export default function HomePage() {
     window.location.href = "/login";
   }
 
+  const profileHref = `/profile/${profile?.username || "me"}`;
+
   return (
     <div className="relative min-h-screen bg-black text-white pb-24 overflow-hidden">
 
-      {/* 🌌 MOVING BACKGROUND (FLASH ENERGY) */}
+      {/* 🌌 MOVING BACKGROUND GLOW */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#53fc18]/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-[#53fc18]/5 rounded-full blur-3xl animate-pulse" />
@@ -127,7 +129,7 @@ export default function HomePage() {
                 className="absolute right-0 mt-2 w-48 bg-[#111] border border-white/15 rounded-xl shadow-lg overflow-hidden"
                 onMouseLeave={() => setMenuOpen(false)}
               >
-                <MenuItem href="/profile">View Profile</MenuItem>
+                <MenuItem href={profileHref}>View Profile</MenuItem>
 
                 {profile?.creator_category && (
                   <MenuItem href="/creator/dashboard">
@@ -159,13 +161,16 @@ export default function HomePage() {
       {/* MAIN GRID */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 pt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
 
-        {/* LEFT SIDEBAR */}
+        {/* LEFT SIDEBAR — ONLINE */}
         <aside className="hidden lg:block sticky top-20 h-fit bg-[#0b0b0b] border border-white/10 rounded-xl p-4">
           <h3 className="text-xs font-bold uppercase text-gray-400 mb-3">
             Online Now
           </h3>
 
-          <div className="flex items-center gap-3">
+          <Link
+            href={profileHref}
+            className="flex items-center gap-3 hover:opacity-80 transition"
+          >
             <div className="relative">
               <Avatar avatar={profile?.avatar_url} />
               <Circle className="w-3 h-3 absolute bottom-0 right-0 fill-[#53fc18] text-[#53fc18]" />
@@ -173,7 +178,7 @@ export default function HomePage() {
             <span className="text-sm">
               {profile?.display_name || "You"}
             </span>
-          </div>
+          </Link>
         </aside>
 
         {/* HOME CONTENT */}
