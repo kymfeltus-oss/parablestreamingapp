@@ -1,4 +1,4 @@
-// PROFILE_PUBLIC_ROUTER_V1
+// PROFILE_PUBLIC_ROUTER_V2
 
 "use client";
 
@@ -21,28 +21,49 @@ type Profile = {
 };
 
 export default function PublicProfilePage() {
-  const { username } = useParams();
+  const params = useParams();
   const supabase = createClient();
+
+  // Decode and normalize URL param
+  const rawParam = Array.isArray(params.username)
+    ? params.username[0]
+    : params.username;
+
+  const normalizedUsername = decodeURIComponent(rawParam || "")
+    .toLowerCase()
+    .replace(/\s+/g, "");
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      if (!username) return;
+      if (!normalizedUsername) return;
 
-      const { data } = await supabase
+      // 1️⃣ Try exact username match
+      let { data } = await supabase
         .from("profiles")
         .select("username,display_name,bio,avatar_url,creator_category")
-        .eq("username", username)
+        .eq("username", normalizedUsername)
         .maybeSingle();
 
-      setProfile(data || null);
+      // 2️⃣ Fallback: match display_name if username missing
+      if (!data) {
+        const fallback = await supabase
+          .from("profiles")
+          .select("username,display_name,bio,avatar_url,creator_category")
+          .ilike("display_name", rawParam || "")
+          .maybeSingle();
+
+        data = fallback.data || null;
+      }
+
+      setProfile(data);
       setLoading(false);
     }
 
     load();
-  }, [username, supabase]);
+  }, [normalizedUsername, rawParam, supabase]);
 
   if (loading) {
     return (
@@ -65,7 +86,6 @@ export default function PublicProfilePage() {
     return <PodcasterProfile profile={profile} />;
   }
 
-  /* FALLBACK (OTHER TYPES COMING NEXT) */
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
       <p className="text-gray-400">
