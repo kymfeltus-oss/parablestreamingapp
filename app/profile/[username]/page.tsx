@@ -1,4 +1,4 @@
-// PROFILE_PUBLIC_ROUTER_V3
+// PROFILE_PUBLIC_ROUTER_V5_INTERACTIVE
 
 "use client";
 
@@ -9,6 +9,8 @@ import {
   PlayCircle,
   Radio,
   BookOpen,
+  Music,
+  Sparkles,
 } from "lucide-react";
 
 /* =========================
@@ -16,31 +18,18 @@ import {
    ========================= */
 const DEMO_PROFILES: Record<string, any> = {
   kymtheceo: {
+    username: "kymtheceo",
     display_name: "Kym The CEO",
     creator_category: "podcaster",
-    bio: "Podcast host sharing conversations that inspire faith, leadership, and purpose.",
-    avatar_url: null,
-  },
-  sarahjakes: {
-    display_name: "Sarah Jakes Roberts",
-    creator_category: "teacher",
-    bio: "Teacher, author, and leader helping people grow in faith and identity.",
-    avatar_url: null,
-  },
-  jamalbryant: {
-    display_name: "Dr. Jamal Bryant",
-    creator_category: "pastor",
-    bio: "Pastor and prophetic voice speaking truth to culture through the Word.",
-    avatar_url: null,
-  },
-  sherylbrady: {
-    display_name: "Pastor Sheryl Brady",
-    creator_category: "pastor",
-    bio: "Senior pastor and teacher encouraging resilience and faith.",
-    avatar_url: null,
+    bio: "Podcast host sharing conversations that inspire faith, leadership, purpose, and kingdom impact.",
+    avatar_url:
+      "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=400",
   },
 };
 
+/* =========================
+   MAIN ROUTER
+   ========================= */
 export default function PublicProfilePage() {
   const params = useParams();
   const raw = Array.isArray(params.username)
@@ -65,13 +54,6 @@ export default function PublicProfilePage() {
     return <PodcasterProfile profile={profile} />;
   }
 
-  if (
-    profile.creator_category === "pastor" ||
-    profile.creator_category === "teacher"
-  ) {
-    return <PastorTeacherProfile profile={profile} />;
-  }
-
   return (
     <div className="min-h-screen bg-black text-gray-400 flex items-center justify-center">
       Template coming soon
@@ -80,131 +62,104 @@ export default function PublicProfilePage() {
 }
 
 /* =========================
-   PODCASTER TEMPLATE
+   PODCASTER PROFILE (INTERACTIVE)
    ========================= */
 function PodcasterProfile({ profile }: { profile: any }) {
   return (
-    <ProfileShell>
-      <ProfileHero profile={profile} icon={<Mic2 />} />
+    <div className="relative min-h-screen bg-black text-white pb-24 overflow-hidden">
 
-      <Section title="Episodes" icon={<Mic2 />}>
-        {["Faith & Leadership", "Calling & Purpose", "Kingdom Conversations"].map(
-          (t, i) => (
-            <EpisodeCard key={i} title={t} />
-          )
-        )}
-      </Section>
-    </ProfileShell>
-  );
-}
-
-/* =========================
-   PASTOR / TEACHER TEMPLATE
-   ========================= */
-function PastorTeacherProfile({ profile }: { profile: any }) {
-  return (
-    <ProfileShell>
-      <ProfileHero profile={profile} icon={<BookOpen />} />
-
-      <Section title="Latest Teaching" icon={<PlayCircle />}>
-        <TeachingCard title="Set the Record Straight" />
-        <TeachingCard title="Why Time Is Flying" />
-        <TeachingCard title="Stronger Than the Storm" />
-      </Section>
-    </ProfileShell>
-  );
-}
-
-/* =========================
-   SHARED COMPONENTS
-   ========================= */
-
-function ProfileShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      <div className="max-w-4xl mx-auto px-6 pt-10 space-y-12">
-        {children}
+      {/* ✨ BACKGROUND MOTION */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#53fc18]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[#53fc18]/5 rounded-full blur-3xl animate-pulse" />
       </div>
-    </div>
-  );
-}
 
-function ProfileHero({
-  profile,
-  icon,
-}: {
-  profile: any;
-  icon: React.ReactNode;
-}) {
-  return (
-    <section className="bg-[#0b0b0b] border border-white/10 rounded-2xl p-6 shadow-[0_0_40px_rgba(83,252,24,0.2)]">
-      <div className="flex items-center gap-6">
-        <div className="w-24 h-24 rounded-full bg-black border border-white/20 flex items-center justify-center">
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} className="w-full h-full object-cover" />
-          ) : (
-            <User className="w-10 h-10 text-gray-500" />
-          )}
-        </div>
+      <div className="relative z-10 max-w-4xl mx-auto px-6 pt-12 space-y-12">
 
-        <div>
-          <h1 className="text-3xl font-extrabold neon-text">
-            {profile.display_name}
-          </h1>
-          <p className="text-sm text-gray-400 mt-2 max-w-xl">
-            {profile.bio}
-          </p>
+        {/* HERO */}
+        <section className="bg-[#0b0b0b] border border-white/10 rounded-2xl p-8 shadow-[0_0_50px_rgba(83,252,24,0.25)]">
+          <div className="flex flex-col md:flex-row gap-8 items-center">
 
-          <div className="mt-4 flex gap-3">
-            <button className="neon-button text-sm flex items-center gap-2">
-              {icon}
-              Follow
-            </button>
-            <button className="px-5 py-3 rounded-lg bg-black border border-white/15 text-sm hover:border-white/30 transition flex items-center gap-2">
-              <Radio className="w-4 h-4" />
-              Live
-            </button>
+            {/* AVATAR */}
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden border border-white/20 shadow-[0_0_30px_rgba(83,252,24,0.4)]">
+                {profile.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-12 h-12 text-gray-500 mx-auto mt-10" />
+                )}
+              </div>
+              <Sparkles className="absolute -bottom-3 -right-3 w-6 h-6 neon-text animate-pulse" />
+            </div>
+
+            {/* INFO */}
+            <div className="text-center md:text-left">
+              <h1 className="text-3xl font-extrabold neon-text">
+                {profile.display_name}
+              </h1>
+
+              <p className="text-sm text-gray-400 mt-3 max-w-xl">
+                {profile.bio}
+              </p>
+
+              <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-4">
+                <button className="neon-button flex items-center gap-2 text-sm">
+                  <PlayCircle className="w-4 h-4" />
+                  Play Latest Episode
+                </button>
+
+                <button className="px-5 py-3 rounded-lg bg-black border border-white/15 text-sm hover:border-white/30 transition flex items-center gap-2">
+                  <Radio className="w-4 h-4" />
+                  Go Live
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* NOW PLAYING */}
+        <section className="bg-[#111] border border-white/10 rounded-xl p-5 hover:neon-border transition">
+          <div className="flex items-center gap-3">
+            <Music className="w-5 h-5 neon-text" />
+            <div>
+              <p className="text-sm font-semibold">Now Playing</p>
+              <p className="text-xs text-gray-400">
+                Faith, Leadership & Purpose — Episode 12
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* EPISODES */}
+        <section>
+          <div className="flex items-center gap-2 mb-5">
+            <Mic2 className="w-4 h-4 neon-text" />
+            <h2 className="text-lg font-extrabold">Episodes</h2>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              "Faith & Leadership",
+              "Calling & Purpose",
+              "Kingdom Conversations",
+            ].map((title, i) => (
+              <div
+                key={i}
+                className="bg-[#111] border border-white/10 rounded-xl p-5 hover:neon-border transition cursor-pointer"
+              >
+                <p className="font-semibold">{title}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  45 min • Tap to play
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
       </div>
-    </section>
-  );
-}
-
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <div className="flex items-center gap-2 mb-4">
-        <span className="neon-text">{icon}</span>
-        <h2 className="text-lg font-extrabold">{title}</h2>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
-  );
-}
-
-function EpisodeCard({ title }: { title: string }) {
-  return (
-    <div className="bg-[#111] border border-white/10 rounded-xl p-4">
-      <p className="font-semibold">{title}</p>
-      <p className="text-xs text-gray-400">45 min • Listen now</p>
-    </div>
-  );
-}
-
-function TeachingCard({ title }: { title: string }) {
-  return (
-    <div className="bg-[#111] border border-white/10 rounded-xl p-4">
-      <p className="font-semibold">{title}</p>
-      <p className="text-xs text-gray-400">Watch teaching</p>
     </div>
   );
 }
