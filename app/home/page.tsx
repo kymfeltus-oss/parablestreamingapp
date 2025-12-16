@@ -4,15 +4,21 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import {
   Radio,
+  Users,
   Image as ImageIcon,
   Video,
   X,
+  Flame,
+  Music,
+  Gamepad2,
+  Mic2,
   User,
 } from "lucide-react";
 
 type Profile = {
   display_name?: string | null;
   avatar_url?: string | null;
+  creator_category?: string | null;
 };
 
 type Post = {
@@ -20,7 +26,6 @@ type Post = {
   author: string;
   avatar?: string | null;
   content: string;
-  type: "text" | "photo" | "video" | "live";
   createdAt: string;
 };
 
@@ -30,7 +35,6 @@ export default function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [postText, setPostText] = useState("");
-  const [mode, setMode] = useState<Post["type"]>("text");
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
@@ -41,7 +45,7 @@ export default function HomePage() {
 
       const { data: p } = await supabase
         .from("profiles")
-        .select("display_name,avatar_url")
+        .select("display_name,avatar_url,creator_category")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -52,82 +56,150 @@ export default function HomePage() {
   }, [supabase]);
 
   function handlePost() {
-    if (!postText.trim() && mode === "text") return;
+    if (!postText.trim()) return;
 
-    const newPost: Post = {
-      id: Date.now(),
-      author: profile?.display_name || "Anonymous",
-      avatar: profile?.avatar_url,
-      content:
-        mode === "live"
-          ? "🔴 Just went live — join now!"
-          : postText,
-      type: mode,
-      createdAt: "Just now",
-    };
+    setPosts((prev) => [
+      {
+        id: Date.now(),
+        author: profile?.display_name || "Anonymous",
+        avatar: profile?.avatar_url,
+        content: postText,
+        createdAt: "Just now",
+      },
+      ...prev,
+    ]);
 
-    setPosts((prev) => [newPost, ...prev]);
-    setComposerOpen(false);
     setPostText("");
-    setMode("text");
+    setComposerOpen(false);
   }
 
   return (
     <div className="min-h-screen bg-black text-white pb-24">
-      <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 pt-6 space-y-10">
 
-        {/* CREATE POST ENTRY */}
-        <div
-          onClick={() => setComposerOpen(true)}
-          className="bg-[#111] border border-white/10 rounded-xl p-4 cursor-pointer hover:border-white/20 transition"
-        >
-          <div className="flex items-center gap-3">
-            <Avatar avatar={profile?.avatar_url} />
-            <span className="text-gray-400">
-              Share what God is doing in your life…
-            </span>
+        {/* HERO — LIVE ENERGY */}
+        <section className="bg-[#0b0b0b] border border-white/10 rounded-2xl p-6 shadow-[0_0_40px_rgba(83,252,24,0.2)]">
+          <h1 className="text-2xl font-extrabold neon-text mb-2">
+            Live right now on Parable
+          </h1>
+          <p className="text-sm text-gray-400">
+            Join worship, teaching, gaming, and conversations happening in real time.
+          </p>
+        </section>
+
+        {/* LIVE NOW STRIP */}
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <Radio className="w-4 h-4 neon-text" />
+            <h2 className="text-lg font-extrabold neon-text">
+              Live Now
+            </h2>
           </div>
-        </div>
 
-        {/* FEED */}
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <div
-              key={post.id}
-              className="bg-[#111] border border-white/10 rounded-xl p-4"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Avatar avatar={post.avatar} />
-                <div>
-                  <p className="text-sm font-semibold">
-                    {post.author}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {post.createdAt}
-                  </p>
-                </div>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="min-w-[240px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition cursor-pointer"
+              >
+                <p className="text-sm font-bold">
+                  Worship & Word Night
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  🔴 126 watching
+                </p>
               </div>
+            ))}
 
-              <p className="text-sm text-gray-300">
-                {post.content}
-              </p>
+            {profile?.creator_category && (
+              <div
+                onClick={() => setComposerOpen(true)}
+                className="min-w-[240px] bg-black border border-dashed border-white/20 rounded-xl p-4 flex flex-col items-center justify-center hover:border-white/40 transition cursor-pointer"
+              >
+                <Radio className="w-6 h-6 neon-text mb-2" />
+                <span className="text-sm font-bold neon-text">
+                  Go Live
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* CREATE POST */}
+        <section>
+          <div
+            onClick={() => setComposerOpen(true)}
+            className="bg-[#111] border border-white/10 rounded-xl p-4 cursor-pointer hover:border-white/20 transition"
+          >
+            <div className="flex items-center gap-3">
+              <Avatar avatar={profile?.avatar_url} />
+              <span className="text-gray-400">
+                Share what God is doing in your life…
+              </span>
             </div>
-          ))}
+          </div>
+        </section>
 
-          {posts.length === 0 && (
-            <p className="text-center text-gray-500 text-sm">
-              No posts yet. Be the first to share.
-            </p>
-          )}
-        </div>
+        {/* COMMUNITY FEED */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Flame className="w-4 h-4 neon-text" />
+            <h2 className="text-lg font-extrabold">
+              Community
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <div
+                key={post.id}
+                className="bg-[#111] border border-white/10 rounded-xl p-4"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Avatar avatar={post.avatar} />
+                  <div>
+                    <p className="text-sm font-semibold">{post.author}</p>
+                    <p className="text-xs text-gray-500">{post.createdAt}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-300">{post.content}</p>
+              </div>
+            ))}
+
+            {posts.length === 0 && (
+              <p className="text-center text-gray-500 text-sm">
+                Be the first to post.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* DISCOVER */}
+        <section>
+          <h2 className="text-lg font-extrabold mb-3">
+            Explore
+          </h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <DiscoverCard icon={<Music />} label="Worship" />
+            <DiscoverCard icon={<Mic2 />} label="Teaching" />
+            <DiscoverCard icon={<Gamepad2 />} label="Christian Gaming" />
+            <DiscoverCard icon={<Users />} label="Testimonies" />
+          </div>
+        </section>
+
+        {/* COMMUNITY PULSE */}
+        <section className="bg-[#111] border border-white/10 rounded-xl p-4 text-xs text-gray-400 flex justify-between">
+          <span>18 creators live</span>
+          <span>2,340 watching</span>
+          <span>New ministries today</span>
+        </section>
       </div>
 
-      {/* COMPOSER MODAL */}
+      {/* POST COMPOSER MODAL */}
       {composerOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="w-full max-w-xl bg-[#0b0b0b] border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(83,252,24,0.25)]">
-
-            {/* Header */}
+          <div className="w-full max-w-lg bg-[#0b0b0b] border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(83,252,24,0.25)]">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <h2 className="text-lg font-extrabold neon-text">
                 Create Post
@@ -137,7 +209,6 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* Body */}
             <div className="px-6 py-5">
               <textarea
                 value={postText}
@@ -147,33 +218,8 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Actions */}
-            <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between">
-              <div className="flex gap-4 text-sm">
-                <ModeButton
-                  label="Photo"
-                  active={mode === "photo"}
-                  onClick={() => setMode("photo")}
-                  icon={<ImageIcon className="w-4 h-4" />}
-                />
-                <ModeButton
-                  label="Video"
-                  active={mode === "video"}
-                  onClick={() => setMode("video")}
-                  icon={<Video className="w-4 h-4" />}
-                />
-                <ModeButton
-                  label="Go Live"
-                  active={mode === "live"}
-                  onClick={() => setMode("live")}
-                  icon={<Radio className="w-4 h-4" />}
-                />
-              </div>
-
-              <button
-                onClick={handlePost}
-                className="neon-button text-sm"
-              >
+            <div className="px-6 py-4 border-t border-white/10 flex justify-end">
+              <button onClick={handlePost} className="neon-button text-sm">
                 Post
               </button>
             </div>
@@ -198,26 +244,17 @@ function Avatar({ avatar }: { avatar?: string | null }) {
   );
 }
 
-function ModeButton({
-  label,
+function DiscoverCard({
   icon,
-  active,
-  onClick,
+  label,
 }: {
-  label: string;
   icon: React.ReactNode;
-  active: boolean;
-  onClick: () => void;
+  label: string;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 ${
-        active ? "neon-text" : "text-gray-400"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
+    <div className="bg-[#111] border border-white/10 rounded-xl p-4 flex items-center gap-3 hover:border-white/20 transition cursor-pointer">
+      <span className="neon-text">{icon}</span>
+      <span className="text-sm font-semibold">{label}</span>
+    </div>
   );
 }
