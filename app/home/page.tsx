@@ -1,4 +1,4 @@
-// HOME_WITH_CLICKABLE_PROFILE_AND_SIDEBAR_V2
+// HOME_WITH_FEATURED_CREATORS_V3
 
 "use client";
 
@@ -45,7 +45,6 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  /* LOAD PROFILE */
   useEffect(() => {
     async function load() {
       const { data } = await supabase.auth.getUser();
@@ -63,7 +62,6 @@ export default function HomePage() {
     load();
   }, [supabase]);
 
-  /* LOAD POSTS (PERSIST) */
   useEffect(() => {
     const stored = localStorage.getItem("parable_home_posts");
     if (stored) setPosts(JSON.parse(stored));
@@ -101,7 +99,7 @@ export default function HomePage() {
   return (
     <div className="relative min-h-screen bg-black text-white pb-24 overflow-hidden">
 
-      {/* MOVING GLOW BACKGROUND */}
+      {/* MOVING GLOW */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#53fc18]/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-[#53fc18]/5 rounded-full blur-3xl animate-pulse" />
@@ -157,7 +155,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* MAIN GRID */}
+      {/* MAIN */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 pt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
 
         {/* LEFT SIDEBAR */}
@@ -169,49 +167,68 @@ export default function HomePage() {
           <Link href={profileHref} className="flex items-center gap-3 hover:opacity-80 transition">
             <div className="relative">
               <Avatar avatar={profile?.avatar_url} />
-              <Circle className="w-3 h-3 absolute bottom-0 right-0 fill-[#53fc18] text-[#53fc18]" />
+              <Circle className="w-3 h-3 absolute bottom-0 right-0 fill-[#53fc18]" />
             </div>
             <span className="text-sm">{profile?.display_name || "You"}</span>
           </Link>
         </aside>
 
-        {/* HOME CONTENT */}
-        <main className="space-y-10">
+        {/* CONTENT */}
+        <main className="space-y-12">
 
+          {/* HERO */}
           <section className="bg-[#0b0b0b] border border-white/10 rounded-2xl p-6 shadow-[0_0_40px_rgba(83,252,24,0.2)]">
             <h1 className="text-2xl font-extrabold neon-text mb-2">
               Live right now on Parable
             </h1>
             <p className="text-sm text-gray-400">
-              Worship, teaching, gaming, and community — happening now.
+              Worship, teaching, music, and testimony — all in one place.
             </p>
           </section>
 
+          {/* FEATURED CREATORS */}
           <section>
-            <div className="flex items-center gap-2 mb-3">
-              <Radio className="w-4 h-4 neon-text" />
-              <h2 className="text-lg font-extrabold neon-text">Live Now</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 neon-text" />
+              <h2 className="text-lg font-extrabold">Featured Creators</h2>
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="min-w-[240px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition">
-                  <p className="text-sm font-bold">Worship & Word Night</p>
-                  <p className="text-xs text-gray-400 mt-1">🔴 126 watching</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <CreatorVideo
+                title="Sarah Jakes Roberts — Set the Record Straight"
+                src="https://www.youtube.com/embed/cd1dJGqDDsI"
+              />
+
+              <CreatorVideo
+                title="Dr. Jamal Bryant — Why Time Is Flying"
+                src="https://www.youtube.com/embed/OIA3pq1EVTI?start=5"
+              />
+
+              <CreatorVideo
+                title="Kirk Franklin — BET Awards Praise Medley"
+                src="https://www.youtube.com/embed/s9XthutHgB4?start=5"
+              />
+
+              <CreatorVideo
+                title="Pastor Sheryl Brady — Stronger Than the Storm"
+                src="https://www.youtube.com/embed/uEmkoAGDUEY?start=3"
+              />
+
+              <CreatorVideo
+                title="Yolanda Adams — Lifestyles"
+                src="https://www.youtube.com/embed/40CFDyA9rQg?start=3"
+              />
+
+              <CreatorVideo
+                title="Fred Hammond — YAHWEH"
+                src="https://www.youtube.com/embed/flzzENtKf28"
+              />
+
             </div>
           </section>
 
-          <section>
-            <div onClick={() => setComposerOpen(true)} className="bg-[#111] border border-white/10 rounded-xl p-4 cursor-pointer hover:border-white/20 transition">
-              <div className="flex items-center gap-3">
-                <Avatar avatar={profile?.avatar_url} />
-                <span className="text-gray-400">Share what God is doing in your life…</span>
-              </div>
-            </div>
-          </section>
-
+          {/* COMMUNITY FEED */}
           <section>
             <div className="flex items-center gap-2 mb-4">
               <Flame className="w-4 h-4 neon-text" />
@@ -233,60 +250,45 @@ export default function HomePage() {
               ))}
 
               {posts.length === 0 && (
-                <p className="text-center text-gray-500 text-sm">Be the first to post.</p>
+                <p className="text-center text-gray-500 text-sm">
+                  Be the first to post.
+                </p>
               )}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-extrabold mb-3">Explore</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <ExploreCard icon={<Music />} label="Worship" href="/explore/worship" />
-              <ExploreCard icon={<Mic2 />} label="Teaching" href="/explore/teaching" />
-              <ExploreCard icon={<Gamepad2 />} label="Christian Gaming" href="/explore/christian-gaming" />
-              <ExploreCard icon={<Users />} label="Testimonies" href="/explore/testimonies" />
             </div>
           </section>
 
         </main>
       </div>
-
-      {/* POST COMPOSER */}
-      {composerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="w-full max-w-lg bg-[#0b0b0b] border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(83,252,24,0.25)]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-              <h2 className="text-lg font-extrabold neon-text">Create Post</h2>
-              <button onClick={() => setComposerOpen(false)}>
-                <X className="w-5 h-5 text-gray-400 hover:text-white" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              <textarea
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                placeholder="Share what God is doing in your life…"
-                className="w-full bg-black border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 min-h-[140px]"
-              />
-            </div>
-
-            <div className="px-6 py-4 border-t border-white/10 flex justify-end">
-              <button onClick={handlePost} className="neon-button text-sm">Post</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-/* HELPERS */
+/* ---------- COMPONENTS ---------- */
+
+function CreatorVideo({ title, src }: { title: string; src: string }) {
+  return (
+    <div className="bg-[#111] border border-white/10 rounded-xl overflow-hidden">
+      <iframe
+        className="w-full aspect-video"
+        src={src}
+        title={title}
+        allowFullScreen
+      />
+      <div className="p-4">
+        <p className="font-semibold">{title}</p>
+      </div>
+    </div>
+  );
+}
 
 function Avatar({ avatar }: { avatar?: string | null }) {
   return (
     <div className="w-9 h-9 rounded-full bg-black border border-white/20 overflow-hidden flex items-center justify-center">
-      {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-gray-500" />}
+      {avatar ? (
+        <img src={avatar} className="w-full h-full object-cover" />
+      ) : (
+        <User className="w-4 h-4 text-gray-500" />
+      )}
     </div>
   );
 }
@@ -295,15 +297,6 @@ function MenuItem({ href, children }: { href: string; children: React.ReactNode 
   return (
     <Link href={href} className="flex items-center gap-2 px-4 py-3 text-sm text-gray-300 hover:bg-black/60 transition">
       {children}
-    </Link>
-  );
-}
-
-function ExploreCard({ icon, label, href }: { icon: React.ReactNode; label: string; href: string }) {
-  return (
-    <Link href={href} className="bg-[#111] border border-white/10 rounded-xl p-4 flex items-center gap-3 hover:border-white/20 transition cursor-pointer">
-      <span className="neon-text">{icon}</span>
-      <span className="text-sm font-semibold">{label}</span>
     </Link>
   );
 }
