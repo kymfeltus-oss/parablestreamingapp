@@ -1,3 +1,4 @@
+// HOME_WITH_SIDEBAR_V1
 "use client";
 
 import { useEffect, useState } from "react";
