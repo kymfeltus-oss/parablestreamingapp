@@ -1,4 +1,5 @@
-// HOME_WITH_SIDEBAR_V1
+// HOME_WITH_SIDEBAR_EXPLORE_V1
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,8 +8,6 @@ import { createClient } from "@/lib/supabaseClient";
 import {
   Radio,
   Users,
-  Image as ImageIcon,
-  Video,
   X,
   Flame,
   Music,
@@ -45,6 +44,7 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  /* ---------- LOAD PROFILE ---------- */
   useEffect(() => {
     async function load() {
       const { data } = await supabase.auth.getUser();
@@ -62,6 +62,16 @@ export default function HomePage() {
 
     load();
   }, [supabase]);
+
+  /* ---------- LOAD POSTS (PERSISTED) ---------- */
+  useEffect(() => {
+    const stored = localStorage.getItem("parable_home_posts");
+    if (stored) setPosts(JSON.parse(stored));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("parable_home_posts", JSON.stringify(posts));
+  }, [posts]);
 
   function handlePost() {
     if (!postText.trim()) return;
@@ -87,10 +97,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
+    <div className="relative min-h-screen bg-black text-white pb-24 overflow-hidden">
+
+      {/* 🌌 MOVING BACKGROUND (FLASH ENERGY) */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#53fc18]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-[#53fc18]/5 rounded-full blur-3xl animate-pulse" />
+      </div>
 
       {/* HEADER */}
-      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur border-b border-white/10">
+      <header className="relative z-40 sticky top-0 bg-black/80 backdrop-blur border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/home" className="text-xl font-extrabold neon-text">
             PARABLE
@@ -139,10 +155,10 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* MAIN LAYOUT */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+      {/* MAIN GRID */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
 
-        {/* LEFT SIDEBAR — ONLINE */}
+        {/* LEFT SIDEBAR */}
         <aside className="hidden lg:block sticky top-20 h-fit bg-[#0b0b0b] border border-white/10 rounded-xl p-4">
           <h3 className="text-xs font-bold uppercase text-gray-400 mb-3">
             Online Now
@@ -168,7 +184,7 @@ export default function HomePage() {
               Live right now on Parable
             </h1>
             <p className="text-sm text-gray-400">
-              Join worship, teaching, gaming, and conversations happening in real time.
+              Worship, teaching, gaming, and community — happening now.
             </p>
           </section>
 
@@ -183,7 +199,7 @@ export default function HomePage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="min-w-[240px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition"
+                  className="min-w-[240px] bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition cursor-pointer"
                 >
                   <p className="text-sm font-bold">Worship & Word Night</p>
                   <p className="text-xs text-gray-400 mt-1">🔴 126 watching</p>
@@ -239,14 +255,14 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* DISCOVER */}
+          {/* EXPLORE */}
           <section>
             <h2 className="text-lg font-extrabold mb-3">Explore</h2>
             <div className="grid grid-cols-2 gap-4">
-              <DiscoverCard icon={<Music />} label="Worship" />
-              <DiscoverCard icon={<Mic2 />} label="Teaching" />
-              <DiscoverCard icon={<Gamepad2 />} label="Christian Gaming" />
-              <DiscoverCard icon={<Users />} label="Testimonies" />
+              <ExploreCard icon={<Music />} label="Worship" href="/explore/worship" />
+              <ExploreCard icon={<Mic2 />} label="Teaching" href="/explore/teaching" />
+              <ExploreCard icon={<Gamepad2 />} label="Christian Gaming" href="/explore/christian-gaming" />
+              <ExploreCard icon={<Users />} label="Testimonies" href="/explore/testimonies" />
             </div>
           </section>
 
@@ -316,17 +332,22 @@ function MenuItem({
   );
 }
 
-function DiscoverCard({
+function ExploreCard({
   icon,
   label,
+  href,
 }: {
   icon: React.ReactNode;
   label: string;
+  href: string;
 }) {
   return (
-    <div className="bg-[#111] border border-white/10 rounded-xl p-4 flex items-center gap-3 hover:border-white/20 transition cursor-pointer">
+    <Link
+      href={href}
+      className="bg-[#111] border border-white/10 rounded-xl p-4 flex items-center gap-3 hover:border-white/20 transition cursor-pointer"
+    >
       <span className="neon-text">{icon}</span>
       <span className="text-sm font-semibold">{label}</span>
-    </div>
+    </Link>
   );
 }
