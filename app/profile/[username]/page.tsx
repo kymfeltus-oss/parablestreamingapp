@@ -1,4 +1,4 @@
-// PROFILE_PUBLIC_ROUTER_V6_PODCASTER_PLUS_ARTIST
+// PROFILE_PUBLIC_ROUTER_V8_DEMO_IMAGES_FIXED
 
 "use client";
 
@@ -24,8 +24,7 @@ const DEMO_PROFILES: Record<string, any> = {
     display_name: "Kym The CEO",
     creator_category: "podcaster",
     bio: "Podcast host sharing conversations that inspire faith, leadership, purpose, and kingdom impact.",
-    avatar_url:
-      "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=400",
+    avatar_url: "/creator/kym-the-ceo/profile.jpg",
   },
 
   /* PARTNER — ARTIST */
@@ -34,8 +33,7 @@ const DEMO_PROFILES: Record<string, any> = {
     display_name: "Fred Hammond",
     creator_category: "artist",
     bio: "Grammy-winning gospel artist, worship leader, producer, and pioneer of contemporary gospel music.",
-    avatar_url:
-      "https://upload.wikimedia.org/wikipedia/commons/6/6c/Fred_Hammond_2019.jpg",
+    avatar_url: "/creator/fred-hammond/profile.jpg",
     albums: [
       "Pages of Life",
       "Purpose By Design",
@@ -56,20 +54,17 @@ const DEMO_PROFILES: Record<string, any> = {
   },
 };
 
-/* =========================
-   MAIN ROUTER
-   ========================= */
 export default function PublicProfilePage() {
   const params = useParams();
   const raw = Array.isArray(params.username)
     ? params.username[0]
     : params.username;
 
-  const normalized = decodeURIComponent(raw || "")
+  const username = decodeURIComponent(raw || "")
     .toLowerCase()
     .replace(/\s+/g, "");
 
-  const profile = DEMO_PROFILES[normalized];
+  const profile = DEMO_PROFILES[username];
 
   if (!profile) {
     return (
@@ -95,13 +90,12 @@ export default function PublicProfilePage() {
 }
 
 /* =========================
-   PODCASTER PROFILE (YOU)
+   PODCASTER PROFILE
    ========================= */
 function PodcasterProfile({ profile }: { profile: any }) {
   return (
     <ProfileShell glow>
       <ProfileHero profile={profile} icon={<Mic2 />} />
-
       <Section title="Episodes" icon={<Mic2 />}>
         {["Faith & Leadership", "Calling & Purpose", "Kingdom Conversations"].map(
           (t, i) => (
@@ -114,15 +108,13 @@ function PodcasterProfile({ profile }: { profile: any }) {
 }
 
 /* =========================
-   ARTIST PROFILE (FRED HAMMOND)
+   ARTIST PROFILE (FRED)
    ========================= */
 function ArtistProfile({ profile }: { profile: any }) {
   return (
     <ProfileShell glow>
-      {/* HERO */}
       <ProfileHero profile={profile} icon={<Music />} large />
 
-      {/* MUSIC */}
       <Section title="Albums" icon={<Music />}>
         {profile.albums.map((a: string, i: number) => (
           <Card key={i} title={a} subtitle="Stream • Purchase" />
@@ -135,7 +127,6 @@ function ArtistProfile({ profile }: { profile: any }) {
         ))}
       </Section>
 
-      {/* EVENTS */}
       <Section title="Events" icon={<Ticket />}>
         {profile.events.map((e: any, i: number) => (
           <Card
@@ -146,7 +137,6 @@ function ArtistProfile({ profile }: { profile: any }) {
         ))}
       </Section>
 
-      {/* MONETIZATION */}
       <Section title="Support & Monetization" icon={<DollarSign />}>
         <Card title="Support the Ministry" subtitle="Donate • Subscribe • Partner" />
         <Card title="Exclusive Content" subtitle="Members-only access" />
@@ -199,11 +189,7 @@ function ProfileHero({
             large ? "w-36 h-36" : "w-28 h-28"
           } rounded-full overflow-hidden border border-white/20 shadow-[0_0_40px_rgba(83,252,24,0.4)]`}
         >
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} className="w-full h-full object-cover" />
-          ) : (
-            <User className="w-12 h-12 text-gray-500 mx-auto mt-10" />
-          )}
+          <img src={profile.avatar_url} className="w-full h-full object-cover" />
         </div>
 
         <div className="text-center md:text-left">
