@@ -1,8 +1,10 @@
-// PROFILE_PUBLIC_ROUTER_V8_DEMO_IMAGES_FIXED
+// PROFILE_PUBLIC_ROUTER_V9_DB_FIRST
 
 "use client";
 
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabaseClient";
 import {
   User,
   Mic2,
@@ -15,19 +17,9 @@ import {
 } from "lucide-react";
 
 /* =========================
-   DEMO PROFILES (TEMP)
+   DEMO PROFILES (FALLBACK)
    ========================= */
 const DEMO_PROFILES: Record<string, any> = {
-  /* YOU — PODCASTER */
-  kymtheceo: {
-    username: "kymtheceo",
-    display_name: "Kym The CEO",
-    creator_category: "podcaster",
-    bio: "Podcast host sharing conversations that inspire faith, leadership, purpose, and kingdom impact.",
-    avatar_url: "/creator/kym-the-ceo/profile.jpg",
-  },
-
-  /* PARTNER — ARTIST */
   fredhammond: {
     username: "fredhammond",
     display_name: "Fred Hammond",
@@ -39,14 +31,8 @@ const DEMO_PROFILES: Record<string, any> = {
       "Purpose By Design",
       "Free To Worship",
       "Somethin’ ’Bout Love",
-      "Love Unstoppable",
     ],
-    singles: [
-      "YAHWEH",
-      "Let the Praise Begin",
-      "King of Glory",
-      "Celebrate (He Lives)",
-    ],
+    singles: ["YAHWEH", "Let the Praise Begin", "King of Glory"],
     events: [
       { title: "Live Worship Experience", ticketed: true },
       { title: "Free Praise Night", ticketed: false },
@@ -56,6 +42,8 @@ const DEMO_PROFILES: Record<string, any> = {
 
 export default function PublicProfilePage() {
   const params = useParams();
+  const supabase = createClient();
+
   const raw = Array.isArray(params.username)
     ? params.username[0]
     : params.username;
@@ -64,7 +52,45 @@ export default function PublicProfilePage() {
     .toLowerCase()
     .replace(/\s+/g, "");
 
-  const profile = DEMO_PROFILES[username];
+  const [profile, setProfile] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProfile() {
+      // 1️⃣ Try Supabase FIRST
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .ilike("username", username)
+        .maybeSingle();
+
+      if (data) {
+        setProfile(data);
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ Fall back to demo profile
+      if (DEMO_PROFILES[username]) {
+        setProfile(DEMO_PROFILES[username]);
+        setLoading(false);
+        return;
+      }
+
+      setProfile(null);
+      setLoading(false);
+    }
+
+    loadProfile();
+  }, [username, supabase]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-gray-400 flex items-center justify-center">
+        Loading profile…
+      </div>
+    );
+  }
 
   if (!profile) {
     return (
@@ -96,6 +122,7 @@ function PodcasterProfile({ profile }: { profile: any }) {
   return (
     <ProfileShell glow>
       <ProfileHero profile={profile} icon={<Mic2 />} />
+
       <Section title="Episodes" icon={<Mic2 />}>
         {["Faith & Leadership", "Calling & Purpose", "Kingdom Conversations"].map(
           (t, i) => (
@@ -108,7 +135,7 @@ function PodcasterProfile({ profile }: { profile: any }) {
 }
 
 /* =========================
-   ARTIST PROFILE (FRED)
+   ARTIST PROFILE
    ========================= */
 function ArtistProfile({ profile }: { profile: any }) {
   return (
@@ -116,19 +143,19 @@ function ArtistProfile({ profile }: { profile: any }) {
       <ProfileHero profile={profile} icon={<Music />} large />
 
       <Section title="Albums" icon={<Music />}>
-        {profile.albums.map((a: string, i: number) => (
+        {profile.albums?.map((a: string, i: number) => (
           <Card key={i} title={a} subtitle="Stream • Purchase" />
         ))}
       </Section>
 
       <Section title="Popular Songs" icon={<PlayCircle />}>
-        {profile.singles.map((s: string, i: number) => (
+        {profile.singles?.map((s: string, i: number) => (
           <Card key={i} title={s} subtitle="Play now" />
         ))}
       </Section>
 
       <Section title="Events" icon={<Ticket />}>
-        {profile.events.map((e: any, i: number) => (
+        {profile.events?.map((e: any, i: number) => (
           <Card
             key={i}
             title={e.title}
@@ -139,23 +166,16 @@ function ArtistProfile({ profile }: { profile: any }) {
 
       <Section title="Support & Monetization" icon={<DollarSign />}>
         <Card title="Support the Ministry" subtitle="Donate • Subscribe • Partner" />
-        <Card title="Exclusive Content" subtitle="Members-only access" />
       </Section>
     </ProfileShell>
   );
 }
 
 /* =========================
-   SHARED COMPONENTS
+   SHARED UI
    ========================= */
 
-function ProfileShell({
-  children,
-  glow,
-}: {
-  children: React.ReactNode;
-  glow?: boolean;
-}) {
+function ProfileShell({ children, glow }: any) {
   return (
     <div className="relative min-h-screen bg-black text-white pb-24 overflow-hidden">
       {glow && (
@@ -164,7 +184,6 @@ function ProfileShell({
           <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-[#53fc18]/5 blur-3xl rounded-full animate-pulse" />
         </div>
       )}
-
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-12 space-y-14">
         {children}
       </div>
@@ -172,15 +191,7 @@ function ProfileShell({
   );
 }
 
-function ProfileHero({
-  profile,
-  icon,
-  large,
-}: {
-  profile: any;
-  icon: React.ReactNode;
-  large?: boolean;
-}) {
+function ProfileHero({ profile, icon, large }: any) {
   return (
     <section className="bg-[#0b0b0b] border border-white/10 rounded-2xl p-8 shadow-[0_0_50px_rgba(83,252,24,0.25)]">
       <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -189,7 +200,11 @@ function ProfileHero({
             large ? "w-36 h-36" : "w-28 h-28"
           } rounded-full overflow-hidden border border-white/20 shadow-[0_0_40px_rgba(83,252,24,0.4)]`}
         >
-          <img src={profile.avatar_url} className="w-full h-full object-cover" />
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-12 h-12 text-gray-500 mx-auto mt-10" />
+          )}
         </div>
 
         <div className="text-center md:text-left">
@@ -219,15 +234,7 @@ function ProfileHero({
   );
 }
 
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function Section({ title, icon, children }: any) {
   return (
     <section>
       <div className="flex items-center gap-2 mb-4">
@@ -239,7 +246,7 @@ function Section({
   );
 }
 
-function Card({ title, subtitle }: { title: string; subtitle: string }) {
+function Card({ title, subtitle }: any) {
   return (
     <div className="bg-[#111] border border-white/10 rounded-xl p-4 hover:neon-border transition">
       <p className="font-semibold">{title}</p>
