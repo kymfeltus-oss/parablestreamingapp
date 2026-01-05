@@ -1,35 +1,33 @@
-// app/page.tsx
-'use client'; 
+"use client";
 
-import { useEffect, useState } from "react";
-// Restoring your original import for the content page/component
-import WelcomePage from "./welcome/page"; 
-import FlashLandingPage from "@/components/FlashLandingPage";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabaseClient";
 
-export default function HomePage() {
-  // Restoring your original state names
-  const [stage, setStage] = useState<"flash" | "welcome">("flash"); 
+export default function RootRouter() {
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
-    // Start the 5-second timer
-    const timer = setTimeout(() => {
-      setStage("welcome");
-    }, 5000); 
+    const run = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    return () => clearTimeout(timer);
-  }, []);
+      if (!user) {
+        router.replace("/auth/login");
+        return;
+      }
 
-  if (stage === "flash") {
-    return (
-      <FlashLandingPage
-        // FIX: Prop name must be 'onEnter' to resolve the TypeScript error
-        onEnter={() => { 
-          setStage("welcome");
-        }}
-      />
-    );
-  }
+      router.replace("/dashboard");
+    };
 
-  // Render the permanent WelcomePage component.
-  return <WelcomePage />;
+    run();
+  }, [router, supabase]);
+
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      Redirecting…
+    </div>
+  );
 }
