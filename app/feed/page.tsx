@@ -1,5 +1,7 @@
 "use client";
 
+console.log("🔥 FEED PAGE VERSION: HYBRID RESET DEBUG v1");
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
@@ -19,7 +21,10 @@ export default function FeedPage() {
   const [showModal, setShowModal] = useState(false);
 
   async function load() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       router.replace("/auth/login");
       return;
@@ -50,13 +55,18 @@ export default function FeedPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading
+        Loading…
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
+
+      {/* DEBUG MARKER – MUST BE VISIBLE */}
+      <div className="fixed top-2 left-2 z-[9999] bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold">
+        FEED v1 HYBRID RESET DEBUG
+      </div>
 
       {/* Ambient depth */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,197,94,0.18),transparent_45%)]" />
@@ -102,12 +112,12 @@ export default function FeedPage() {
                   <ReportPost postId={post.id} />
                 </div>
 
-                {/* Content as hero */}
+                {/* Content */}
                 <p className="text-xl leading-relaxed mb-6">
                   {post.content}
                 </p>
 
-                {/* Praise emphasis */}
+                {/* Praise */}
                 {post.post_type === "praise" && (
                   <div className="inline-block mb-5 px-5 py-1 rounded-full bg-green-500 text-black font-bold shadow-lg">
                     PRAISE
@@ -130,12 +140,12 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* Floating creator action dock */}
+      {/* Floating create button */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="fixed bottom-6 right-6 z-50 flex flex-col gap-3"
+        className="fixed bottom-6 right-6 z-50"
       >
         <motion.button
           whileHover={{ scale: 1.08 }}
