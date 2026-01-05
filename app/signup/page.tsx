@@ -1,52 +1,87 @@
-// app/signup/page.tsx
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { supabase } from '../../supabase/client'
+import { useRouter } from 'next/navigation'
 
-export default function SignUpPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const supabase = createClient();
-  // useRouter is only imported for general routing capability; it's not strictly necessary here
-  // const router = useRouter(); 
+export default function SignupPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [status, setStatus] = useState<string>('')
+  const [busy, setBusy] = useState(false)
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setMessage('');
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // CRITICAL: This URL must point to your verification handler
-        emailRedirectTo: `${window.location.origin}/auth/confirm`, 
-      },
-    });
+  const siteUrl =
+    (process.env.NEXT_PUBLIC_SITE_URL && process.env.NEXT_PUBLIC_SITE_URL.trim()) ||
+    'https://main.dqugj22h6x51v.amplifyapp.com'
 
-    if (error) {
-      setMessage(`Error signing up: ${error.message}`);
-    } else {
-      setMessage('Success! Check your email to verify your account.');
+  const handleSignup = async () => {
+    setStatus('')
+    setBusy(true)
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${siteUrl}/verify`,
+        },
+      })
+
+      if (error) {
+        console.log('SUPABASE SIGNUP ERROR', error)
+        const anyErr: any = error
+        const details =
+          `Message: ${error.message}\n` +
+          (anyErr.status ? `Status: ${anyErr.status}\n` : '') +
+          (anyErr.code ? `Code: ${anyErr.code}\n` : '') +
+          (anyErr.details ? `Details: ${anyErr.details}\n` : '') +
+          (anyErr.hint ? `Hint: ${anyErr.hint}\n` : '')
+
+        setStatus(details)
+        alert(details)
+        return
+      }
+
+      console.log('SUPABASE SIGNUP OK', data)
+      setStatus('Account created. Check your email for the verification link.')
+      router.push('/verify')
+    } catch (e: any) {
+      console.log('SIGNUP EXCEPTION', e)
+      const msg = e?.message || String(e)
+      setStatus(msg)
+      alert(msg)
+    } finally {
+      setBusy(false)
     }
-  };
+  }
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSignUp} className="p-6 border rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2 mb-3 border rounded" />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full p-2 mb-4 border rounded" />
-        <button type="submit" className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600">
-          Sign Up
+    <div style={{ padding: 24 }}>
+      <h1>Create your Parable account</h1>
+
+      <div style={{ marginTop: 16 }}>
+        <input
+          value={email}
+          placeholder="Email"
+          onChange={e => setEmail(e.target.value)}
+          style={{ width: 360, padding: 10, display: 'block', marginBottom: 10 }}
+        />
+        <input
+          value={password}
+          type="password"
+          placeholder="Password"
+          onChange={e => setPassword(e.target.value)}
+          style={{ width: 360, padding: 10, display: 'block', marginBottom: 10 }}
+        />
+        <button onClick={handleSignup} disabled={busy} style={{ padding: '10px 16px' }}>
+          {busy ? 'Creating...' : 'Sign up'}
         </button>
-        {message && <p className="mt-4 text-sm text-center text-gray-700">{message}</p>}
-        <p className="mt-4 text-center">
-            Already have an account? <a href="/login" className="text-indigo-600 hover:underline">Log In</a>
-        </p>
-      </form>
+      </div>
+
+      {status ? (
+        <pre style={{ marginTop: 16, whiteSpace: 'pre-wrap' }}>{status}</pre>
+      ) : null}
     </div>
-  );
+  )
 }
