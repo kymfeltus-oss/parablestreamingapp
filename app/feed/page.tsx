@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
+import { motion } from "framer-motion";
 
 import CreatePostModal from "@/components/CreatePostModal";
 import LikeButton from "@/components/LikeButton";
@@ -60,26 +61,42 @@ export default function FeedPage() {
       <div className="w-full max-w-xl space-y-6">
 
         {/* Header */}
-        <div className="flex justify-between items-center sticky top-0 bg-black z-10 pb-2">
-          <h1 className="text-2xl font-bold">Feed</h1>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex justify-between items-center sticky top-0 bg-black z-10 pb-2"
+        >
+          <h1 className="text-2xl font-bold tracking-tight">
+            Feed
+          </h1>
+
           <div className="flex gap-2">
             <PraiseBreakButton refresh={load} />
-            <button
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={() => setShowModal(true)}
               className="bg-green-500 text-black px-4 py-2 rounded-lg font-semibold"
             >
               Post
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Posts */}
-        {posts.map(post => (
-          <div key={post.id} className="bg-zinc-900 rounded-xl p-4 space-y-3">
+        {posts.map((post, index) => (
+          <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.05 }}
+            className="bg-zinc-900 rounded-xl p-4 space-y-3 shadow-lg"
+          >
 
             {/* User header */}
             <div className="flex items-center gap-3">
-              <img
+              <motion.img
+                whileHover={{ scale: 1.05 }}
                 src={post.profiles?.avatar_url || "/avatar-placeholder.png"}
                 className="w-10 h-10 rounded-full object-cover"
               />
@@ -95,26 +112,35 @@ export default function FeedPage() {
             </div>
 
             {/* Content */}
-            <p className="whitespace-pre-wrap text-sm">
+            <motion.p
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 1 }}
+              className="whitespace-pre-wrap text-sm leading-relaxed"
+            >
               {post.content}
-            </p>
+            </motion.p>
 
-            {/* Praise badge */}
+            {/* Praise emphasis */}
             {post.post_type === "praise" && (
-              <div className="inline-block bg-green-500 text-black px-3 py-1 rounded-full text-xs font-bold">
-                Praise Break 🙌
-              </div>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="inline-block bg-green-500 text-black px-3 py-1 rounded-full text-xs font-bold"
+              >
+                Praise Break
+              </motion.div>
             )}
 
-            {/* Action bar */}
-            <div className="flex gap-4 pt-2 text-sm">
+            {/* Actions */}
+            <div className="pt-1">
               <LikeButton postId={post.id} />
             </div>
 
             {/* Comments */}
             <Comments postId={post.id} />
 
-          </div>
+          </motion.div>
         ))}
       </div>
 
