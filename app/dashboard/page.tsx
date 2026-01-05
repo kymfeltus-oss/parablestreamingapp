@@ -47,132 +47,134 @@ export default function DashboardPage() {
   }
 
   const accountType = user.user_metadata?.accountType || "viewer";
-
   const go = (path: string) => router.push(path);
 
-  const Tile = ({
+  const ActionTile = ({
     title,
-    value,
     subtitle,
-    onClick,
+    path,
   }: {
     title: string;
-    value?: string | number;
-    subtitle?: string;
-    onClick: () => void;
+    subtitle: string;
+    path: string;
   }) => (
     <button
-      onClick={onClick}
-      className="bg-zinc-900 hover:bg-zinc-800 transition rounded-xl p-5 text-left"
+      onClick={() => go(path)}
+      className="relative group bg-zinc-900 rounded-2xl p-6 text-left overflow-hidden
+                 hover:bg-zinc-800 transition-all duration-300"
     >
-      <p className="text-sm text-gray-400">{title}</p>
-      {value !== undefined && (
-        <p className="text-3xl font-bold text-green-400 mt-1">
-          {value}
-        </p>
-      )}
-      {subtitle && (
-        <p className="text-gray-400 text-sm mt-2">{subtitle}</p>
-      )}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition
+                      bg-gradient-to-br from-green-500/10 to-transparent" />
+      <h3 className="text-lg font-semibold relative z-10">{title}</h3>
+      <p className="text-sm text-gray-400 mt-1 relative z-10">
+        {subtitle}
+      </p>
+    </button>
+  );
+
+  const StatChip = ({
+    label,
+    value,
+    path,
+  }: {
+    label: string;
+    value: string | number;
+    path: string;
+  }) => (
+    <button
+      onClick={() => go(path)}
+      className="flex flex-col bg-zinc-900 rounded-xl px-5 py-4
+                 hover:bg-zinc-800 transition"
+    >
+      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-2xl font-bold text-green-400 mt-1">
+        {value}
+      </span>
     </button>
   );
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 space-y-8">
+    <div className="min-h-screen bg-black text-white p-6 space-y-10">
       {/* HEADER */}
       <div className="flex items-center gap-4">
         <img
           src={profile?.avatar_url || "/avatar-placeholder.png"}
-          className="w-12 h-12 rounded-full object-cover"
+          className="w-12 h-12 rounded-full object-cover ring-2 ring-green-500/40"
         />
         <div>
-          <h1 className="text-xl font-bold">
-            Welcome, {profile?.display_name || "User"}
+          <h1 className="text-xl font-bold tracking-wide">
+            {profile?.display_name || "User"}
           </h1>
-          <p className="text-gray-400 capitalize">
-            {accountType} dashboard
+          <p className="text-gray-400 text-sm capitalize">
+            {accountType} access
           </p>
         </div>
       </div>
 
-      {/* CORE STATS */}
+      {/* STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Tile
-          title="Seeds"
+        <StatChip
+          label="Seeds"
           value={profile?.seeds_balance || 0}
-          onClick={() => go("/dashboard/coming-soon/seeds")}
+          path="/dashboard/coming-soon/seeds"
         />
-        <Tile
-          title="Following"
+        <StatChip
+          label="Following"
           value={profile?.following_count || 0}
-          onClick={() => go("/dashboard/coming-soon/following")}
+          path="/dashboard/coming-soon/following"
         />
-        <Tile
-          title="Account"
+        <StatChip
+          label="Account"
           value={accountType}
-          onClick={() => go("/dashboard/coming-soon/account")}
+          path="/dashboard/coming-soon/account"
         />
-        <Tile
-          title="Profile"
-          subtitle="Edit your info"
-          onClick={() => go("/profile-setup")}
+        <StatChip
+          label="Profile"
+          value="Edit"
+          path="/profile-setup"
         />
       </div>
 
-      {/* CREATOR ACTIONS */}
+      {/* ACTIONS */}
       {accountType === "creator" && (
-        <>
-          <div>
-            <h2 className="text-lg font-semibold mb-3">
-              Creator Actions
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Tile
-                title="Go Live"
-                subtitle="Start a stream"
-                onClick={() => go("/dashboard/coming-soon/live")}
-              />
-              <Tile
-                title="Upload"
-                subtitle="Videos or clips"
-                onClick={() => go("/dashboard/coming-soon/upload")}
-              />
-              <Tile
-                title="Creator Profile"
-                subtitle="Public page"
-                onClick={() => go("/profile-setup")}
-              />
-              <Tile
-                title="Stats"
-                subtitle="Performance"
-                onClick={() => go("/dashboard/coming-soon/stats")}
-              />
-            </div>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold mb-4 tracking-wide">
+            Creator Command Center
+          </h2>
 
-          <div>
-            <h2 className="text-lg font-semibold mb-3">
-              Creator Metrics
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <Tile
-                title="Followers"
-                value={profile?.followers_count || 0}
-                onClick={() => go("/dashboard/coming-soon/followers")}
-              />
-              <Tile
-                title="Streams This Month"
-                value={0}
-                onClick={() => go("/dashboard/coming-soon/streams")}
-              />
-              <Tile
-                title="Seeds Earned"
-                value={profile?.seeds_balance || 0}
-                onClick={() => go("/dashboard/coming-soon/earnings")}
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <ActionTile
+              title="Go Live"
+              subtitle="Start a broadcast"
+              path="/dashboard/coming-soon/live"
+            />
+            <ActionTile
+              title="Upload Content"
+              subtitle="Videos or clips"
+              path="/dashboard/coming-soon/upload"
+            />
+            <ActionTile
+              title="Creator Profile"
+              subtitle="Public presence"
+              path="/profile-setup"
+            />
+            <ActionTile
+              title="Analytics"
+              subtitle="Performance metrics"
+              path="/dashboard/coming-soon/stats"
+            />
+            <ActionTile
+              title="Monetization"
+              subtitle="Earnings and seeds"
+              path="/dashboard/coming-soon/earnings"
+            />
+            <ActionTile
+              title="Community"
+              subtitle="Engage followers"
+              path="/dashboard/coming-soon/community"
+            />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
