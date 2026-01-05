@@ -11,36 +11,45 @@ export default function ConfirmEmailPage() {
 
   useEffect(() => {
     const run = async () => {
-      const code = params.get("code");
+      // New Supabase OTP-style confirmation
+      const token_hash = params.get("token_hash");
+      const type = params.get("type") as
+        | "signup"
+        | "invite"
+        | "recovery"
+        | "email_change"
+        | null;
 
-      if (!code) {
-        router.replace("/auth/login");
-        return;
-      }
+      if (token_hash && type) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash,
+          type,
+        });
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          router.replace("/login");
+          return;
+        }
 
-      if (error) {
-        router.replace("/auth/login");
-        return;
-      }
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.replace("/auth/login");
-        return;
-      }
-
-      const type = user.user_metadata?.accountType;
-
-      if (type === "creator") {
-        router.replace("/creator/setup");
-      } else {
         router.replace("/profile-setup");
+        return;
       }
+
+      // Legacy PKCE-style confirmation
+      const code = params.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          router.replace("/login");
+          return;
+        }
+
+        router.replace("/profile-setup");
+        return;
+      }
+
+      router.replace("/login");
     };
 
     run();

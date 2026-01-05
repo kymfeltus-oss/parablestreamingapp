@@ -24,35 +24,18 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${siteUrl}/profile-setup`,
+          emailRedirectTo: `${siteUrl}/auth/confirm`,
         },
       })
 
       if (error) {
-        console.log('SUPABASE SIGNUP ERROR', error)
-        const anyErr: any = error
-        const details =
-          `Message: ${error.message}\n` +
-          (anyErr.status ? `Status: ${anyErr.status}\n` : '') +
-          (anyErr.code ? `Code: ${anyErr.code}\n` : '') +
-          (anyErr.details ? `Details: ${anyErr.details}\n` : '') +
-          (anyErr.hint ? `Hint: ${anyErr.hint}\n` : '')
-
-        setStatus(details)
-        alert(details)
+        setStatus(error.message)
+        alert(error.message)
         return
       }
 
-      console.log('SUPABASE SIGNUP OK', data)
-      setStatus('Account created. Check your email for the verification link.')
-
-      // User will land on /profile-setup after clicking email link
+      setStatus('Account created. Check your email to continue.')
       router.push('/login')
-    } catch (e: any) {
-      console.log('SIGNUP EXCEPTION', e)
-      const msg = e?.message || String(e)
-      setStatus(msg)
-      alert(msg)
     } finally {
       setBusy(false)
     }
