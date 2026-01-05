@@ -1,19 +1,20 @@
 "use client";
 
 import React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 
+/* ---------------- TYPES ---------------- */
+
 type PostRow = {
   id: string;
-  created_at?: string;
   content?: string | null;
-  type?: string | null;
-  user_id?: string | null;
   display_name?: string | null;
   avatar_url?: string | null;
 };
+
+/* ---------------- PAGE ---------------- */
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -55,18 +56,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        setPostsLoading(true);
-
         const { data } = await supabase
           .from("posts")
-          .select("id, created_at, content, type, display_name, avatar_url")
+          .select("id, content, display_name, avatar_url")
           .order("created_at", { ascending: false })
-          .limit(8);
+          .limit(6);
 
         setRecentPosts((data || []) as PostRow[]);
-        setPostsLoading(false);
       } catch {
         setRecentPosts([]);
+      } finally {
         setPostsLoading(false);
       }
     };
@@ -86,18 +85,6 @@ export default function DashboardPage() {
   const isCreator = accountType === "creator";
   const go = (path: string) => router.push(path);
 
-  const seededSeries = useMemo(() => {
-    const mk = (base: number) =>
-      Array.from({ length: 14 }, (_, i) => Math.max(0, base + ((i * 7) % 9) - 4));
-
-    return {
-      seeds: mk(profile?.seeds_balance || 0),
-      followers: mk(profile?.followers_count || 0),
-      uploads: mk(6),
-      engagement: mk(12),
-    };
-  }, [profile]);
-
   return (
     <div className="min-h-screen bg-black text-white p-6 space-y-6">
       <HeaderBar
@@ -112,8 +99,6 @@ export default function DashboardPage() {
         onFeed={() => go("/feed")}
         onGoLive={() => go("/dashboard/coming-soon/live")}
         onUpload={() => go("/dashboard/coming-soon/upload")}
-        onAnalytics={() => go("/dashboard/coming-soon/stats")}
-        onCommunity={() => go("/dashboard/coming-soon/community")}
         onApplyCreator={() => go("/creator/apply")}
       />
 
@@ -123,7 +108,7 @@ export default function DashboardPage() {
             title="Spotlight"
             headline="Your next move starts here"
             sub="Live, upload, engage, and grow your presence on Parable."
-            primaryLabel={isCreator ? "Go Live" : "Explore Creators"}
+            primaryLabel={isCreator ? "Go Live" : "Explore Feed"}
             primaryPath={isCreator ? "/dashboard/coming-soon/live" : "/feed"}
             secondaryLabel="Upload"
             secondaryPath="/dashboard/coming-soon/upload"
@@ -131,25 +116,47 @@ export default function DashboardPage() {
           />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatChip label="Seeds" value={profile?.seeds_balance || 0} series={seededSeries.seeds} onClick={() => go("/dashboard/coming-soon/seeds")} />
-            <StatChip label="Followers" value={profile?.followers_count || 0} series={seededSeries.followers} onClick={() => go("/dashboard/coming-soon/followers")} />
-            <StatChip label="Uploads" value="—" series={seededSeries.uploads} onClick={() => go("/dashboard/coming-soon/upload")} />
-            <StatChip label="Engagement" value="—" series={seededSeries.engagement} onClick={() => go("/dashboard/coming-soon/community")} />
+            <StatChip
+              label="Seeds"
+              value={profile?.seeds_balance || 0}
+              onClick={() => go("/dashboard/coming-soon/seeds")}
+            />
+            <StatChip
+              label="Followers"
+              value={profile?.followers_count || 0}
+              onClick={() => go("/dashboard/coming-soon/followers")}
+            />
+            <StatChip
+              label="Following"
+              value={profile?.following_count || 0}
+              onClick={() => go("/dashboard/coming-soon/following")}
+            />
+            <StatChip
+              label="Profile"
+              value="Edit"
+              onClick={() => go("/profile-setup")}
+            />
           </div>
 
           <Panel title="Live Activity">
             {postsLoading ? (
               <div className="text-gray-400 text-sm">Loading activity…</div>
+            ) : recentPosts.length === 0 ? (
+              <div className="text-gray-400 text-sm">
+                No activity available yet.
+              </div>
             ) : (
-              recentPosts.map((p) => (
-                <ActivityRow
-                  key={p.id}
-                  avatarUrl={p.avatar_url || "/avatar-placeholder.png"}
-                  name={p.display_name || "User"}
-                  content={p.content || ""}
-                  onClick={() => go("/feed")}
-                />
-              ))
+              <div className="space-y-3">
+                {recentPosts.map((p) => (
+                  <ActivityRow
+                    key={p.id}
+                    avatarUrl={p.avatar_url || "/avatar-placeholder.png"}
+                    name={p.display_name || "User"}
+                    content={p.content || ""}
+                    onClick={() => go("/feed")}
+                  />
+                ))}
+              </div>
             )}
           </Panel>
         </div>
@@ -159,6 +166,7 @@ export default function DashboardPage() {
             <StatusRow label="Auth" />
             <StatusRow label="Feed" />
             <StatusRow label="Upload" />
+            <StatusRow label="Go Live" />
           </Panel>
         </div>
       </div>
@@ -166,24 +174,80 @@ export default function DashboardPage() {
   );
 }
 
-/* ---------- COMPONENTS ---------- */
+/* ---------------- COMPONENTS ---------------- */
 
-function HeaderBar({ avatarUrl, displayName, accountType, onEditProfile }: any) {
+function SpotlightCard({
+  title,
+  headline,
+  sub,
+  primaryLabel,
+  primaryPath,
+  secondaryLabel,
+  secondaryPath,
+  go,
+}: any) {
+  return (
+    <div className="rounded-2xl bg-zinc-900 p-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-green-500/15 to-transparent" />
+      <div className="relative flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <div className="text-xs text-green-400 mb-2">{title}</div>
+          <div className="text-2xl font-bold">{headline}</div>
+          <div className="text-sm text-gray-400 mt-2">{sub}</div>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => go(primaryPath)}
+            className="bg-green-500 hover:bg-green-400 text-black px-5 py-3 rounded-xl font-semibold"
+          >
+            {primaryLabel}
+          </button>
+          <button
+            onClick={() => go(secondaryPath)}
+            className="border border-green-500/50 text-green-400 px-5 py-3 rounded-xl font-semibold"
+          >
+            {secondaryLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeaderBar({
+  avatarUrl,
+  displayName,
+  accountType,
+  onEditProfile,
+}: any) {
   return (
     <div className="rounded-2xl bg-zinc-900 p-5 flex items-center gap-4">
-      <img src={avatarUrl} className="w-12 h-12 rounded-full object-cover ring-2 ring-green-500/40" />
+      <img
+        src={avatarUrl}
+        className="w-12 h-12 rounded-full object-cover"
+        alt="Profile"
+      />
       <div className="flex-1">
         <div className="text-xl font-bold">{displayName}</div>
         <div className="text-xs text-gray-400 capitalize">{accountType}</div>
       </div>
-      <button onClick={onEditProfile} className="bg-green-500 hover:bg-green-400 text-black px-4 py-2 rounded-xl">
+      <button
+        onClick={onEditProfile}
+        className="bg-green-500 hover:bg-green-400 text-black px-4 py-2 rounded-xl"
+      >
         Edit Profile
       </button>
     </div>
   );
 }
 
-function CommandStrip({ isCreator, onFeed, onGoLive, onUpload, onAnalytics, onCommunity, onApplyCreator }: any) {
+function CommandStrip({
+  isCreator,
+  onFeed,
+  onGoLive,
+  onUpload,
+  onApplyCreator,
+}: any) {
   return (
     <div className="rounded-2xl bg-zinc-900 p-3 flex gap-2 overflow-x-auto">
       <Cmd label="Feed" onClick={onFeed} />
@@ -191,8 +255,6 @@ function CommandStrip({ isCreator, onFeed, onGoLive, onUpload, onAnalytics, onCo
         <>
           <Cmd label="Go Live" onClick={onGoLive} />
           <Cmd label="Upload" onClick={onUpload} />
-          <Cmd label="Analytics" onClick={onAnalytics} />
-          <Cmd label="Community" onClick={onCommunity} />
         </>
       ) : (
         <Cmd label="Become Creator" onClick={onApplyCreator} />
@@ -203,7 +265,10 @@ function CommandStrip({ isCreator, onFeed, onGoLive, onUpload, onAnalytics, onCo
 
 function Cmd({ label, onClick }: any) {
   return (
-    <button onClick={onClick} className="px-4 py-2 rounded-xl bg-black/40 border border-green-500/25 hover:border-green-500/60">
+    <button
+      onClick={onClick}
+      className="px-4 py-2 rounded-xl bg-black/40 border border-green-500/25 hover:border-green-500/60"
+    >
       {label}
     </button>
   );
@@ -218,48 +283,44 @@ function Panel({ title, children }: any) {
   );
 }
 
-function StatChip({ label, value, series, onClick }: any) {
+function StatChip({ label, value, onClick }: any) {
   return (
-    <button onClick={onClick} className="rounded-2xl bg-zinc-900 p-4 text-left">
+    <div
+      onClick={onClick}
+      className="cursor-pointer rounded-2xl bg-zinc-900 p-4 hover:bg-zinc-800 transition"
+    >
       <div className="text-xs text-gray-400">{label}</div>
       <div className="text-2xl font-bold text-green-400">{value}</div>
-      <Sparkline data={series} />
-    </button>
+    </div>
   );
 }
 
 function ActivityRow({ avatarUrl, name, content, onClick }: any) {
   return (
-    <button onClick={onClick} className="flex gap-3 p-3 rounded-xl bg-black/40 hover:bg-black/60">
-      <img src={avatarUrl} className="w-8 h-8 rounded-full" />
-      <div>
-        <div className="font-semibold">{name}</div>
-        <div className="text-sm text-gray-400 truncate max-w-xs">{content}</div>
+    <div
+      onClick={onClick}
+      className="flex gap-3 p-3 rounded-xl bg-black/40 hover:bg-black/60 cursor-pointer"
+    >
+      <img
+        src={avatarUrl}
+        className="w-8 h-8 rounded-full object-cover"
+        alt="User"
+      />
+      <div className="flex-1">
+        <div className="text-sm font-bold">{name}</div>
+        <div className="text-xs text-gray-400 truncate">
+          {content || "No text"}
+        </div>
       </div>
-    </button>
-  );
-}
-
-function StatusRow({ label }: any) {
-  return (
-    <div className="flex justify-between items-center p-3 rounded-xl bg-black/40">
-      <span>{label}</span>
-      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
     </div>
   );
 }
 
-function Sparkline({ data }: any) {
-  const w = 80;
-  const h = 24;
-  const max = Math.max(...data, 1);
-  const pts = data
-    .map((v: number, i: number) => `${(i / (data.length - 1)) * w},${h - (v / max) * h}`)
-    .join(" ");
-
+function StatusRow({ label }: { label: string }) {
   return (
-    <svg width={w} height={h}>
-      <polyline points={pts} fill="none" stroke="lime" strokeWidth="2" />
-    </svg>
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-gray-400">{label}</span>
+      <span className="text-green-500">● Operational</span>
+    </div>
   );
 }
