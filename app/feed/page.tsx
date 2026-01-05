@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 
 import CreatePostModal from "@/components/CreatePostModal";
 import LikeButton from "@/components/LikeButton";
-import PraiseBreakButton from "@/components/PraiseBreakButton";
 import Comments from "@/components/Comments";
 import ReportPost from "@/components/ReportPost";
 
@@ -51,121 +50,102 @@ export default function FeedPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading feed…
+        Loading
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
 
-      {/* Ambient animated background */}
+      {/* Ambient depth */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,197,94,0.18),transparent_45%)]" />
+
+      {/* Vertical energy line */}
       <motion.div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-b from-green-500/10 via-transparent to-black"
-        animate={{ opacity: [0.4, 0.7, 0.4] }}
-        transition={{ duration: 8, repeat: Infinity }}
+        className="absolute left-1/2 top-0 h-full w-px bg-green-500/20"
+        animate={{ opacity: [0.2, 0.5, 0.2] }}
+        transition={{ duration: 6, repeat: Infinity }}
       />
 
-      <div className="relative flex justify-center px-4 py-6">
-        <div className="w-full max-w-xl space-y-6">
+      <div className="relative z-10 flex justify-center px-4 py-16">
+        <div className="w-full max-w-xl space-y-16">
 
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur z-10 pb-2"
-          >
-            <motion.h1
-              animate={{ opacity: [0.85, 1, 0.85] }}
-              transition={{ duration: 6, repeat: Infinity }}
-              className="text-2xl font-bold tracking-tight"
-            >
-              Feed
-            </motion.h1>
-
-            <div className="flex gap-2">
-              <PraiseBreakButton refresh={load} />
-              <motion.button
-                whileTap={{ scale: 0.94 }}
-                whileHover={{ scale: 1.02 }}
-                onClick={() => setShowModal(true)}
-                className="bg-green-500 text-black px-4 py-2 rounded-lg font-semibold shadow-lg"
-              >
-                Post
-              </motion.button>
-            </div>
-          </motion.div>
-
-          {/* Posts */}
           {posts.map((post, index) => (
             <motion.div
               key={post.id}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: index * 0.04 }}
-              className="relative bg-zinc-900/90 rounded-xl p-4 space-y-3 shadow-xl"
+              initial={{ opacity: 0, scale: 0.96, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className="relative group"
             >
 
-              {/* Glow on new posts */}
-              <motion.div
-                aria-hidden
-                className="absolute inset-0 rounded-xl border border-green-500/20"
-                animate={{ opacity: [0.15, 0.35, 0.15] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              />
+              {/* Presence glow */}
+              <div className="absolute -inset-6 rounded-3xl bg-green-500/5 opacity-0 group-hover:opacity-100 transition" />
 
-              {/* User header */}
-              <div className="relative flex items-center gap-3">
-                <motion.img
-                  whileHover={{ scale: 1.06 }}
-                  src={post.profiles?.avatar_url || "/avatar-placeholder.png"}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div className="flex-1">
-                  <p className="font-semibold leading-tight">
-                    {post.profiles?.display_name}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(post.created_at).toLocaleString()}
-                  </p>
+              <div className="relative rounded-3xl bg-zinc-900/70 backdrop-blur p-6 border border-white/10 shadow-2xl">
+
+                {/* Identity */}
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src={post.profiles?.avatar_url || "/avatar-placeholder.png"}
+                    className="w-14 h-14 rounded-full ring-2 ring-green-500/40"
+                  />
+                  <div className="flex-1">
+                    <p className="text-lg font-semibold">
+                      {post.profiles?.display_name}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(post.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <ReportPost postId={post.id} />
                 </div>
-                <ReportPost postId={post.id} />
+
+                {/* Content as hero */}
+                <p className="text-xl leading-relaxed mb-6">
+                  {post.content}
+                </p>
+
+                {/* Praise emphasis */}
+                {post.post_type === "praise" && (
+                  <div className="inline-block mb-5 px-5 py-1 rounded-full bg-green-500 text-black font-bold shadow-lg">
+                    PRAISE
+                  </div>
+                )}
+
+                {/* Interaction rail */}
+                <div className="flex items-center gap-6 opacity-80 group-hover:opacity-100 transition">
+                  <LikeButton postId={post.id} />
+                </div>
+
+                {/* Comments */}
+                <div className="mt-4">
+                  <Comments postId={post.id} />
+                </div>
+
               </div>
-
-              {/* Content */}
-              <motion.p
-                animate={{ opacity: [0.9, 1, 0.9] }}
-                transition={{ duration: 5, repeat: Infinity }}
-                className="whitespace-pre-wrap text-sm leading-relaxed"
-              >
-                {post.content}
-              </motion.p>
-
-              {/* Praise pulse */}
-              {post.post_type === "praise" && (
-                <motion.div
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 1.8, repeat: Infinity }}
-                  className="inline-block bg-green-500 text-black px-3 py-1 rounded-full text-xs font-bold shadow-md"
-                >
-                  Praise Break
-                </motion.div>
-              )}
-
-              {/* Actions */}
-              <div className="pt-1">
-                <LikeButton postId={post.id} />
-              </div>
-
-              {/* Comments */}
-              <Comments postId={post.id} />
-
             </motion.div>
           ))}
         </div>
       </div>
+
+      {/* Floating creator action dock */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="fixed bottom-6 right-6 z-50 flex flex-col gap-3"
+      >
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowModal(true)}
+          className="w-14 h-14 rounded-full bg-green-500 text-black font-bold shadow-[0_0_30px_rgba(34,197,94,0.8)]"
+        >
+          +
+        </motion.button>
+      </motion.div>
 
       {showModal && (
         <CreatePostModal
