@@ -1,6 +1,6 @@
 'use client'
 
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '../../../supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function CreatorApplyPage() {
@@ -14,7 +14,7 @@ export default function CreatorApplyPage() {
       .from('profiles')
       .update({
         is_creator: true,
-        role: 'creator'
+        role: 'creator',
       })
       .eq('id', user.id)
 
