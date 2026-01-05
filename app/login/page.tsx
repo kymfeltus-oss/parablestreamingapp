@@ -12,12 +12,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   async function handleLogin() {
     if (loading) return;
 
     setLoading(true);
     setError(null);
+    setMessage(null);
 
     const { data, error: authError } =
       await supabase.auth.signInWithPassword({
@@ -39,12 +42,41 @@ export default function LoginPage() {
 
     setLoading(false);
 
+    // Onboarding gate
     if (!profile || profile.onboarding_complete !== true) {
-      router.replace("/profile-setup/creator");
-    } else {
-      // ✅ FINAL DESTINATION FOR CREATORS
-      router.replace("/creator/dashboard");
+      router.replace("/profile-setup");
+      return;
     }
+
+    // Unified dashboard
+    router.replace("/dashboard");
+  }
+
+  async function handleResetPassword() {
+    if (!email) {
+      setError("Enter your email address first.");
+      return;
+    }
+
+    setResetting(true);
+    setError(null);
+    setMessage(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo:
+        (process.env.NEXT_PUBLIC_SITE_URL ||
+          "https://main.dqugj22h6x51v.amplifyapp.com") +
+        "/auth/reset",
+    });
+
+    setResetting(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setMessage("Password reset email sent. Check your inbox.");
   }
 
   return (
@@ -70,6 +102,12 @@ export default function LoginPage() {
           {error && (
             <div className="mb-4 rounded-lg bg-red-900/40 border border-red-500 px-4 py-3 text-sm text-red-200">
               {error}
+            </div>
+          )}
+
+          {message && (
+            <div className="mb-4 rounded-lg bg-green-900/40 border border-green-500 px-4 py-3 text-sm text-green-200">
+              {message}
             </div>
           )}
 
@@ -107,6 +145,15 @@ export default function LoginPage() {
               className="w-full neon-button disabled:opacity-60"
             >
               {loading ? "Entering…" : "Enter Parable"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResetPassword}
+              disabled={resetting}
+              className="w-full text-sm text-green-400 hover:underline"
+            >
+              {resetting ? "Sending reset…" : "Forgot password?"}
             </button>
           </div>
 
