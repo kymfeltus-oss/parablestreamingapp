@@ -24,16 +24,8 @@ export default function DashboardRouter() {
       return;
     }
 
-    const type = user.user_metadata?.accountType;
-
-    // Creator → go to creator dashboard
-    if (type === "creator") {
-      router.replace("/creator/dashboard");
-      return;
-    }
-
-    // Viewer → go to feed
-    router.replace("/feed");
+    // Unified dashboard for all users
+    router.replace("/dashboard");
   }
 
   return (
