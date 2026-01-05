@@ -1,3 +1,6 @@
+<div className="bg-red-600 text-white p-4 text-center font-bold">
+  DASHBOARD DEBUG MARKER — NEW CODE IS RENDERING
+</div>
 "use client";
 
 import React from "react";
