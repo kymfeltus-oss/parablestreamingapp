@@ -129,7 +129,7 @@ export default function HomePage() {
                 <MenuItem href={profileHref}>View Profile</MenuItem>
 
                 {profile?.creator_category && (
-                  <MenuItem href="/creator/dashboard">
+                  <MenuItem href="/dashboard">
                     <LayoutDashboard className="w-4 h-4" />
                     Creator Dashboard
                   </MenuItem>
@@ -195,35 +195,12 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              <CreatorVideo
-                title="Sarah Jakes Roberts — Set the Record Straight"
-                src="https://www.youtube.com/embed/cd1dJGqDDsI"
-              />
-
-              <CreatorVideo
-                title="Dr. Jamal Bryant — Why Time Is Flying"
-                src="https://www.youtube.com/embed/OIA3pq1EVTI?start=5"
-              />
-
-              <CreatorVideo
-                title="Kirk Franklin — BET Awards Praise Medley"
-                src="https://www.youtube.com/embed/s9XthutHgB4?start=5"
-              />
-
-              <CreatorVideo
-                title="Pastor Sheryl Brady — Stronger Than the Storm"
-                src="https://www.youtube.com/embed/uEmkoAGDUEY?start=3"
-              />
-
-              <CreatorVideo
-                title="Yolanda Adams — Lifestyles"
-                src="https://www.youtube.com/embed/40CFDyA9rQg?start=3"
-              />
-
-              <CreatorVideo
-                title="Fred Hammond — YAHWEH"
-                src="https://www.youtube.com/embed/flzzENtKf28"
-              />
+              <CreatorVideo title="Sarah Jakes Roberts — Set the Record Straight" src="https://www.youtube.com/embed/cd1dJGqDDsI" />
+              <CreatorVideo title="Dr. Jamal Bryant — Why Time Is Flying" src="https://www.youtube.com/embed/OIA3pq1EVTI?start=5" />
+              <CreatorVideo title="Kirk Franklin — BET Awards Praise Medley" src="https://www.youtube.com/embed/s9XthutHgB4?start=5" />
+              <CreatorVideo title="Pastor Sheryl Brady — Stronger Than the Storm" src="https://www.youtube.com/embed/uEmkoAGDUEY?start=3" />
+              <CreatorVideo title="Yolanda Adams — Lifestyles" src="https://www.youtube.com/embed/40CFDyA9rQg?start=3" />
+              <CreatorVideo title="Fred Hammond — YAHWEH" src="https://www.youtube.com/embed/flzzENtKf28" />
 
             </div>
           </section>
@@ -268,12 +245,7 @@ export default function HomePage() {
 function CreatorVideo({ title, src }: { title: string; src: string }) {
   return (
     <div className="bg-[#111] border border-white/10 rounded-xl overflow-hidden">
-      <iframe
-        className="w-full aspect-video"
-        src={src}
-        title={title}
-        allowFullScreen
-      />
+      <iframe className="w-full aspect-video" src={src} title={title} allowFullScreen />
       <div className="p-4">
         <p className="font-semibold">{title}</p>
       </div>
