@@ -24,7 +24,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${siteUrl}/verify`,
+          emailRedirectTo: `${siteUrl}/profile-setup`,
         },
       })
 
@@ -45,7 +45,9 @@ export default function SignupPage() {
 
       console.log('SUPABASE SIGNUP OK', data)
       setStatus('Account created. Check your email for the verification link.')
-      router.push('/verify')
+
+      // User will land on /profile-setup after clicking email link
+      router.push('/login')
     } catch (e: any) {
       console.log('SIGNUP EXCEPTION', e)
       const msg = e?.message || String(e)
