@@ -1,4 +1,3 @@
-// flash-click-fix
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -8,7 +7,7 @@ export default function FlashPage() {
   const router = useRouter();
 
   const handleEnter = () => {
-    router.push("/login");
+    router.push("/welcome");
   };
 
   return (
