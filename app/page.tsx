@@ -1,7 +1,7 @@
 "use client";
 
-import FlashPage from "./flash/page";
+import FlashLandingPage from "@/components/FlashLandingPage";
 
 export default function Home() {
-  return <FlashPage />;
+  return <FlashLandingPage />;
 }
