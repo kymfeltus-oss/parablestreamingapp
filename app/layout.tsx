@@ -4,47 +4,38 @@ export const fetchCache = "force-no-store";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import ClientBottomNav from "./mobile-bottom-nav";
+import Sidebar from "@/components/Sidebar";
+import { createClient } from "@/utils/supabase/server";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "Parable Streaming | Streaming. Creating. Believing.",
-  description:
-    "Parable Streaming is a faith-centered platform for pastors, musicians, creators, and ministries.",
-  metadataBase: new URL("https://www.parablestreaming.com"),
-  openGraph: {
-    title: "Parable Streaming",
-    description:
-      "Stream • Create • Worship • Connect — A home for pastors, musicians, and gospel creators.",
-    url: "https://www.parablestreaming.com",
-    images: ["/og-image.png"],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@parable",
-    title: "Parable Streaming",
-    description:
-      "A faith-first streaming platform for ministries, musicians, and creators.",
-    images: ["/og-image.png"],
-  },
-};
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  let profile = null;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+  if (user) {
+    // Correctly fetching username and avatar for persistence
+    const { data } = await supabase
+      .from('profiles')
+      .select('username, avatar_url, id')
+      .eq('id', user.id)
+      .single();
+    profile = data;
+  }
+
   return (
     <html lang="en" className="bg-black">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-        {/* APP ICONS */}
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-      </head>
-
-      <body className={`${inter.className} bg-black text-white min-h-screen flex flex-col`}>
-        <div className="flex-1">{children}</div>
-        <ClientBottomNav />
+      <body className={`${inter.className} bg-black text-white min-h-screen flex flex-row overflow-hidden`}>
+        {/* Profile data sent to sidebar for persistent identity */}
+        <Sidebar profile={profile} />
+        
+        <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
+          <div className="flex-1 overflow-y-auto scrollbar-hide bg-[#050505]">
+            {children}
+          </div>
+          <ClientBottomNav />
+        </div>
       </body>
     </html>
   );

@@ -1,155 +1,158 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-// 1. Import the new utility function you created
-import { createClient } from '@/utils/supabase/client' 
-import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client'; 
+import ParableParticles from '@/components/ParableParticles';
+import { Camera, Loader2 } from 'lucide-react';
 
-export default function OnboardingWizard() {
-  // 2. Use the new utility function instead of the old function
-  const supabase = createClient()
-  const router = useRouter()
-  const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
+const InputField = ({ name, placeholder, type = 'text', value, onChange }: any) => (
+  <input 
+    name={name} 
+    type={type} 
+    value={value || ""} 
+    onChange={onChange} 
+    placeholder={placeholder} 
+    className="w-full bg-black border border-white/10 p-4 text-xs tracking-[2px] text-white outline-none focus:border-[#00f2ff] placeholder:text-gray-500 rounded-none appearance-none" 
+  />
+);
 
-  // This holds all the strategy data
+export default function OnboardingPage() {
+  const supabase = createClient();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null); // NEW: To store the actual file bytes
+
   const [formData, setFormData] = useState({
-    full_name: '',
-    zip_code: '',
-    life_stage: '',
-    primary_intent: '',
+    full_name: '', 
+    username: '', 
+    email: '',
+    password: '',
+    avatar_url: '',
+    role: '', 
+    primary_platform: '', 
+    timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC',
+    open_to_collab: false,
     interests: [] as string[]
-  })
+  });
 
-  // Handle text inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const finalValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    setFormData(prev => ({ ...prev, [name]: finalValue }));
+  };
 
-  // Handle Selection Buttons (Vibe Check)
-  const selectInterest = (topic: string) => {
-    setFormData(prev => ({
-      ...prev,
-      interests: prev.interests.includes(topic)
-        ? prev.interests.filter(i => i !== topic) // Remove if already selected
-        : [...prev.interests, topic] // Add if not
-    }))
-  }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; 
+    if (file) {
+      setImageFile(file); // Capture the file for upload
+      setPreviewUrl(URL.createObjectURL(file));
+      setFormData(prev => ({ ...prev, avatar_url: file.name })); 
+    }
+  };
 
-  // Final Submit to Supabase
-  const completeOnboarding = async () => {
-    setLoading(true)
-    // The methods getUser() and from('profiles') are the same, no changes needed here
-    const { data: { user } } = await supabase.auth.getUser()
+  const completeOnboarding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
 
-    if (user) {
-      const { error } = await supabase
+    // 1. Sign Up Logic
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: { 
+          full_name: formData.full_name, 
+          username: formData.username.toLowerCase() 
+        }
+      }
+    });
+
+    if (authError) {
+      setErrorMsg(authError.message.toUpperCase());
+      setLoading(false);
+      return;
+    }
+
+    if (authData.user) {
+      let finalAvatarPath = null;
+
+      // 2. NEW: Physical File Upload to Supabase Storage
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${authData.user.id}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, imageFile);
+
+        if (!uploadError) {
+          finalAvatarPath = fileName; // The path used for database reference
+        }
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await supabase.auth.getSession();
+
+      // 3. Profiles Upsert with the REAL avatar path
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
-          id: user.id,
-          email: user.email,
-          ...formData,
+          id: authData.user.id,
+          username: formData.username.toLowerCase(),
+          email: formData.email,
+          full_name: formData.full_name,
+          avatar_url: finalAvatarPath, // Link the database to the storage file
+          role: formData.role,
+          primary_platform: formData.primary_platform,
+          timezone: formData.timezone,
+          open_to_collab: formData.open_to_collab,
+          interests: formData.interests,
+          onboarding_complete: true,
           marketing_opt_in: true 
-        })
+        });
 
-      if (!error) {
-        router.push('/dashboard') // Send them to the main app
+      if (!profileError) {
+          router.push('/welcome?verified=false');
       } else {
-        alert('Error saving profile!')
+          setErrorMsg(`DATABASE ERROR: ${profileError.message.toUpperCase()}`);
       }
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-      <div className="max-w-md w-full space-y-8">
-        
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-800 h-2 rounded-full mb-8">
-          <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${step * 33}%` }}></div>
-        </div>
-
-        {/* STEP 1: THE BASICS */}
-        {step === 1 && (
+    <div className="h-[100dvh] w-full bg-black text-white relative overflow-hidden font-sans">
+      <ParableParticles />
+      <div className="relative z-20 h-full overflow-y-auto scrollbar-hide flex flex-col items-center">
+        <form onSubmit={completeOnboarding} className="w-full max-w-md px-6 pt-12 pb-24">
+          <h1 className="text-xl font-black uppercase tracking-[6px] text-[#00f2ff] text-center mb-8">CREATE ACCOUNT</h1>
+          
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <label className="relative cursor-pointer group">
+              <div className="w-24 h-24 rounded-full border-2 border-dashed border-[#00f2ff] flex items-center justify-center overflow-hidden bg-black group-hover:bg-white/10 transition-all shadow-[0_0_15px_rgba(0,242,255,0.2)]">
+                {previewUrl ? <img src={previewUrl} className="w-full h-full object-cover" alt="Preview" /> : <Camera className="text-[#00f2ff] w-8 h-8" />}
+              </div>
+              <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+            </label>
+            <span className="text-[9px] text-gray-500 uppercase tracking-[2px]">SET PROFILE PHOTO</span>
+          </div>
+          
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold">Welcome to Nexus.</h2>
-            <p className="text-gray-400">Let's get your profile set up.</p>
-            
-            <input 
-              name="full_name" 
-              placeholder="What should we call you?" 
-              className="w-full p-4 bg-gray-900 rounded-lg border border-gray-700 focus:border-blue-500 outline-none"
-              onChange={handleChange}
-            />
-            <input 
-              name="zip_code" 
-              placeholder="Zip Code (for local events)" 
-              className="w-full p-4 bg-gray-900 rounded-lg border border-gray-700 focus:border-blue-500 outline-none"
-              onChange={handleChange}
-            />
-            <button onClick={() => setStep(2)} className="w-full bg-blue-600 p-4 rounded-lg font-bold hover:bg-blue-700">
-              Next
+            <InputField name="full_name" placeholder="NAME / MINISTRY" value={formData.full_name} onChange={handleChange} />
+            <InputField name="username" placeholder="USERNAME" value={formData.username} onChange={handleChange} />
+            <InputField name="email" type="email" placeholder="EMAIL" value={formData.email} onChange={handleChange} />
+            <InputField name="password" type="password" placeholder="PASSWORD" value={formData.password} onChange={handleChange} />
+
+            <button type="submit" disabled={loading} className="w-full py-4 mt-6 text-xs font-bold uppercase tracking-[4px] bg-[#00f2ff] text-black hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> SYNCING...</> : 'CREATE ACCOUNT'}
             </button>
           </div>
-        )}
-
-        {/* STEP 2: LIFE STAGE (The Advertiser Goldmine) */}
-        {step === 2 && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Which describes you best?</h2>
-            <p className="text-gray-400">We'll curate content for your season of life.</p>
-            
-            <div className="grid grid-cols-1 gap-3">
-              {['Student / Gen Z', 'Young Professional', 'Parent / Family', 'Church Leader'].map((stage) => (
-                <button
-                  key={stage}
-                  onClick={() => {
-                    setFormData({ ...formData, life_stage: stage })
-                    setStep(3) // Auto-advance on click
-                  }}
-                  className="p-4 bg-gray-900 rounded-lg border border-gray-700 hover:border-blue-500 text-left transition-all"
-                >
-                  {stage}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: VIBE CHECK & TOPICS */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">What are you into?</h2>
-            <p className="text-gray-400">Select as many as you like.</p>
-            
-            <div className="flex flex-wrap gap-3">
-              {['Mental Health', 'Finance', 'Relationships', 'Deep Theology', 'Worship Music', 'Politics', 'Parenting'].map((topic) => (
-                <button
-                  key={topic}
-                  onClick={() => selectInterest(topic)}
-                  className={`px-4 py-2 rounded-full border transition-all ${
-                    formData.interests.includes(topic) 
-                    ? 'bg-blue-600 border-blue-600 text-white' 
-                    : 'bg-transparent border-gray-600 text-gray-400 hover:border-gray-400'
-                  }`}
-                >
-                  {topic}
-                </button>
-              ))}
-            </div>
-
-            <button 
-              onClick={completeOnboarding} 
-              disabled={loading}
-              className="w-full bg-green-600 p-4 rounded-lg font-bold hover:bg-green-700 mt-8"
-            >
-              {loading ? 'Building your experience...' : 'Finish Setup'}
-            </button>
-          </div>
-        )}
-
+        </form>
       </div>
     </div>
-  )
+  );
 }

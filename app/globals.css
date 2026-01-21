@@ -15,40 +15,40 @@ body {
   font-family: system-ui, sans-serif;
 }
 
-/* Scrollbar */
+/* Scrollbar - Cyber-Cyan */
 ::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #53fc18;
+  background: #00f2ff;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-track {
   background: #111;
 }
 
-/* Neon Utilities */
+/* Neon Utilities - Cyber-Cyan */
 .neon-text {
-  color: #53fc18;
-  text-shadow: 0 0 5px #53fc18, 0 0 10px #53fc18;
+  color: #00f2ff;
+  text-shadow: 0 0 5px #00f2ff, 0 0 10px #00f2ff;
 }
 
 .neon-border {
-  border: 2px solid #53fc18;
-  box-shadow: 0 0 5px #53fc18, 0 0 15px #53fc18;
+  border: 2px solid #00f2ff;
+  box-shadow: 0 0 5px #00f2ff, 0 0 15px #00f2ff;
 }
 
 .neon-button {
-  background: #53fc18;
+  background: #00f2ff;
   color: black;
   font-weight: bold;
   padding: 12px 22px;
   border-radius: 10px;
-  box-shadow: 0 0 10px #53fc18, 0 0 20px #53fc18;
+  box-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
   transition: 0.25s ease;
 }
 
 .neon-button:hover {
-  box-shadow: 0 0 15px #53fc18, 0 0 30px #53fc18;
+  box-shadow: 0 0 15px #00f2ff, 0 0 30px #00f2ff;
 }

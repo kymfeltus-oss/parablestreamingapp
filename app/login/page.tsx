@@ -3,6 +3,23 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
+import ParableParticles from "@/components/ParableParticles";
+import { Lock, Mail, ChevronRight } from "lucide-react";
+
+// Reusing the InputField component structure from the onboarding page
+const InputField = ({ name, placeholder, type = 'text', value, onChange, icon: Icon }: any) => (
+  <div className="relative">
+    {Icon && <Icon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />}
+    <input 
+      name={name} 
+      type={type} 
+      value={value || ""} 
+      onChange={onChange} 
+      placeholder={placeholder} 
+      className={`w-full bg-black border border-white/10 p-4 text-xs tracking-[2px] text-white outline-none focus:border-[#00f2ff] placeholder:text-gray-500 rounded-none appearance-none ${Icon ? 'pl-12' : ''}`} 
+    />
+  </div>
+);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,25 +28,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
 
   async function handleLogin() {
     if (loading) return;
-
     setLoading(true);
-    setError(null);
+    setErrorMsg(null);
     setMessage(null);
 
-    const { data, error: authError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (authError || !data.user) {
-      setError(authError?.message || "Login failed");
+      setErrorMsg(authError?.message || "AUTHENTICATION FAILED");
       setLoading(false);
       return;
     }
@@ -42,126 +57,100 @@ export default function LoginPage() {
 
     setLoading(false);
 
-    // Onboarding gate
     if (!profile || profile.onboarding_complete !== true) {
-      router.replace("/profile-setup");
+      router.replace("/onboarding");
       return;
     }
 
-    // Unified dashboard
     router.replace("/dashboard");
   }
 
   async function handleResetPassword() {
     if (!email) {
-      setError("Enter your email address first.");
-      return;
+        setErrorMsg("ENTER YOUR EMAIL ADDRESS FIRST.");
+        return;
     }
-
     setResetting(true);
-    setError(null);
-    setMessage(null);
-
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo:
-        (process.env.NEXT_PUBLIC_SITE_URL ||
-          "https://main.dqugj22h6x51v.amplifyapp.com") +
-        "/auth/reset",
+      redirectTo: (process.env.NEXT_PUBLIC_SITE_URL || "https://main.dqugj22h6x51v.amplifyapp.com") + "/auth/reset",
     });
-
     setResetting(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    setMessage("Password reset email sent. Check your inbox.");
+    if (error) setErrorMsg(error.message);
+    else setMessage("RESET LINK DISPATCHED. CHECK YOUR INBOX.");
   }
 
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,rgba(34,255,0,0.15),transparent_60%)]" />
-
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#111] p-8 shadow-[0_0_30px_rgba(83,252,24,0.25)]">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-black border border-white/20 shadow-[0_0_25px_rgba(83,252,24,0.8)] mb-4">
-              <span className="neon-text text-xl font-bold">P</span>
+    // Updated container styling for consistent feel and mobile-first approach
+    <div className="h-[100dvh] w-full bg-black text-white relative overflow-hidden font-sans">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <ParableParticles />
+      </div>
+      
+      <div className="relative z-20 h-full overflow-y-auto scrollbar-hide flex flex-col items-center justify-center">
+        {/* Form container matches the create account page's form container */}
+        <div className="w-full max-w-md px-6 py-12">
+          
+          <div className="text-center mb-10">
+            {/* Added logo placeholder/name area */}
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#00f2ff] shadow-[0_0_20px_rgba(0,242,255,0.4)] mb-6 mx-auto">
+              <span className="text-2xl font-black text-[#00f2ff] tracking-tighter">P</span>
             </div>
-
-            <h1 className="text-3xl font-bold tracking-tight neon-text">
-              Welcome to Parable
-            </h1>
-
-            <p className="text-zinc-400 mt-2">
-              Enter the platform built for faith-driven creators
-            </p>
+            <h1 className="text-xl font-black uppercase tracking-[6px] text-[#00f2ff] mb-2">Welcome Back</h1>
+            <p className="text-gray-500 text-[10px] tracking-[2px] uppercase">Access the Global Gospel Nexus</p>
           </div>
 
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-900/40 border border-red-500 px-4 py-3 text-sm text-red-200">
-              {error}
-            </div>
+          {errorMsg && (
+            <p className="text-red-500 text-[10px] text-center mb-4 tracking-[1px] uppercase">{errorMsg}</p>
           )}
 
           {message && (
-            <div className="mb-4 rounded-lg bg-green-900/40 border border-green-500 px-4 py-3 text-sm text-green-200">
-              {message}
-            </div>
+             <p className="text-[#00f2ff] text-[10px] text-center mb-4 tracking-[1px] uppercase">{message}</p>
           )}
 
-          <div className="space-y-5">
-            <div>
-              <label className="text-xs uppercase tracking-wide text-zinc-400">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@parable.com"
-                className="mt-1 w-full rounded-lg bg-black border border-white/15 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#53fc18]"
-              />
-            </div>
+          <div className="space-y-4">
+            <InputField 
+                name="email" 
+                type="email" 
+                placeholder="EMAIL ADDRESS" 
+                value={email} 
+                onChange={(e: any) => setEmail(e.target.value)} 
+                icon={Mail}
+            />
 
-            <div>
-              <label className="text-xs uppercase tracking-wide text-zinc-400">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="mt-1 w-full rounded-lg bg-black border border-white/15 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#53fc18]"
-              />
-            </div>
+            <InputField 
+                name="password" 
+                type="password" 
+                placeholder="PASSWORD" 
+                value={password} 
+                onChange={(e: any) => setPassword(e.target.value)} 
+                icon={Lock}
+            />
 
-            <button
-              type="button"
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full neon-button disabled:opacity-60"
+            <button 
+              onClick={handleLogin} 
+              disabled={loading} 
+              // Updated button styling to match create account page exactly
+              className="w-full py-4 mt-2 text-xs font-bold uppercase tracking-[4px] bg-[#00f2ff] text-black disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
             >
-              {loading ? "Entering…" : "Enter Parable"}
+              {loading ? "INITIALIZING..." : "ENTER HUB"} <ChevronRight className="w-5 h-5" />
             </button>
 
-            <button
-              type="button"
-              onClick={handleResetPassword}
-              disabled={resetting}
-              className="w-full text-sm text-green-400 hover:underline"
-            >
-              {resetting ? "Sending reset…" : "Forgot password?"}
-            </button>
-          </div>
-
-          <div className="mt-8 text-center text-sm text-zinc-400">
-            New to Parable?{" "}
-            <a href="/auth/register" className="neon-text hover:underline">
-              Create your account
-            </a>
+            <div className="flex justify-between items-center pt-4">
+              <button 
+                onClick={handleResetPassword} 
+                disabled={resetting}
+                className="text-[9px] uppercase tracking-[1px] text-gray-500 hover:text-[#00f2ff] transition-colors"
+              >
+                {resetting ? "SENDING..." : "FORGOT CREDENTIALS?"}
+              </button>
+              
+              <a 
+                href="/onboarding" 
+                className="text-[9px] uppercase tracking-[1px] text-[#00f2ff] font-bold hover:underline"
+              >
+                CREATE NEW IDENTITY
+              </a>
+            </div>
           </div>
         </div>
       </div>

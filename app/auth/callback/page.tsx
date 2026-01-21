@@ -1,15 +1,25 @@
 "use client";
 
 import { useEffect } from "react";
-import { createClient } from "@/lib/supabaseClient"; // <--- 1. FIXED IMPORT
+import { createClient } from "@/lib/supabaseClient"; 
 import { useRouter } from "next/navigation";
+import { useSearchParams } from 'next/navigation'; // <-- ADDED: Import search params hook
 
 export default function AuthCallback() {
   const router = useRouter();
-  const supabase = createClient(); // <--- 2. INITIALIZE CLIENT HERE
+  const supabase = createClient(); 
+  const searchParams = useSearchParams(); // <-- ADDED: Initialize search params
 
   useEffect(() => {
     async function finalizeAccount() {
+      // ADDED: Logic to handle the code exchange
+      const code = searchParams.get('code');
+      
+      if (code) {
+        await supabase.auth.exchangeCodeForSession(code);
+      }
+      
+      // The rest of your existing logic starts here:
       const {
         data: { user }
       } = await supabase.auth.getUser();
@@ -62,7 +72,7 @@ export default function AuthCallback() {
     }
 
     finalizeAccount();
-  }, [router, supabase]); // Added dependencies for safety
+  }, [router, supabase, searchParams]); // ADDED: searchParams to dependency array
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
